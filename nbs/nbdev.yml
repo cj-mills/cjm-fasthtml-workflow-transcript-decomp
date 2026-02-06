@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "cjm-fasthtml-workflow-transcript-decomp"
+  site-url: "https://cj-mills.github.io/cjm-fasthtml-workflow-transcript-decomp"
+  description: "A FastHTML-based human-in-the-loop workflow for decomposing raw transcripts into traversable context graph spines with precise text segmentation and audio alignment."
+  repo-branch: main
+  repo-url: "https://github.com/cj-mills/cjm-fasthtml-workflow-transcript-decomp"
