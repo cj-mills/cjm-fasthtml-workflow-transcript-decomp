@@ -146,10 +146,10 @@ def init_router(
         )
 
     @router
-    def keyboard_reorder(request, sess, record_id: str, direction: str):
+    def keyboard_reorder(request, sess, record_id: str, provider_id: str, direction: str):
         """Move an item up or down in the queue via keyboard (Shift+Up/Down)."""
         return _handle_keyboard_reorder(
-            workflow, request, sess, record_id, direction, urls=_selection_urls,
+            workflow, request, sess, record_id, provider_id, direction, urls=_selection_urls,
         )
 
     @router

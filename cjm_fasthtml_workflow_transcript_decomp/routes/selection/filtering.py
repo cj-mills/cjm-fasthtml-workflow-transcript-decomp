@@ -101,7 +101,8 @@ def _handle_keyboard_reorder(
     workflow: StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    record_id: str,  # Job ID of item to move
+    record_id: str,  # Record ID of item to move
+    provider_id: str,  # Provider ID of item to move
     direction: str,  # Direction to move: "up" or "down"
     urls: SelectionUrls,  # URL bundle for rendering
 ):  # Queue component, optionally with OOB source list
@@ -110,7 +111,7 @@ def _handle_keyboard_reorder(
     step_state = _get_step_state(workflow, session_id)
     selected_sources = step_state.get("selected_sources", [])
     
-    selected_sources = reorder_item(selected_sources, record_id, direction)
+    selected_sources = reorder_item(selected_sources, record_id, provider_id, direction)
     _update_step_state(workflow, session_id, selected_sources)
     
     return _build_queue_response(

@@ -147,12 +147,17 @@ def toggle_source_selection(
 # %% ../../nbs/services/source_utils.ipynb #gvvdhrgpf6l
 def reorder_item(
     selected_sources: List[Dict[str, str]],  # Current selections
-    record_id: str,  # Job ID of item to move
+    record_id: str,  # Record ID of item to move
+    provider_id: str,  # Provider ID of item to move
     direction: str,  # Direction: "up" or "down"
 ) -> List[Dict[str, str]]:  # Reordered selections
     """Move an item up or down in the selection list by swapping with its neighbor."""
     sources = list(selected_sources)
-    current_index = next((i for i, s in enumerate(sources) if s.get("record_id") == record_id), None)
+    current_index = next(
+        (i for i, s in enumerate(sources)
+         if s.get("record_id") == record_id and s.get("provider_id") == provider_id),
+        None
+    )
     
     if current_index is None:
         return sources

@@ -101,104 +101,104 @@ graph LR
 
     components_step_decomposition_helpers --> core_models
     components_step_decomposition_keyboard_config --> components_step_decomposition_card_stack_config
-    components_step_decomposition_segment_card --> core_models
     components_step_decomposition_segment_card --> services_formatting
     components_step_decomposition_segment_card --> components_step_decomposition_card_stack_config
+    components_step_decomposition_segment_card --> core_models
     components_step_decomposition_segment_card --> core_html_ids
     components_step_decomposition_step_renderer --> components_step_decomposition_helpers
-    components_step_decomposition_step_renderer --> core_models
     components_step_decomposition_step_renderer --> components_step_decomposition_keyboard_config
     components_step_decomposition_step_renderer --> components_step_decomposition_card_stack_config
     components_step_decomposition_step_renderer --> components_step_decomposition_callbacks
+    components_step_decomposition_step_renderer --> core_models
+    components_step_decomposition_step_renderer --> components_step_decomposition_segment_card
+    components_step_decomposition_step_renderer --> core_html_ids
     components_step_decomposition_step_renderer --> services_text_utils
     components_step_decomposition_step_renderer --> routes_models
-    components_step_decomposition_step_renderer --> core_html_ids
-    components_step_decomposition_step_renderer --> components_step_decomposition_segment_card
     components_step_selection_helpers --> core_models
     components_step_selection_local_files --> components_step_selection_helpers
     components_step_selection_local_files --> core_html_ids
     components_step_selection_preview_panel --> core_html_ids
     components_step_selection_selection_queue --> core_html_ids
-    components_step_selection_source_browser --> services_formatting
     components_step_selection_source_browser --> services_source_utils
-    components_step_selection_source_browser --> services_text_utils
+    components_step_selection_source_browser --> services_formatting
     components_step_selection_source_browser --> core_html_ids
-    components_step_selection_step_renderer --> components_step_selection_selection_queue
-    components_step_selection_step_renderer --> components_step_selection_source_browser
+    components_step_selection_source_browser --> services_text_utils
     components_step_selection_step_renderer --> components_step_selection_local_files
-    components_step_selection_step_renderer --> services_text_utils
     components_step_selection_step_renderer --> components_step_selection_helpers
-    components_step_selection_step_renderer --> components_step_selection_preview_panel
-    components_step_selection_step_renderer --> routes_models
     components_step_selection_step_renderer --> core_html_ids
+    components_step_selection_step_renderer --> components_step_selection_source_browser
+    components_step_selection_step_renderer --> services_text_utils
+    components_step_selection_step_renderer --> components_step_selection_preview_panel
+    components_step_selection_step_renderer --> components_step_selection_selection_queue
+    components_step_selection_step_renderer --> routes_models
     components_steps --> core_html_ids
     routes_core --> workflow_workflow
-    routes_decomposition_card_stack --> components_step_decomposition_card_stack_config
     routes_decomposition_card_stack --> routes_decomposition_core
-    routes_decomposition_card_stack --> workflow_workflow
-    routes_decomposition_card_stack --> routes_models
     routes_decomposition_card_stack --> components_step_decomposition_segment_card
-    routes_decomposition_core --> workflow_workflow
+    routes_decomposition_card_stack --> workflow_workflow
+    routes_decomposition_card_stack --> components_step_decomposition_card_stack_config
+    routes_decomposition_card_stack --> routes_models
     routes_decomposition_core --> core_models
-    routes_decomposition_handlers --> core_models
+    routes_decomposition_core --> workflow_workflow
     routes_decomposition_handlers --> routes_decomposition_core
     routes_decomposition_handlers --> components_step_decomposition_step_renderer
     routes_decomposition_handlers --> services_segmentation
-    routes_decomposition_handlers --> components_step_decomposition_card_stack_config
     routes_decomposition_handlers --> routes_decomposition_card_stack
+    routes_decomposition_handlers --> core_models
     routes_decomposition_handlers --> services_text_utils
+    routes_decomposition_handlers --> components_step_decomposition_card_stack_config
     routes_decomposition_handlers --> workflow_workflow
     routes_decomposition_handlers --> routes_models
-    routes_init --> routes_selection_local_files
+    routes_init --> routes_selection_tabs
     routes_init --> routes_selection_queue
     routes_init --> routes_selection_filtering
     routes_init --> routes_core
     routes_init --> routes_decomposition_handlers
+    routes_init --> routes_selection_local_files
     routes_init --> routes_decomposition_card_stack
-    routes_init --> routes_selection_tabs
-    routes_init --> routes_models
     routes_init --> workflow_workflow
-    routes_selection_core --> components_step_selection_source_browser
-    routes_selection_core --> workflow_workflow
+    routes_init --> routes_models
     routes_selection_core --> components_step_selection_selection_queue
-    routes_selection_core --> components_step_selection_step_renderer
     routes_selection_core --> routes_models
-    routes_selection_filtering --> routes_selection_core
-    routes_selection_filtering --> components_step_selection_source_browser
-    routes_selection_filtering --> workflow_workflow
-    routes_selection_filtering --> services_source_utils
+    routes_selection_core --> components_step_selection_step_renderer
+    routes_selection_core --> workflow_workflow
+    routes_selection_core --> components_step_selection_source_browser
     routes_selection_filtering --> routes_models
-    routes_selection_local_files --> routes_selection_core
-    routes_selection_local_files --> workflow_workflow
-    routes_selection_local_files --> services_source
+    routes_selection_filtering --> services_source_utils
+    routes_selection_filtering --> routes_selection_core
+    routes_selection_filtering --> workflow_workflow
+    routes_selection_filtering --> components_step_selection_source_browser
     routes_selection_local_files --> components_step_selection_local_files
     routes_selection_local_files --> routes_models
-    routes_selection_queue --> routes_selection_core
-    routes_selection_queue --> workflow_workflow
-    routes_selection_queue --> services_source_utils
-    routes_selection_queue --> components_step_selection_preview_panel
+    routes_selection_local_files --> routes_selection_core
+    routes_selection_local_files --> services_source
+    routes_selection_local_files --> workflow_workflow
     routes_selection_queue --> routes_models
-    routes_selection_tabs --> routes_selection_core
-    routes_selection_tabs --> workflow_workflow
-    routes_selection_tabs --> services_source_utils
-    routes_selection_tabs --> components_step_selection_step_renderer
-    routes_selection_tabs --> components_step_selection_source_browser
-    routes_selection_tabs --> routes_selection_local_files
+    routes_selection_queue --> routes_selection_core
+    routes_selection_queue --> services_source_utils
+    routes_selection_queue --> workflow_workflow
+    routes_selection_queue --> components_step_selection_preview_panel
     routes_selection_tabs --> components_step_selection_local_files
     routes_selection_tabs --> routes_models
+    routes_selection_tabs --> workflow_workflow
+    routes_selection_tabs --> components_step_selection_source_browser
+    routes_selection_tabs --> services_source_utils
+    routes_selection_tabs --> routes_selection_local_files
+    routes_selection_tabs --> components_step_selection_step_renderer
+    routes_selection_tabs --> routes_selection_core
     services_alignment --> core_models
     services_graph --> core_models
     services_segmentation --> core_models
     services_text_utils --> core_models
+    workflow_workflow --> services_alignment
     workflow_workflow --> routes_models
-    workflow_workflow --> components_step_decomposition_step_renderer
     workflow_workflow --> services_graph
+    workflow_workflow --> components_steps
     workflow_workflow --> components_step_selection_step_renderer
-    workflow_workflow --> services_source
     workflow_workflow --> core_config
     workflow_workflow --> services_segmentation
-    workflow_workflow --> components_steps
-    workflow_workflow --> services_alignment
+    workflow_workflow --> services_source
+    workflow_workflow --> components_step_decomposition_step_renderer
 ```
 
 *100 cross-module dependencies detected*
@@ -748,7 +748,8 @@ def _handle_keyboard_reorder(
     workflow: StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    record_id: str,  # Job ID of item to move
+    record_id: str,  # Record ID of item to move
+    provider_id: str,  # Provider ID of item to move
     direction: str,  # Direction to move: "up" or "down"
     urls: SelectionUrls,  # URL bundle for rendering
 ):  # Queue component, optionally with OOB source list
@@ -2223,7 +2224,8 @@ def toggle_source_selection(
 ``` python
 def reorder_item(
     selected_sources: List[Dict[str, str]],  # Current selections
-    record_id: str,  # Job ID of item to move
+    record_id: str,  # Record ID of item to move
+    provider_id: str,  # Provider ID of item to move
     direction: str,  # Direction: "up" or "down"
 ) -> List[Dict[str, str]]:  # Reordered selections
     "Move an item up or down in the selection list by swapping with its neighbor."
