@@ -29,13 +29,10 @@ from ..services.segmentation import SegmentationService
 from ..services.alignment import AlignmentService
 from ..services.graph import GraphService
 
-# Step renderers - selection and decomposition from dedicated modules, others from placeholder
+# Step renderers
 from ..components.step_selection.step_renderer import render_selection_step
-from ..components.step_decomposition.step_renderer import render_decomposition_step
-from cjm_fasthtml_workflow_transcript_decomp.components.steps import (
-    render_alignment_step,
-    render_review_step,
-)
+from ..components.step_combined import render_combined_step
+from ..components.steps import render_review_step
 
 # %% ../../nbs/workflow/workflow.ipynb #ngyugzueiw
 class _SessionStateStoreAdapter:
@@ -281,10 +278,6 @@ def _create_step_flow(
         # Data is loaded via init route, not data_loader
         return {}
     
-    def load_alignment_data(request) -> Dict[str, Any]:
-        """Load data for alignment step."""
-        return {}
-    
     def load_review_data(request) -> Dict[str, Any]:
         """Load data for review step."""
         return {}
@@ -304,10 +297,6 @@ def _create_step_flow(
         segments = decomp_state.get("segments", [])
         # Must have at least one segment
         return len(segments) > 0
-    
-    def validate_alignment(state: Dict[str, Any]) -> bool:
-        """Validate that alignment is complete."""
-        return True
     
     def validate_review(state: Dict[str, Any]) -> bool:
         """Validate review step."""
@@ -331,12 +320,12 @@ def _create_step_flow(
             urls=getattr(workflow, '_selection_urls', None),
         )
     
-    # Create render wrapper for decomposition step that injects URLs
-    def render_decomposition_step_with_urls(ctx: InteractionContext):
-        """Render decomposition step with URL bundle from workflow routes."""
+    # Create render wrapper for combined step that injects URLs
+    def render_combined_step_with_urls(ctx: InteractionContext):
+        """Render combined segment & align step with URL bundle from workflow routes."""
         routes = getattr(workflow, "_decomposition_routes", {})
         
-        urls = DecompUrls(
+        decomp_urls = DecompUrls(
             card_stack=CardStackUrls(
                 nav_up=routes["nav_up"].to() if routes.get("nav_up") else "",
                 nav_down=routes["nav_down"].to() if routes.get("nav_down") else "",
@@ -357,7 +346,7 @@ def _create_step_flow(
             undo=routes["undo"].to() if routes.get("undo") else "",
         )
         
-        return render_decomposition_step(ctx=ctx, urls=urls)
+        return render_combined_step(ctx=ctx, decomp_urls=decomp_urls)
     
     return StepFlow(
         debug=True,
@@ -378,22 +367,11 @@ def _create_step_flow(
             ),
             Step(
                 id="decomposition",
-                title="Decompose",
-                render=render_decomposition_step_with_urls,
+                title="Segment & Align",
+                render=render_combined_step_with_urls,
                 validate=validate_decomposition,
                 data_loader=load_decomposition_data,
                 data_keys=["segments"],
-                show_back=True,
-                show_cancel=True,
-                next_button_text="Continue"
-            ),
-            Step(
-                id="alignment",
-                title="Align",
-                render=render_alignment_step,
-                validate=validate_alignment,
-                data_loader=load_alignment_data,
-                data_keys=["aligned_segments"],
                 show_back=True,
                 show_cancel=True,
                 next_button_text="Continue"

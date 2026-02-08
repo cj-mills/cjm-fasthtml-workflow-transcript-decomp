@@ -25,7 +25,7 @@ class SelectionStepState(TypedDict, total=False):
 
 # %% ../../nbs/core/models.ipynb #41a1na4i5nk
 class DecompositionStepState(TypedDict, total=False):
-    """State for Phase 2: Structural Decomposition."""
+    """State for Phase 2 (left column): Structural Decomposition."""
 
     # --- Workflow-specific ---
     is_initialized: bool  # Whether segments have been initialized from Phase 1
@@ -40,7 +40,7 @@ class DecompositionStepState(TypedDict, total=False):
 
 # %% ../../nbs/core/models.ipynb #6849a2d6-56db-435e-9748-ea76b6c08c3b
 class AlignmentStepState(TypedDict, total=False):
-    """State for Phase 3: Temporal Alignment."""
+    """State for Phase 2 (right column): Temporal Alignment."""
     
     vad_chunks: List[Dict[str, Any]]  # VAD chunks (serialized VADChunk)
     focused_chunk_index: Optional[int]  # Currently focused VAD chunk
@@ -49,7 +49,7 @@ class AlignmentStepState(TypedDict, total=False):
 
 # %% ../../nbs/core/models.ipynb #2a1u6xderpe
 class ReviewStepState(TypedDict, total=False):
-    """State for Phase 4: Review & Commit."""
+    """State for Phase 3: Review & Commit."""
     
     document_title: str  # Final document title
     validation_errors: List[str]  # List of validation issues
@@ -57,12 +57,17 @@ class ReviewStepState(TypedDict, total=False):
 
 # %% ../../nbs/core/models.ipynb #fdzhhq1cmdi
 class WorkflowStepStates(TypedDict, total=False):
-    """Container for all step states in the workflow."""
+    """Container for all step states in the workflow.
+    
+    The workflow has 3 StepFlow steps, but decomposition and alignment
+    states are stored separately since they represent distinct concerns
+    accessed from the same combined Phase 2 step.
+    """
     
     selection: SelectionStepState  # Phase 1 state
-    decomposition: DecompositionStepState  # Phase 2 state
-    alignment: AlignmentStepState  # Phase 3 state
-    review: ReviewStepState  # Phase 4 state
+    decomposition: DecompositionStepState  # Phase 2 state (left column)
+    alignment: AlignmentStepState  # Phase 2 state (right column)
+    review: ReviewStepState  # Phase 3 state
 
 # %% ../../nbs/core/models.ipynb #99eb669b
 @dataclass

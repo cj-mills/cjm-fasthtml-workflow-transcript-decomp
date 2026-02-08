@@ -86,14 +86,31 @@ class StructureDecompHtmlIds:
     SPLIT_MODE_CONTAINER = "sd-split-mode-container"
     SPLIT_MODE_ACTIONS = "sd-split-mode-actions"
 
-    # Phase 3: Temporal Alignment (Magnetic Timeline)
+    # Phase 2: Combined Segment & Align - Shared Chrome
+    SHARED_HINTS = "sd-shared-hints"
+    SHARED_TOOLBAR = "sd-shared-toolbar"
+    SHARED_CONTROLS = "sd-shared-controls"
+    SHARED_FOOTER = "sd-shared-footer"
+
+    # Phase 2: Combined Segment & Align - Column Containers
+    DECOMP_COLUMN = "sd-decomp-column"
+    DECOMP_COLUMN_HEADER = "sd-decomp-column-header"
+    DECOMP_MINI_STATS = "sd-decomp-mini-stats"
+    ALIGNMENT_COLUMN = "sd-align-column"
+    ALIGNMENT_COLUMN_HEADER = "sd-align-column-header"
+    ALIGNMENT_MINI_STATS = "sd-align-mini-stats"
+
+    # Phase 2: Combined Segment & Align - Active Column State
+    ACTIVE_COLUMN_INPUT = "sd-active-column"
+
+    # Phase 2: Temporal Alignment (sub-column IDs)
     ALIGNMENT_CONTAINER = "sd-alignment-container"
     TEXT_COLUMN = "sd-text-column"
     VAD_COLUMN = "sd-vad-column"
     AUDIO_PLAYER = "sd-audio-player"
     ACTIVE_SEGMENT = "sd-active-segment"
 
-    # Phase 4: Review & Commit
+    # Phase 3: Review & Commit
     REVIEW_CONTAINER = "sd-review-container"
     READER_VIEW = "sd-reader-view"
     COMMIT_SUMMARY = "sd-commit-summary"

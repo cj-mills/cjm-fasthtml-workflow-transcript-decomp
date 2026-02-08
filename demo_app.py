@@ -5,7 +5,7 @@ This demo showcases the structure decomposition workflow:
 1. StructureDecompWorkflow:
    - Receives PluginManager from host application (dependency injection)
    - SQLite-backed state persistence across restarts
-   - 4-step wizard: Selection -> Decomposition -> Alignment -> Review
+   - 3-step wizard: Selection -> Segment & Align -> Review
 
 2. PluginManager:
    - Discovers plugins from JSON manifests in ~/.cjm/manifests/
@@ -20,9 +20,8 @@ This demo showcases the structure decomposition workflow:
 
 4. StepFlow Integration:
    - Phase 1: Source Selection & Ordering
-   - Phase 2: Structural Decomposition (Card Stack UI)
-   - Phase 3: Temporal Alignment (Magnetic Timeline)
-   - Phase 4: Review & Commit
+   - Phase 2: Segment & Align (Dual-Column UI)
+   - Phase 3: Review & Commit
 
 Run with plugins installed via `cjm-ctl install-all --plugins plugins_test.yaml`.
 """
@@ -189,17 +188,12 @@ def main():
                     ),
                     Div(
                         Span("", cls=combine_classes(font_size._2xl, m.r(3))),
-                        Span("Phase 2: Structural Decomposition (Card Stack UI)"),
+                        Span("Phase 2: Segment & Align (Dual-Column UI)"),
                         cls=combine_classes(m.b(3))
                     ),
                     Div(
                         Span("", cls=combine_classes(font_size._2xl, m.r(3))),
-                        Span("Phase 3: Temporal Alignment (Magnetic Timeline)"),
-                        cls=combine_classes(m.b(3))
-                    ),
-                    Div(
-                        Span("", cls=combine_classes(font_size._2xl, m.r(3))),
-                        Span("Phase 4: Review & Commit to Context Graph"),
+                        Span("Phase 3: Review & Commit to Context Graph"),
                         cls=combine_classes(m.b(8))
                     ),
                     cls=combine_classes(text_align.left, m.b(8))
@@ -316,7 +310,7 @@ def main():
     print("  - SegmentationService - NLTK sentence splitting")
     print("  - AlignmentService - Silero VAD analysis")
     print("  - GraphService - Context graph commit")
-    print("  - StepFlow integration - 4-step wizard")
+    print("  - StepFlow integration - 3-step wizard")
     print("="*70 + "\n")
 
     return app

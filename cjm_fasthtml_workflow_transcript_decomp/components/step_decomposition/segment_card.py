@@ -15,7 +15,6 @@ from fasthtml.common import Div, Span, Button, P
 from cjm_fasthtml_daisyui.components.actions.button import (
     btn, btn_sizes, btn_styles, btn_colors, btn_modifiers
 )
-from cjm_fasthtml_daisyui.components.data_display.badge import badge, badge_colors, badge_sizes
 from cjm_fasthtml_daisyui.components.data_display.card import card, card_body
 from cjm_fasthtml_daisyui.components.data_display.kbd import kbd, kbd_sizes
 from cjm_fasthtml_daisyui.components.feedback.tooltip import tooltip, tooltip_placement
@@ -53,14 +52,13 @@ from cjm_fasthtml_token_selector.core.models import TokenSelectorState
 # Local imports
 from ...core.html_ids import StructureDecompHtmlIds
 from ...core.models import WorkingSegment
-from ...services.formatting import format_time
 from cjm_fasthtml_workflow_transcript_decomp.components.step_decomposition.card_stack_config import (
     DECOMP_TS_CONFIG, DECOMP_TS_IDS,
 )
 
 # %% ../../../nbs/components/step_decomposition/segment_card.ipynb #e5f6a7b8
 def _render_card_metadata(
-    segment: WorkingSegment,  # Segment to render metadata for
+    segment:WorkingSegment,  # Segment to render metadata for
 ) -> Any:  # Metadata component
     """Render the left metadata column of a segment card."""
     return Div(
@@ -68,11 +66,6 @@ def _render_card_metadata(
         Span(
             f"#{segment.index + 1}",
             cls=combine_classes(font_size.xs, font_family.mono, font_weight.bold)
-        ),
-        # Timestamp badge
-        Div(
-            format_time(segment.start_time),
-            cls=combine_classes(badge, badge_colors.neutral, badge_sizes.xs)
         ),
         cls=combine_classes(
             w(16), shrink(0),
