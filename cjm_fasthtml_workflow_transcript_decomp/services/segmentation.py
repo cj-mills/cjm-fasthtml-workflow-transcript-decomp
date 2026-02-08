@@ -10,8 +10,9 @@ from typing import List, Dict, Any, Optional
 import asyncio
 
 from cjm_plugin_system.core.manager import PluginManager
+from cjm_source_provider.models import SourceBlock
 
-from ..core.models import SourceBlock, WorkingSegment
+from ..core.models import WorkingSegment
 
 # %% ../../nbs/services/segmentation.ipynb #be134f4e
 class SegmentationService:
@@ -48,7 +49,7 @@ class SegmentationService:
         self,
         text: str,  # Text to split into sentences
         source_id: Optional[str] = None,  # Source block ID for traceability
-        source_plugin: Optional[str] = None  # Source plugin name for traceability
+        source_provider_id: Optional[str] = None  # Source provider identifier for traceability
     ) -> List[WorkingSegment]:  # List of WorkingSegment objects
         """Split text into sentences asynchronously."""
         if not self.is_available():
@@ -70,7 +71,7 @@ class SegmentationService:
                 index=idx,
                 text=span['text'],
                 source_id=source_id,
-                source_plugin=source_plugin,
+                source_provider_id=source_provider_id,
                 start_char=span.get('start_char'),
                 end_char=span.get('end_char')
             )
@@ -82,11 +83,11 @@ class SegmentationService:
         self,
         text: str,  # Text to split into sentences
         source_id: Optional[str] = None,  # Source block ID for traceability
-        source_plugin: Optional[str] = None  # Source plugin name for traceability
+        source_provider_id: Optional[str] = None  # Source provider identifier for traceability
     ) -> List[WorkingSegment]:  # List of WorkingSegment objects
         """Split text into sentences synchronously."""
         return asyncio.get_event_loop().run_until_complete(
-            self.split_sentences_async(text, source_id, source_plugin)
+            self.split_sentences_async(text, source_id, source_provider_id)
         )
     
     async def split_combined_sources_async(
@@ -101,7 +102,7 @@ class SegmentationService:
             segments = await self.split_sentences_async(
                 text=block.text,
                 source_id=block.id,
-                source_plugin=block.plugin_name
+                source_provider_id=block.provider_id
             )
             
             # Update indices to be globally sequential
@@ -131,7 +132,7 @@ def split_segment_at_position(
         index=segment.index,
         text=segment.text[:char_position].strip(),
         source_id=segment.source_id,
-        source_plugin=segment.source_plugin,
+        source_provider_id=segment.source_provider_id,
         start_char=first_start,
         end_char=first_end
     )
@@ -140,7 +141,7 @@ def split_segment_at_position(
         index=segment.index + 1,  # Will need reindexing
         text=segment.text[char_position:].strip(),
         source_id=segment.source_id,
-        source_plugin=segment.source_plugin,
+        source_provider_id=segment.source_provider_id,
         start_char=second_start,
         end_char=second_end
     )
@@ -158,7 +159,7 @@ def merge_segments(
     
     # Preserve source tracking if from same source
     source_id = first.source_id if first.source_id == second.source_id else None
-    source_plugin = first.source_plugin if first.source_plugin == second.source_plugin else None
+    source_provider_id = first.source_provider_id if first.source_provider_id == second.source_provider_id else None
     
     # Merge character ranges if both exist and from same source
     start_char = first.start_char if source_id else None
@@ -176,7 +177,7 @@ def merge_segments(
         index=first.index,
         text=merged_text,
         source_id=source_id,
-        source_plugin=source_plugin,
+        source_provider_id=source_provider_id,
         start_char=start_char,
         end_char=end_char,
         start_time=start_time,
@@ -208,9 +209,9 @@ def reconstruct_source_blocks(
     source_blocks = []
     for source_id, segs in segments_by_source.items():
         combined_text = " ".join(s.get("text", "") for s in segs)
-        source_plugin = segs[0].get("source_plugin", "unknown") if segs else "unknown"
+        source_provider_id = segs[0].get("source_provider_id", "unknown") if segs else "unknown"
         source_blocks.append(SourceBlock(
-            id=source_id, plugin_name=source_plugin, text=combined_text,
+            id=source_id, provider_id=source_provider_id, text=combined_text,
         ))
     
     return source_blocks

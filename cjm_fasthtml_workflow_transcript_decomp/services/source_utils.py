@@ -59,7 +59,7 @@ def extract_model_name(
 # %% ../../nbs/services/source_utils.ipynb #su-group-transcriptions
 def group_transcriptions(
     transcriptions: List[Dict[str, Any]],  # List of transcription records
-    group_by: str = "audio_path"  # Grouping mode: "audio_path" or "batch_id"
+    group_by: str = "media_path"  # Grouping mode: "media_path" or "batch_id"
 ) -> Dict[str, List[Dict[str, Any]]]:  # Grouped transcriptions
     """Group transcription records by the specified field."""
     groups = {}
@@ -67,8 +67,8 @@ def group_transcriptions(
         if group_by == "batch_id":
             key = extract_batch_id(t.get("metadata"))
         else:
-            # Default to audio_path grouping
-            key = t.get("audio_path", "Unknown")
+            # Default to media_path grouping
+            key = t.get("media_path", "Unknown")
         
         if key not in groups:
             groups[key] = []
@@ -78,32 +78,32 @@ def group_transcriptions(
 # %% ../../nbs/services/source_utils.ipynb #su-group-by-audio
 def group_transcriptions_by_audio(
     transcriptions: List[Dict[str, Any]]  # List of transcription records
-) -> Dict[str, List[Dict[str, Any]]]:  # Grouped by audio_path
+) -> Dict[str, List[Dict[str, Any]]]:  # Grouped by media_path
     """Group transcription records by their source audio file."""
-    return group_transcriptions(transcriptions, group_by="audio_path")
+    return group_transcriptions(transcriptions, group_by="media_path")
 
 # %% ../../nbs/services/source_utils.ipynb #su-is-source-selected
 def is_source_selected(
-    job_id: str,  # Job ID to check
+    record_id: str,  # Job ID to check
     selected_sources: List[Dict[str, str]]  # List of selected sources
 ) -> bool:  # True if source is selected
     """Check if a source is in the selected list."""
-    return any(s.get("job_id") == job_id for s in selected_sources)
+    return any(s.get("record_id") == record_id for s in selected_sources)
 
 # %% ../../nbs/services/source_utils.ipynb #tg25xqgkaa
 def filter_transcriptions(
     transcriptions: List[Dict[str, Any]],  # List of transcription records to filter
     search_text: str,  # Search term for case-insensitive substring matching
 ) -> List[Dict[str, Any]]:  # Filtered transcription records
-    """Filter transcriptions by substring match across job_id, audio_path, and text fields."""
+    """Filter transcriptions by substring match across record_id, media_path, and text fields."""
     if not search_text or not search_text.strip():
         return transcriptions
     
     search_lower = search_text.lower().strip()
     return [
         t for t in transcriptions
-        if (search_lower in t.get("job_id", "").lower() or
-            search_lower in t.get("audio_path", "").lower() or
+        if (search_lower in t.get("record_id", "").lower() or
+            search_lower in t.get("media_path", "").lower() or
             search_lower in t.get("text", "").lower())
     ]
 
@@ -111,7 +111,7 @@ def filter_transcriptions(
 def select_all_in_group(
     transcriptions: List[Dict[str, Any]],  # All transcription records
     group_key: str,  # Group key to match against
-    grouping_mode: str,  # Grouping mode: "audio_path" or "batch_id"
+    grouping_mode: str,  # Grouping mode: "media_path" or "batch_id"
     selected_sources: List[Dict[str, str]],  # Current selections
 ) -> List[Dict[str, str]]:  # Updated selections with new items appended
     """Add all transcriptions matching a group key to the selection list, skipping duplicates."""
@@ -119,40 +119,40 @@ def select_all_in_group(
     if grouping_mode == "batch_id":
         matching = [t for t in transcriptions if extract_batch_id(t.get("metadata")) == group_key]
     else:
-        matching = [t for t in transcriptions if t.get("audio_path") == group_key]
+        matching = [t for t in transcriptions if t.get("media_path") == group_key]
     
     # Deduplicate against existing selections
-    existing_job_ids = {s.get("job_id") for s in selected_sources}
+    existing_record_ids = {s.get("record_id") for s in selected_sources}
     result = list(selected_sources)
     for t in matching:
-        job_id = t.get("job_id")
-        if job_id and job_id not in existing_job_ids:
-            result.append({"job_id": job_id, "plugin_name": t.get("plugin_name", "")})
-            existing_job_ids.add(job_id)
+        record_id = t.get("record_id")
+        if record_id and record_id not in existing_record_ids:
+            result.append({"record_id": record_id, "provider_id": t.get("provider_id", "")})
+            existing_record_ids.add(record_id)
     
     return result
 
 # %% ../../nbs/services/source_utils.ipynb #gtja2coiu2n
 def toggle_source_selection(
-    job_id: str,  # Job ID to toggle
-    plugin_name: str,  # Plugin name for the source
+    record_id: str,  # Job ID to toggle
+    provider_id: str,  # Plugin name for the source
     selected_sources: List[Dict[str, str]],  # Current selections
 ) -> List[Dict[str, str]]:  # Updated selections
     """Toggle a source in or out of the selection list."""
-    if any(s.get("job_id") == job_id for s in selected_sources):
-        return [s for s in selected_sources if s.get("job_id") != job_id]
+    if any(s.get("record_id") == record_id for s in selected_sources):
+        return [s for s in selected_sources if s.get("record_id") != record_id]
     else:
-        return selected_sources + [{"job_id": job_id, "plugin_name": plugin_name}]
+        return selected_sources + [{"record_id": record_id, "provider_id": provider_id}]
 
 # %% ../../nbs/services/source_utils.ipynb #gvvdhrgpf6l
 def reorder_item(
     selected_sources: List[Dict[str, str]],  # Current selections
-    job_id: str,  # Job ID of item to move
+    record_id: str,  # Job ID of item to move
     direction: str,  # Direction: "up" or "down"
 ) -> List[Dict[str, str]]:  # Reordered selections
     """Move an item up or down in the selection list by swapping with its neighbor."""
     sources = list(selected_sources)
-    current_index = next((i for i, s in enumerate(sources) if s.get("job_id") == job_id), None)
+    current_index = next((i for i, s in enumerate(sources) if s.get("record_id") == record_id), None)
     
     if current_index is None:
         return sources
@@ -173,13 +173,13 @@ def reorder_sources(
     if not new_order_ids:
         return list(selected_sources)
     
-    source_lookup = {s.get("job_id"): s for s in selected_sources}
+    source_lookup = {s.get("record_id"): s for s in selected_sources}
     reordered = [source_lookup[jid] for jid in new_order_ids if jid in source_lookup]
     
     # Append any sources not in the new order (safety fallback)
     new_order_set = set(new_order_ids)
     for s in selected_sources:
-        if s.get("job_id") not in new_order_set:
+        if s.get("record_id") not in new_order_set:
             reordered.append(s)
     
     return reordered
@@ -202,12 +202,12 @@ def calculate_next_tab(
 
 # %% ../../nbs/services/source_utils.ipynb #su-check-audio-exists
 def check_audio_exists(
-    audio_path: str  # Path to audio file
+    media_path: str  # Path to audio file
 ) -> bool:  # True if file exists
     """Check if the audio file exists at the given path."""
-    if not audio_path or audio_path == "Unknown":
+    if not media_path or media_path == "Unknown":
         return False
-    return Path(audio_path).exists()
+    return Path(media_path).exists()
 
 # %% ../../nbs/services/source_utils.ipynb #su-validate-browse-path
 def validate_browse_path(

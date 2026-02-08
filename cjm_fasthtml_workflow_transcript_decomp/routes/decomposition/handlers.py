@@ -12,6 +12,7 @@ from cjm_fasthtml_card_stack.core.models import CardStackState
 from cjm_fasthtml_card_stack.core.constants import DEFAULT_VISIBLE_COUNT, DEFAULT_CARD_WIDTH
 
 from cjm_fasthtml_interactions.core.state_store import get_session_id
+from cjm_workflow_state.history import pop_history
 
 from ...core.models import WorkingSegment
 from ..models import DecompUrls
@@ -28,7 +29,6 @@ from cjm_fasthtml_workflow_transcript_decomp.services.segmentation import (
     split_segment_at_position, merge_segments, reindex_segments,
     reconstruct_source_blocks
 )
-from ...services.history import pop_history
 from cjm_fasthtml_workflow_transcript_decomp.routes.decomposition.core import (
     _to_segments, _load_decomp_context, _get_decomp_state,
     _get_selection_state, _update_decomp_state, _push_history,
@@ -244,7 +244,9 @@ def _handle_decomp_undo(
         state = _build_card_stack_state(ctx)
         return _build_slots_oob(ctx.segment_dicts, state, urls)
     
-    previous_segments, new_focused_index, remaining_history = result
+    snapshot, remaining_history = result
+    previous_segments = snapshot["segments"]
+    new_focused_index = min(snapshot["focused_index"], max(0, len(previous_segments) - 1))
     
     _update_decomp_state(workflow, session_id,
         segments=previous_segments, history=remaining_history,

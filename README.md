@@ -28,11 +28,10 @@ pip install cjm_fasthtml_workflow_transcript_decomp
     │   │   ├── source_browser.ipynb   # Source browser components for displaying and filtering transcription sources
     │   │   └── step_renderer.ipynb    # Phase 1 step renderer: Source Selection & Ordering with two-column layout and collapsible preview
     │   └── steps.ipynb  # Placeholder step renderers for the structure decomposition workflow
-    ├── core/ (4)
-    │   ├── config.ipynb       # Configuration dataclass for structure decomposition workflow
-    │   ├── html_ids.ipynb     # Centralized HTML ID constants for structure decomposition workflow components
-    │   ├── models.ipynb       # Internal workflow data models for structure decomposition
-    │   └── state_store.ipynb  # SQLite-backed workflow state storage for persistence across restarts
+    ├── core/ (3)
+    │   ├── config.ipynb    # Configuration dataclass for structure decomposition workflow
+    │   ├── html_ids.ipynb  # Centralized HTML ID constants for structure decomposition workflow components
+    │   └── models.ipynb    # Internal workflow data models for structure decomposition
     ├── routes/ (11)
     │   ├── decomposition/ (3)
     │   │   ├── card_stack.ipynb  # Card stack UI operations — navigation, viewport, mode switching, and response builders
@@ -47,11 +46,10 @@ pip install cjm_fasthtml_workflow_transcript_decomp
     │   ├── core.ipynb    # Workflow-level route handlers for status, reset, and source retrieval
     │   ├── init.ipynb    # Router initialization for the structure decomposition workflow
     │   └── models.ipynb  # URL bundle dataclasses for route handlers and UI renderers
-    ├── services/ (8)
+    ├── services/ (7)
     │   ├── alignment.ipynb     # Alignment service for temporal coordination via Silero VAD plugin
     │   ├── formatting.ipynb    # Display formatting utilities for dates, times, and filenames
     │   ├── graph.ipynb         # Graph service for committing documents and segments to the context graph
-    │   ├── history.ipynb       # Undo history management for segment editing workflows
     │   ├── segmentation.ipynb  # Segmentation service for text decomposition via NLTK plugin
     │   ├── source.ipynb        # Source service for federated transcription queries via DuckDB
     │   ├── source_utils.ipynb  # Source record operations for metadata extraction, grouping, and validation
@@ -59,7 +57,7 @@ pip install cjm_fasthtml_workflow_transcript_decomp
     └── workflow/ (1)
         └── workflow.ipynb  # Main workflow class for structure decomposition
 
-Total: 37 notebooks across 5 directories
+Total: 35 notebooks across 5 directories
 
 ## Module Dependencies
 
@@ -81,7 +79,6 @@ graph LR
     core_config[core.config<br/>config]
     core_html_ids[core.html_ids<br/>html_ids]
     core_models[core.models<br/>models]
-    core_state_store[core.state_store<br/>state_store]
     routes_core[routes.core<br/>core]
     routes_decomposition_card_stack[routes.decomposition.card_stack<br/>card_stack]
     routes_decomposition_core[routes.decomposition.core<br/>core]
@@ -96,7 +93,6 @@ graph LR
     services_alignment[services.alignment<br/>alignment]
     services_formatting[services.formatting<br/>formatting]
     services_graph[services.graph<br/>graph]
-    services_history[services.history<br/>history]
     services_segmentation[services.segmentation<br/>segmentation]
     services_source[services.source<br/>source]
     services_source_utils[services.source_utils<br/>source_utils]
@@ -105,111 +101,107 @@ graph LR
 
     components_step_decomposition_helpers --> core_models
     components_step_decomposition_keyboard_config --> components_step_decomposition_card_stack_config
+    components_step_decomposition_segment_card --> core_models
     components_step_decomposition_segment_card --> services_formatting
     components_step_decomposition_segment_card --> components_step_decomposition_card_stack_config
     components_step_decomposition_segment_card --> core_html_ids
-    components_step_decomposition_segment_card --> core_models
-    components_step_decomposition_step_renderer --> components_step_decomposition_card_stack_config
-    components_step_decomposition_step_renderer --> components_step_decomposition_segment_card
     components_step_decomposition_step_renderer --> components_step_decomposition_helpers
-    components_step_decomposition_step_renderer --> components_step_decomposition_keyboard_config
-    components_step_decomposition_step_renderer --> components_step_decomposition_callbacks
-    components_step_decomposition_step_renderer --> core_html_ids
-    components_step_decomposition_step_renderer --> routes_models
-    components_step_decomposition_step_renderer --> services_text_utils
     components_step_decomposition_step_renderer --> core_models
+    components_step_decomposition_step_renderer --> components_step_decomposition_keyboard_config
+    components_step_decomposition_step_renderer --> components_step_decomposition_card_stack_config
+    components_step_decomposition_step_renderer --> components_step_decomposition_callbacks
+    components_step_decomposition_step_renderer --> services_text_utils
+    components_step_decomposition_step_renderer --> routes_models
+    components_step_decomposition_step_renderer --> core_html_ids
+    components_step_decomposition_step_renderer --> components_step_decomposition_segment_card
     components_step_selection_helpers --> core_models
     components_step_selection_local_files --> components_step_selection_helpers
     components_step_selection_local_files --> core_html_ids
     components_step_selection_preview_panel --> core_html_ids
     components_step_selection_selection_queue --> core_html_ids
-    components_step_selection_source_browser --> services_source_utils
     components_step_selection_source_browser --> services_formatting
-    components_step_selection_source_browser --> core_html_ids
+    components_step_selection_source_browser --> services_source_utils
     components_step_selection_source_browser --> services_text_utils
-    components_step_selection_step_renderer --> routes_models
-    components_step_selection_step_renderer --> components_step_selection_helpers
-    components_step_selection_step_renderer --> components_step_selection_local_files
-    components_step_selection_step_renderer --> core_html_ids
-    components_step_selection_step_renderer --> components_step_selection_preview_panel
-    components_step_selection_step_renderer --> components_step_selection_source_browser
+    components_step_selection_source_browser --> core_html_ids
     components_step_selection_step_renderer --> components_step_selection_selection_queue
+    components_step_selection_step_renderer --> components_step_selection_source_browser
+    components_step_selection_step_renderer --> components_step_selection_local_files
     components_step_selection_step_renderer --> services_text_utils
+    components_step_selection_step_renderer --> components_step_selection_helpers
+    components_step_selection_step_renderer --> components_step_selection_preview_panel
+    components_step_selection_step_renderer --> routes_models
+    components_step_selection_step_renderer --> core_html_ids
     components_steps --> core_html_ids
     routes_core --> workflow_workflow
-    routes_decomposition_card_stack --> routes_decomposition_core
     routes_decomposition_card_stack --> components_step_decomposition_card_stack_config
-    routes_decomposition_card_stack --> components_step_decomposition_segment_card
+    routes_decomposition_card_stack --> routes_decomposition_core
     routes_decomposition_card_stack --> workflow_workflow
     routes_decomposition_card_stack --> routes_models
-    routes_decomposition_core --> core_models
-    routes_decomposition_core --> services_history
+    routes_decomposition_card_stack --> components_step_decomposition_segment_card
     routes_decomposition_core --> workflow_workflow
-    routes_decomposition_handlers --> routes_decomposition_core
-    routes_decomposition_handlers --> components_step_decomposition_card_stack_config
-    routes_decomposition_handlers --> services_history
-    routes_decomposition_handlers --> services_segmentation
-    routes_decomposition_handlers --> workflow_workflow
-    routes_decomposition_handlers --> routes_decomposition_card_stack
-    routes_decomposition_handlers --> routes_models
-    routes_decomposition_handlers --> components_step_decomposition_step_renderer
-    routes_decomposition_handlers --> services_text_utils
+    routes_decomposition_core --> core_models
     routes_decomposition_handlers --> core_models
-    routes_init --> routes_models
-    routes_init --> routes_selection_tabs
+    routes_decomposition_handlers --> routes_decomposition_core
+    routes_decomposition_handlers --> components_step_decomposition_step_renderer
+    routes_decomposition_handlers --> services_segmentation
+    routes_decomposition_handlers --> components_step_decomposition_card_stack_config
+    routes_decomposition_handlers --> routes_decomposition_card_stack
+    routes_decomposition_handlers --> services_text_utils
+    routes_decomposition_handlers --> workflow_workflow
+    routes_decomposition_handlers --> routes_models
+    routes_init --> routes_selection_local_files
     routes_init --> routes_selection_queue
     routes_init --> routes_selection_filtering
-    routes_init --> routes_selection_local_files
-    routes_init --> routes_decomposition_card_stack
-    routes_init --> routes_decomposition_handlers
-    routes_init --> workflow_workflow
     routes_init --> routes_core
+    routes_init --> routes_decomposition_handlers
+    routes_init --> routes_decomposition_card_stack
+    routes_init --> routes_selection_tabs
+    routes_init --> routes_models
+    routes_init --> workflow_workflow
+    routes_selection_core --> components_step_selection_source_browser
+    routes_selection_core --> workflow_workflow
+    routes_selection_core --> components_step_selection_selection_queue
     routes_selection_core --> components_step_selection_step_renderer
     routes_selection_core --> routes_models
-    routes_selection_core --> workflow_workflow
-    routes_selection_core --> components_step_selection_source_browser
-    routes_selection_core --> components_step_selection_selection_queue
-    routes_selection_filtering --> services_source_utils
     routes_selection_filtering --> routes_selection_core
-    routes_selection_filtering --> routes_models
-    routes_selection_filtering --> workflow_workflow
     routes_selection_filtering --> components_step_selection_source_browser
-    routes_selection_local_files --> routes_models
+    routes_selection_filtering --> workflow_workflow
+    routes_selection_filtering --> services_source_utils
+    routes_selection_filtering --> routes_models
     routes_selection_local_files --> routes_selection_core
-    routes_selection_local_files --> components_step_selection_local_files
     routes_selection_local_files --> workflow_workflow
     routes_selection_local_files --> services_source
+    routes_selection_local_files --> components_step_selection_local_files
+    routes_selection_local_files --> routes_models
     routes_selection_queue --> routes_selection_core
-    routes_selection_queue --> services_source_utils
-    routes_selection_queue --> routes_models
     routes_selection_queue --> workflow_workflow
+    routes_selection_queue --> services_source_utils
     routes_selection_queue --> components_step_selection_preview_panel
-    routes_selection_tabs --> components_step_selection_source_browser
-    routes_selection_tabs --> routes_models
-    routes_selection_tabs --> components_step_selection_step_renderer
-    routes_selection_tabs --> components_step_selection_local_files
-    routes_selection_tabs --> workflow_workflow
-    routes_selection_tabs --> routes_selection_local_files
-    routes_selection_tabs --> services_source_utils
+    routes_selection_queue --> routes_models
     routes_selection_tabs --> routes_selection_core
+    routes_selection_tabs --> workflow_workflow
+    routes_selection_tabs --> services_source_utils
+    routes_selection_tabs --> components_step_selection_step_renderer
+    routes_selection_tabs --> components_step_selection_source_browser
+    routes_selection_tabs --> routes_selection_local_files
+    routes_selection_tabs --> components_step_selection_local_files
+    routes_selection_tabs --> routes_models
     services_alignment --> core_models
     services_graph --> core_models
     services_segmentation --> core_models
-    services_source --> core_models
     services_text_utils --> core_models
-    workflow_workflow --> core_config
-    workflow_workflow --> services_alignment
-    workflow_workflow --> core_state_store
     workflow_workflow --> routes_models
-    workflow_workflow --> services_graph
-    workflow_workflow --> components_steps
-    workflow_workflow --> services_source
-    workflow_workflow --> components_step_selection_step_renderer
-    workflow_workflow --> services_segmentation
     workflow_workflow --> components_step_decomposition_step_renderer
+    workflow_workflow --> services_graph
+    workflow_workflow --> components_step_selection_step_renderer
+    workflow_workflow --> services_source
+    workflow_workflow --> core_config
+    workflow_workflow --> services_segmentation
+    workflow_workflow --> components_steps
+    workflow_workflow --> services_alignment
 ```
 
-*104 cross-module dependencies detected*
+*100 cross-module dependencies detected*
 
 ## CLI Reference
 
@@ -578,7 +570,7 @@ def _handle_reset(
 def _handle_get_sources(
     workflow: StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
-    plugin_name: str = None,  # Optional plugin name filter
+    provider_id: str = None,  # Optional plugin name filter
     limit: int = 50  # Maximum number of results
 ):  # JSON response with transcription sources
     "Get available transcription sources."
@@ -733,7 +725,7 @@ def _handle_grouping_change(
     workflow: StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    grouping_mode: str,  # New grouping mode: "audio_path" or "batch_id"
+    grouping_mode: str,  # New grouping mode: "media_path" or "batch_id"
     urls: SelectionUrls,  # URL bundle for rendering
 ):  # Updated source list component
     "Change the grouping mode and re-render the source list."
@@ -744,8 +736,8 @@ def _handle_selection_toggle_focused(
     workflow: StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    job_id: str,  # Job ID from focused row (via hx-include)
-    plugin_name: str,  # Plugin name from focused row (via hx-include)
+    record_id: str,  # Job ID from focused row (via hx-include)
+    provider_id: str,  # Plugin name from focused row (via hx-include)
     urls: SelectionUrls,  # URL bundle for rendering
 ):  # Queue component with OOB stats, optionally with OOB source list
     "Toggle selection of the focused row (keyboard shortcut handler)."
@@ -756,7 +748,7 @@ def _handle_keyboard_reorder(
     workflow: StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    job_id: str,  # Job ID of item to move
+    record_id: str,  # Job ID of item to move
     direction: str,  # Direction to move: "up" or "down"
     urls: SelectionUrls,  # URL bundle for rendering
 ):  # Queue component, optionally with OOB source list
@@ -1041,7 +1033,7 @@ def _get_selected_sources(
 ``` python
 def _get_grouping_mode(
     ctx: InteractionContext  # Interaction context with state
-) -> str:  # Grouping mode: "audio_path" or "batch_id"
+) -> str:  # Grouping mode: "media_path" or "batch_id"
     "Get the current grouping mode from step state."
 ```
 
@@ -1052,45 +1044,6 @@ def _generate_sortable_init_script(
     animation_ms: int = 150,  # Animation duration in milliseconds
 ) -> str:  # JavaScript initialization script
     "Generate Sortable.js initialization script for htmx integration."
-```
-
-### history (`history.ipynb`)
-
-> Undo history management for segment editing workflows
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.services.history import (
-    DEFAULT_MAX_HISTORY_DEPTH,
-    push_history,
-    pop_history
-)
-```
-
-#### Functions
-
-``` python
-def push_history(
-    history: List[Dict[str, Any]],  # Current history stack
-    segments: List[Dict[str, Any]],  # Segments to snapshot
-    focused_index: int,  # Focused index to snapshot
-    max_depth: int = DEFAULT_MAX_HISTORY_DEPTH,  # Maximum history depth
-) -> List[Dict[str, Any]]:  # Updated history stack
-    "Push a state snapshot onto the history stack, enforcing max depth."
-```
-
-``` python
-def pop_history(
-    history: List[Dict[str, Any]],  # Current history stack
-) -> Optional[Tuple[List[Dict[str, Any]], int, List[Dict[str, Any]]]]:  # (segments, focused_index, updated_history) or None
-    "Pop the most recent snapshot from the history stack, clamping the focused index."
-```
-
-#### Variables
-
-``` python
-DEFAULT_MAX_HISTORY_DEPTH = 50
 ```
 
 ### html_ids (`html_ids.ipynb`)
@@ -1118,17 +1071,20 @@ class StructureDecompHtmlIds:
         "Convert an ID to a CSS selector format."
     
     def source_checkbox(
-            source_id:str  # Unique source identifier to generate ID for
+            record_id:str,  # Record identifier
+            provider_id:str  # Provider identifier
         ) -> str:  # HTML ID for the source checkbox
         "Generate HTML ID for a source selection checkbox."
     
     def source_row(
-            job_id:str  # Job ID to generate row ID for
+            record_id:str,  # Record identifier
+            provider_id:str  # Provider identifier
         ) -> str:  # HTML ID for the source row
         "Generate HTML ID for a source browser row."
     
     def queue_item(
-            job_id:str  # Job ID to generate queue item ID for
+            record_id:str,  # Record identifier
+            provider_id:str  # Provider identifier
         ) -> str:  # HTML ID for the queue item
         "Generate HTML ID for a queue item."
     
@@ -1359,15 +1315,11 @@ _local_files_config: Optional[FileBrowserConfig] = None
 
 ``` python
 from cjm_fasthtml_workflow_transcript_decomp.core.models import (
-    SourceRecord,
-    SourceProvider,
-    SelectedSource,
     SelectionStepState,
     DecompositionStepState,
     AlignmentStepState,
     ReviewStepState,
     WorkflowStepStates,
-    SourceBlock,
     WorkingSegment,
     VADChunk,
     WorkingDocument
@@ -1375,60 +1327,6 @@ from cjm_fasthtml_workflow_transcript_decomp.core.models import (
 ```
 
 #### Classes
-
-``` python
-class SourceRecord(TypedDict):
-    "Standard record format for source providers."
-```
-
-``` python
-@runtime_checkable
-class SourceProvider(Protocol):
-    "Protocol for content source providers."
-    
-    def provider_id(self) -> str:
-            """Unique identifier for this provider instance."""
-            ...
-        
-        @property
-        def provider_name(self) -> str
-        "Unique identifier for this provider instance."
-    
-    def provider_name(self) -> str:
-            """Human-readable name for display."""
-            ...
-        
-        @property
-        def provider_type(self) -> str
-        "Human-readable name for display."
-    
-    def provider_type(self) -> str:
-            """Provider type category (e.g., 'transcription_db', 'local_file')."""
-            ...
-        
-        def query_records(
-            self,
-            limit: int = 100  # Maximum number of records to return
-        ) -> List['SourceRecord']:  # List of source records
-        "Provider type category (e.g., 'transcription_db', 'local_file')."
-    
-    def query_records(
-            self,
-            limit: int = 100  # Maximum number of records to return
-        ) -> List['SourceRecord']:  # List of source records
-        "Query available records from this provider."
-    
-    def get_source_block(
-            self,
-            record_id: str  # Record identifier (job_id)
-        ) -> Optional['SourceBlock']:  # SourceBlock or None if not found
-        "Fetch a specific record as a SourceBlock."
-```
-
-``` python
-class SelectedSource(TypedDict):
-    "A selected source in the queue."
-```
 
 ``` python
 class SelectionStepState(TypedDict):
@@ -1457,28 +1355,13 @@ class WorkflowStepStates(TypedDict):
 
 ``` python
 @dataclass
-class SourceBlock:
-    "A raw text block from a transcription source."
-    
-    id: str  # Unique identifier (typically job_id from transcription)
-    plugin_name: str  # Source plugin name
-    text: str  # Raw transcription text
-    media_path: Optional[str]  # Path to source media file
-    metadata: Dict[str, Any] = field(...)  # Additional metadata from source
-    
-    def to_dict(self) -> Dict[str, Any]:  # Dictionary representation
-        "Convert to dictionary for JSON serialization."
-```
-
-``` python
-@dataclass
 class WorkingSegment:
     "A segment during workflow processing before graph commit."
     
     index: int  # Sequence position (0-indexed)
     text: str  # Segment text content
     source_id: Optional[str]  # ID of source block
-    source_plugin: Optional[str]  # Source plugin name
+    source_provider_id: Optional[str]  # Source provider identifier
     start_char: Optional[int]  # Start character index in source
     end_char: Optional[int]  # End character index in source
     start_time: Optional[float]  # Start time in seconds
@@ -1631,7 +1514,7 @@ from cjm_fasthtml_workflow_transcript_decomp.components.step_selection.preview_p
 
 ``` python
 def _render_preview_panel(
-    preview_job_id: Optional[str] = None,  # Job ID being previewed
+    preview_record_id: Optional[str] = None,  # Job ID being previewed
     preview_text: Optional[str] = None,  # Text content to preview
     is_open: bool = False,  # Whether the collapse should be open
 ) -> Any:  # Preview panel component (collapsible, full-width)
@@ -1655,8 +1538,8 @@ def _handle_selection_add(
     workflow: StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    job_id: str,  # Job ID to add
-    plugin_name: str,  # Plugin name for the source
+    record_id: str,  # Job ID to add
+    provider_id: str,  # Plugin name for the source
     urls: SelectionUrls,  # URL bundle for rendering
 ):  # Queue component with OOB stats, optionally with OOB source list
     "Add a source to the selection queue."
@@ -1667,7 +1550,7 @@ def _handle_selection_remove(
     workflow: StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    job_id: str,  # Job ID to remove
+    record_id: str,  # Job ID to remove
     urls: SelectionUrls,  # URL bundle for rendering
 ):  # Queue component with OOB stats, optionally with OOB source list
     "Remove a source from the selection queue."
@@ -1699,7 +1582,7 @@ def _handle_selection_select_all(
     request,  # FastHTML request object
     sess,  # FastHTML session object
     group_key: str,  # Group key to select all transcriptions for
-    grouping_mode: str,  # Current grouping mode: "audio_path" or "batch_id"
+    grouping_mode: str,  # Current grouping mode: "media_path" or "batch_id"
     urls: SelectionUrls,  # URL bundle for rendering
 ):  # Queue component with OOB stats, optionally with OOB source list
     "Select all transcriptions for a given group."
@@ -1709,8 +1592,8 @@ def _handle_selection_select_all(
 def _handle_selection_preview(
     workflow: StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
-    job_id: str,  # Job ID to preview
-    plugin_name: str,  # Plugin name for the source
+    record_id: str,  # Job ID to preview
+    provider_id: str,  # Plugin name for the source
 ):  # Full preview panel component (collapsible, open with content)
     "Get preview panel for a selected source."
 ```
@@ -1875,7 +1758,7 @@ class SegmentationService:
             self,
             text: str,  # Text to split into sentences
             source_id: Optional[str] = None,  # Source block ID for traceability
-            source_plugin: Optional[str] = None  # Source plugin name for traceability
+            source_provider_id: Optional[str] = None  # Source provider identifier for traceability
         ) -> List[WorkingSegment]:  # List of WorkingSegment objects
         "Split text into sentences asynchronously."
     
@@ -1883,7 +1766,7 @@ class SegmentationService:
             self,
             text: str,  # Text to split into sentences
             source_id: Optional[str] = None,  # Source block ID for traceability
-            source_plugin: Optional[str] = None  # Source plugin name for traceability
+            source_provider_id: Optional[str] = None  # Source provider identifier for traceability
         ) -> List[WorkingSegment]:  # List of WorkingSegment objects
         "Split text into sentences synchronously."
     
@@ -1908,7 +1791,7 @@ from cjm_fasthtml_workflow_transcript_decomp.components.step_selection.selection
 
 ``` python
 def _render_queue_item(
-    source: Dict[str, str],  # Source dict with job_id and plugin_name
+    source: Dict[str, str],  # Source dict with record_id and provider_id
     index: int,  # Position in queue (1-based)
     remove_url: str,  # URL for removing from queue
 ) -> Any:  # Queue item element
@@ -2046,7 +1929,7 @@ class SourceService:
         self,
         plugin_manager: PluginManager,  # Plugin manager for discovering plugin sources
         source_categories: List[str] = None,  # Plugin categories to query (default: ['transcription'])
-        external_paths: List[str] = None  # External database paths (backward compat)
+        external_paths: List[str] = None  # External database paths
     )
     "Service for federated access to content sources via providers."
     
@@ -2054,7 +1937,7 @@ class SourceService:
             self,
             plugin_manager: PluginManager,  # Plugin manager for discovering plugin sources
             source_categories: List[str] = None,  # Plugin categories to query (default: ['transcription'])
-            external_paths: List[str] = None  # External database paths (backward compat)
+            external_paths: List[str] = None  # External database paths
         )
         "Initialize the source service."
     
@@ -2139,21 +2022,21 @@ class SourceService:
     
     def query_transcriptions(
             self,
-            plugin_name: Optional[str] = None,  # Filter by provider name (None for all)
+            provider_name: Optional[str] = None,  # Filter by provider name (None for all)
             limit: int = 100  # Maximum number of results per provider
         ) -> List[Dict[str, Any]]:  # List of transcription records
         "Query records from all providers (or a specific one)."
     
     def get_transcription_by_id(
             self,
-            job_id: str,  # Job ID to fetch
-            plugin_name: str  # Provider name that owns this record
+            record_id: str,  # Record ID to fetch
+            provider_id: str  # Provider ID that owns this record
         ) -> Optional[SourceBlock]:  # SourceBlock or None if not found
         "Get a specific transcription as a SourceBlock."
     
     def get_source_blocks(
             self,
-            selections: List[Dict[str, str]]  # List of {job_id, plugin_name} dicts
+            selections: List[Dict[str, str]]  # List of {record_id, provider_id} dicts
         ) -> List[SourceBlock]:  # Ordered list of SourceBlocks
         "Fetch multiple records as SourceBlocks in order."
 ```
@@ -2179,7 +2062,7 @@ from cjm_fasthtml_workflow_transcript_decomp.components.step_selection.source_br
 
 ``` python
 def _render_grouping_selector(
-    grouping_mode: str,  # Current grouping mode: "audio_path" or "batch_id"
+    grouping_mode: str,  # Current grouping mode: "media_path" or "batch_id"
     grouping_change_url: str,  # URL for changing grouping mode
 ) -> Any:  # Grouping selector component
     "Render the dropdown for selecting grouping mode."
@@ -2199,17 +2082,17 @@ def _render_source_row(
 
 ``` python
 def _render_group_header(
-    group_key: str,  # The group key (audio_path or batch_id value)
+    group_key: str,  # The group key (media_path or batch_id value)
     record_count: int,  # Number of records in this group
     select_all_url: str,  # URL for selecting all in group
-    grouping_mode: str = "audio_path",  # Current grouping mode
+    grouping_mode: str = "media_path",  # Current grouping mode
 ) -> Any:  # Table row for group header
     "Render a group header row."
 ```
 
 ``` python
 def _render_audio_group_header(
-    audio_path: str,  # Path to audio file
+    media_path: str,  # Path to audio file
     record_count: int,  # Number of records in this group
     select_all_url: str,  # URL for selecting all in group
 ) -> Any:  # Table row for group header
@@ -2224,7 +2107,7 @@ def _render_source_list(
     remove_url: str,  # URL for removing from queue
     preview_url: str,  # URL for previewing content
     select_all_url: str,  # URL for selecting all in a group
-    grouping_mode: str = "audio_path",  # Grouping mode: "audio_path" or "batch_id"
+    grouping_mode: str = "media_path",  # Grouping mode: "media_path" or "batch_id"
     oob: bool = False,  # Whether to include hx-swap-oob for out-of-band swap
 ) -> Any:  # Source list container with table
     "Render the source list table with grouped rows."
@@ -2240,7 +2123,7 @@ def _render_source_browser(
     preview_url: str,  # URL for previewing content
     select_all_url: str,  # URL for selecting all in a group
     filter_url: str,  # URL for filtering sources
-    grouping_mode: str = "audio_path",  # Current grouping mode
+    grouping_mode: str = "media_path",  # Current grouping mode
     grouping_change_url: str = "",  # URL for changing grouping mode
 ) -> Any:  # Source browser component
     "Render the source browser panel with search filtering and grouped table."
@@ -2290,7 +2173,7 @@ def extract_model_name(
 ``` python
 def group_transcriptions(
     transcriptions: List[Dict[str, Any]],  # List of transcription records
-    group_by: str = "audio_path"  # Grouping mode: "audio_path" or "batch_id"
+    group_by: str = "media_path"  # Grouping mode: "media_path" or "batch_id"
 ) -> Dict[str, List[Dict[str, Any]]]:  # Grouped transcriptions
     "Group transcription records by the specified field."
 ```
@@ -2298,13 +2181,13 @@ def group_transcriptions(
 ``` python
 def group_transcriptions_by_audio(
     transcriptions: List[Dict[str, Any]]  # List of transcription records
-) -> Dict[str, List[Dict[str, Any]]]:  # Grouped by audio_path
+) -> Dict[str, List[Dict[str, Any]]]:  # Grouped by media_path
     "Group transcription records by their source audio file."
 ```
 
 ``` python
 def is_source_selected(
-    job_id: str,  # Job ID to check
+    record_id: str,  # Job ID to check
     selected_sources: List[Dict[str, str]]  # List of selected sources
 ) -> bool:  # True if source is selected
     "Check if a source is in the selected list."
@@ -2315,14 +2198,14 @@ def filter_transcriptions(
     transcriptions: List[Dict[str, Any]],  # List of transcription records to filter
     search_text: str,  # Search term for case-insensitive substring matching
 ) -> List[Dict[str, Any]]:  # Filtered transcription records
-    "Filter transcriptions by substring match across job_id, audio_path, and text fields."
+    "Filter transcriptions by substring match across record_id, media_path, and text fields."
 ```
 
 ``` python
 def select_all_in_group(
     transcriptions: List[Dict[str, Any]],  # All transcription records
     group_key: str,  # Group key to match against
-    grouping_mode: str,  # Grouping mode: "audio_path" or "batch_id"
+    grouping_mode: str,  # Grouping mode: "media_path" or "batch_id"
     selected_sources: List[Dict[str, str]],  # Current selections
 ) -> List[Dict[str, str]]:  # Updated selections with new items appended
     "Add all transcriptions matching a group key to the selection list, skipping duplicates."
@@ -2330,8 +2213,8 @@ def select_all_in_group(
 
 ``` python
 def toggle_source_selection(
-    job_id: str,  # Job ID to toggle
-    plugin_name: str,  # Plugin name for the source
+    record_id: str,  # Job ID to toggle
+    provider_id: str,  # Plugin name for the source
     selected_sources: List[Dict[str, str]],  # Current selections
 ) -> List[Dict[str, str]]:  # Updated selections
     "Toggle a source in or out of the selection list."
@@ -2340,7 +2223,7 @@ def toggle_source_selection(
 ``` python
 def reorder_item(
     selected_sources: List[Dict[str, str]],  # Current selections
-    job_id: str,  # Job ID of item to move
+    record_id: str,  # Job ID of item to move
     direction: str,  # Direction: "up" or "down"
 ) -> List[Dict[str, str]]:  # Reordered selections
     "Move an item up or down in the selection list by swapping with its neighbor."
@@ -2365,7 +2248,7 @@ def calculate_next_tab(
 
 ``` python
 def check_audio_exists(
-    audio_path: str  # Path to audio file
+    media_path: str  # Path to audio file
 ) -> bool:  # True if file exists
     "Check if the audio file exists at the given path."
 ```
@@ -2375,97 +2258,6 @@ def validate_browse_path(
     path: str  # Path to validate
 ) -> str:  # Validated and resolved path, or home directory on error
     "Validate a browse path for security. Returns home directory on invalid input."
-```
-
-### state_store (`state_store.ipynb`)
-
-> SQLite-backed workflow state storage for persistence across restarts
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.core.state_store import (
-    SQLiteWorkflowStateStore
-)
-```
-
-#### Classes
-
-``` python
-class SQLiteWorkflowStateStore:
-    def __init__(
-        self,
-        db_path: Path  # Path to SQLite database file
-    )
-    "SQLite-backed workflow state storage for persistence across restarts."
-    
-    def __init__(
-            self,
-            db_path: Path  # Path to SQLite database file
-        )
-        "Initialize the state store and create tables if needed."
-    
-    def get_current_step(
-            self,
-            flow_id: str,  # Workflow identifier
-            session_id: str  # Session identifier string
-        ) -> Optional[str]:  # Current step ID or None
-        "Get current step ID for a workflow."
-    
-    def set_current_step(
-            self,
-            flow_id: str,  # Workflow identifier
-            session_id: str,  # Session identifier string
-            step_id: str  # Step ID to set as current
-        ) -> None
-        "Set current step ID for a workflow."
-    
-    def get_state(
-            self,
-            flow_id: str,  # Workflow identifier
-            session_id: str  # Session identifier string
-        ) -> Dict[str, Any]:  # Workflow state dictionary
-        "Get all workflow state."
-    
-    def update_state(
-            self,
-            flow_id: str,  # Workflow identifier
-            session_id: str,  # Session identifier string
-            updates: Dict[str, Any]  # State updates to apply
-        ) -> None
-        "Update workflow state with new values."
-    
-    def clear_state(
-            self,
-            flow_id: str,  # Workflow identifier
-            session_id: str  # Session identifier string
-        ) -> None
-        "Clear all workflow state."
-    
-    def get_step_state(
-            self,
-            flow_id: str,  # Workflow identifier
-            session_id: str,  # Session identifier string
-            step_id: str  # Step identifier
-        ) -> Dict[str, Any]:  # Step-specific state dictionary
-        "Get state for a specific step."
-    
-    def update_step_state(
-            self,
-            flow_id: str,  # Workflow identifier
-            session_id: str,  # Session identifier string
-            step_id: str,  # Step identifier
-            updates: Dict[str, Any]  # Step-specific state updates
-        ) -> None
-        "Update state for a specific step."
-    
-    def clear_step_state(
-            self,
-            flow_id: str,  # Workflow identifier
-            session_id: str,  # Session identifier string
-            step_id: str  # Step identifier
-        ) -> None
-        "Clear state for a specific step."
 ```
 
 ### step_renderer (`step_renderer.ipynb`)
@@ -2534,8 +2326,8 @@ def render_decomposition_step(
 
 ``` python
 from cjm_fasthtml_workflow_transcript_decomp.components.step_selection.step_renderer import (
-    SD_FOCUSED_JOB_ID_INPUT,
-    SD_FOCUSED_PLUGIN_INPUT,
+    SD_FOCUSED_RECORD_ID_INPUT,
+    SD_FOCUSED_PROVIDER_ID_INPUT,
     SD_TOGGLE_BTN,
     SD_REMOVE_BTN,
     SD_REORDER_UP_BTN,
@@ -2633,8 +2425,8 @@ def render_selection_step(
 #### Variables
 
 ``` python
-SD_FOCUSED_JOB_ID_INPUT = 'sd-focused-job-id'
-SD_FOCUSED_PLUGIN_INPUT = 'sd-focused-plugin-name'
+SD_FOCUSED_RECORD_ID_INPUT = 'sd-focused-record-id'
+SD_FOCUSED_PROVIDER_ID_INPUT = 'sd-focused-provider-id'
 SD_TOGGLE_BTN = 'sd-toggle-btn'
 SD_REMOVE_BTN = 'sd-remove-btn'
 SD_REORDER_UP_BTN = 'sd-reorder-up-btn'

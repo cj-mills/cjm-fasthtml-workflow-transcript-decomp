@@ -51,12 +51,12 @@ def _handle_reset(
 def _handle_get_sources(
     workflow: StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
-    plugin_name: str = None,  # Optional plugin name filter
+    provider_id: str = None,  # Optional plugin name filter
     limit: int = 50  # Maximum number of results
 ):  # JSON response with transcription sources
     """Get available transcription sources."""
     transcriptions = workflow.source_service.query_transcriptions(
-        plugin_name=plugin_name,
+        provider_id=provider_id,
         limit=limit
     )
     return {"transcriptions": transcriptions}

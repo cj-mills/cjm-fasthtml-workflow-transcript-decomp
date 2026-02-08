@@ -41,7 +41,7 @@ def _handle_tab_switch(
     # Get current state
     step_state = _get_step_state(workflow, session_id)
     selected_sources = step_state.get("selected_sources", [])
-    grouping_mode = step_state.get("grouping_mode", "audio_path")
+    grouping_mode = step_state.get("grouping_mode", "media_path")
     external_db_paths = step_state.get("external_db_paths", [])
     
     # Determine new tab

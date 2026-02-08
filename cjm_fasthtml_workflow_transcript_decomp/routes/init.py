@@ -86,26 +86,26 @@ def init_router(
         return _handle_reset(workflow, request, sess)
 
     @router
-    def get_sources(request, plugin_name: str = None, limit: int = 50):
+    def get_sources(request, provider_id: str = None, limit: int = 50):
         """Get available transcription sources."""
-        return _handle_get_sources(workflow, request, plugin_name, limit)
+        return _handle_get_sources(workflow, request, provider_id, limit)
 
     # -------------------------------------------------------------------------
     # Selection Management Routes
     # -------------------------------------------------------------------------
 
     @router
-    def selection_add(request, sess, job_id: str, plugin_name: str):
+    def selection_add(request, sess, record_id: str, provider_id: str):
         """Add a source to the selection queue."""
         return _handle_selection_add(
-            workflow, request, sess, job_id, plugin_name, urls=_selection_urls,
+            workflow, request, sess, record_id, provider_id, urls=_selection_urls,
         )
 
     @router
-    def selection_remove(request, sess, job_id: str):
+    def selection_remove(request, sess, record_id: str):
         """Remove a source from the selection queue."""
         return _handle_selection_remove(
-            workflow, request, sess, job_id, urls=_selection_urls,
+            workflow, request, sess, record_id, urls=_selection_urls,
         )
 
     @router
@@ -123,33 +123,33 @@ def init_router(
         )
 
     @router
-    def selection_select_all(request, sess, group_key: str, grouping_mode: str = "audio_path"):
+    def selection_select_all(request, sess, group_key: str, grouping_mode: str = "media_path"):
         """Select all transcriptions for a given group."""
         return _handle_selection_select_all(
             workflow, request, sess, group_key, grouping_mode, urls=_selection_urls,
         )
 
     @router
-    def selection_preview(request, job_id: str, plugin_name: str):
+    def selection_preview(request, record_id: str, provider_id: str):
         """Get preview content for a selected source."""
-        return _handle_selection_preview(workflow, request, job_id, plugin_name)
+        return _handle_selection_preview(workflow, request, record_id, provider_id)
 
     # -------------------------------------------------------------------------
     # Keyboard and Filtering Routes
     # -------------------------------------------------------------------------
 
     @router
-    def selection_toggle_focused(request, sess, job_id: str, plugin_name: str):
+    def selection_toggle_focused(request, sess, record_id: str, provider_id: str):
         """Toggle selection of the focused row (keyboard shortcut)."""
         return _handle_selection_toggle_focused(
-            workflow, request, sess, job_id, plugin_name, urls=_selection_urls,
+            workflow, request, sess, record_id, provider_id, urls=_selection_urls,
         )
 
     @router
-    def keyboard_reorder(request, sess, job_id: str, direction: str):
+    def keyboard_reorder(request, sess, record_id: str, direction: str):
         """Move an item up or down in the queue via keyboard (Shift+Up/Down)."""
         return _handle_keyboard_reorder(
-            workflow, request, sess, job_id, direction, urls=_selection_urls,
+            workflow, request, sess, record_id, direction, urls=_selection_urls,
         )
 
     @router

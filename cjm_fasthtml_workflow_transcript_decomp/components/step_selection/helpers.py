@@ -30,10 +30,10 @@ def _get_selected_sources(
 # %% ../../../nbs/components/step_selection/helpers.ipynb #8mza4710z6
 def _get_grouping_mode(
     ctx: InteractionContext  # Interaction context with state
-) -> str:  # Grouping mode: "audio_path" or "batch_id"
+) -> str:  # Grouping mode: "media_path" or "batch_id"
     """Get the current grouping mode from step state."""
     state = _get_selection_state(ctx)
-    return state.get("grouping_mode", "audio_path")
+    return state.get("grouping_mode", "media_path")
 
 # %% ../../../nbs/components/step_selection/helpers.ipynb #264e90b1
 def _generate_sortable_init_script(

@@ -20,9 +20,9 @@ from cjm_fasthtml_tailwind.utilities.spacing import m
 from cjm_fasthtml_tailwind.core.base import combine_classes
 
 from cjm_plugin_system.core.manager import PluginManager
+from cjm_workflow_state.state_store import SQLiteWorkflowStateStore
 
 from ..core.config import StructureDecompWorkflowConfig
-from ..core.state_store import SQLiteWorkflowStateStore
 from ..routes.models import CardStackUrls, DecompUrls
 from ..services.source import SourceService
 from ..services.segmentation import SegmentationService

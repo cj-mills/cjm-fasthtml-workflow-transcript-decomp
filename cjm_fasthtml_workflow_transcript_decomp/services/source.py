@@ -13,9 +13,8 @@ import json
 from cjm_plugin_system.core.manager import PluginManager
 from cjm_plugin_system.core.metadata import PluginMeta
 
-from cjm_fasthtml_workflow_transcript_decomp.core.models import (
-    SourceBlock, SourceRecord, SourceProvider
-)
+from cjm_source_provider.models import SourceBlock, SourceRecord
+from cjm_source_provider.protocols import SourceProvider
 
 # %% ../../nbs/services/source.ipynb #di5ejklhski
 class TranscriptionDBProvider:
@@ -76,7 +75,6 @@ class TranscriptionDBProvider:
             )
 
             # Check if transcriptions table exists and get its columns
-            # Using DESCRIBE works reliably with DuckDB's SQLite attachment
             try:
                 result = con.execute("DESCRIBE db.transcriptions").fetchall()
                 column_names = {row[0] for row in result}
@@ -127,12 +125,12 @@ class TranscriptionDBProvider:
             rows = con.execute(query).fetchall()
             for row in rows:
                 records.append(SourceRecord(
-                    job_id=row[0],
-                    audio_path=row[1] or "",
+                    record_id=row[0],
+                    media_path=row[1] or "",
                     text=row[2] or "",
                     metadata=json.loads(row[3]) if row[3] else {},
                     created_at=row[4] or "",
-                    plugin_name=self._name
+                    provider_id=self._id
                 ))
         except Exception as e:
             print(f"Warning: Could not query {self._name}: {e}")
@@ -173,7 +171,7 @@ class TranscriptionDBProvider:
                 metadata = json.loads(row[3]) if row[3] else {}
                 return SourceBlock(
                     id=row[0],
-                    plugin_name=self._name,
+                    provider_id=self._id,
                     text=row[2] or "",
                     media_path=row[1],
                     metadata=metadata
@@ -225,14 +223,14 @@ class SourceService:
         self,
         plugin_manager: PluginManager,  # Plugin manager for discovering plugin sources
         source_categories: List[str] = None,  # Plugin categories to query (default: ['transcription'])
-        external_paths: List[str] = None  # External database paths (backward compat)
+        external_paths: List[str] = None  # External database paths
     ):
         """Initialize the source service."""
         self._manager = plugin_manager
         self._categories = source_categories or ["transcription"]
         self._providers: Dict[str, SourceProvider] = {}
         
-        # Add providers from external paths (backward compatibility)
+        # Add providers from external paths
         if external_paths:
             for path in external_paths:
                 self.add_external_path(path)
@@ -322,7 +320,7 @@ class SourceService:
         return added
     
     # -------------------------------------------------------------------------
-    # External Path Management (Backward Compatibility)
+    # External Path Management
     # -------------------------------------------------------------------------
     
     def set_external_paths(
@@ -370,7 +368,7 @@ class SourceService:
         return paths
     
     # -------------------------------------------------------------------------
-    # Source Queries (Backward Compatible API)
+    # Source Queries
     # -------------------------------------------------------------------------
     
     def get_available_sources(self) -> List[Dict[str, Any]]:  # List of source info dicts
@@ -392,7 +390,7 @@ class SourceService:
     
     def query_transcriptions(
         self,
-        plugin_name: Optional[str] = None,  # Filter by provider name (None for all)
+        provider_name: Optional[str] = None,  # Filter by provider name (None for all)
         limit: int = 100  # Maximum number of results per provider
     ) -> List[Dict[str, Any]]:  # List of transcription records
         """Query records from all providers (or a specific one)."""
@@ -403,13 +401,13 @@ class SourceService:
         
         for provider in self._providers.values():
             # Filter by name if specified
-            if plugin_name and provider.provider_name != plugin_name:
+            if provider_name and provider.provider_name != provider_name:
                 continue
             
             # Query records from provider
             records = provider.query_records(limit=limit)
             
-            # Convert SourceRecord to dict for backward compatibility
+            # Convert SourceRecord to dict
             for rec in records:
                 results.append(dict(rec))
         
@@ -417,30 +415,30 @@ class SourceService:
     
     def get_transcription_by_id(
         self,
-        job_id: str,  # Job ID to fetch
-        plugin_name: str  # Provider name that owns this record
+        record_id: str,  # Record ID to fetch
+        provider_id: str  # Provider ID that owns this record
     ) -> Optional[SourceBlock]:  # SourceBlock or None if not found
         """Get a specific transcription as a SourceBlock."""
         # Ensure plugin providers are loaded
         self.add_plugin_providers()
         
-        # Find provider by name
-        provider = self.get_provider_by_name(plugin_name)
+        # Find provider by ID
+        provider = self.get_provider(provider_id)
         if not provider:
             return None
         
-        return provider.get_source_block(job_id)
+        return provider.get_source_block(record_id)
     
     def get_source_blocks(
         self,
-        selections: List[Dict[str, str]]  # List of {job_id, plugin_name} dicts
+        selections: List[Dict[str, str]]  # List of {record_id, provider_id} dicts
     ) -> List[SourceBlock]:  # Ordered list of SourceBlocks
         """Fetch multiple records as SourceBlocks in order."""
         blocks = []
         for sel in selections:
             block = self.get_transcription_by_id(
-                job_id=sel['job_id'],
-                plugin_name=sel['plugin_name']
+                record_id=sel['record_id'],
+                provider_id=sel['provider_id']
             )
             if block:
                 blocks.append(block)

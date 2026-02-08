@@ -54,7 +54,7 @@ from cjm_fasthtml_workflow_transcript_decomp.services.formatting import (
 
 # %% ../../../nbs/components/step_selection/source_browser.ipynb #d332b55d
 def _render_grouping_selector(
-    grouping_mode: str,  # Current grouping mode: "audio_path" or "batch_id"
+    grouping_mode: str,  # Current grouping mode: "media_path" or "batch_id"
     grouping_change_url: str,  # URL for changing grouping mode
 ) -> Any:  # Grouping selector component
     """Render the dropdown for selecting grouping mode."""
@@ -64,7 +64,7 @@ def _render_grouping_selector(
             cls=combine_classes(font_size.sm, text_dui.base_content.opacity(70), m.r(2))
         ),
         Select(
-            Option("Audio File", value="audio_path", selected=grouping_mode == "audio_path"),
+            Option("Audio File", value="media_path", selected=grouping_mode == "media_path"),
             Option("Batch ID", value="batch_id", selected=grouping_mode == "batch_id"),
             name="grouping_mode",
             id=StructureDecompHtmlIds.GROUPING_SELECTOR,
@@ -86,11 +86,11 @@ def _render_source_row(
     is_first: bool = False,  # Whether this is the first row (gets initial focus)
 ) -> Any:  # Table row element
     """Render a single source row in the browser table."""
-    job_id = record.get("job_id", "")
-    plugin_name = record.get("plugin_name", "")
+    record_id = record.get("record_id", "")
+    provider_id = record.get("provider_id", "")
     text = record.get("text", "")
     created_at = record.get("created_at", "")
-    audio_path = record.get("audio_path", "")
+    media_path = record.get("media_path", "")
     metadata = record.get("metadata")
     word_count = count_words(text)
     
@@ -98,7 +98,7 @@ def _render_source_row(
     model_name = extract_model_name(metadata)
     
     # Check if audio file exists
-    audio_exists = check_audio_exists(audio_path)
+    audio_exists = check_audio_exists(media_path)
     
     # Determine action URL based on selection state
     action_url = remove_url if is_selected else add_url
@@ -107,7 +107,7 @@ def _render_source_row(
     model_badge = Div(
         Div(
             Div(
-                f"Plugin: {plugin_name}",
+                f"Plugin: {provider_id}",
                 cls=combine_classes(whitespace.normal, max_w.xs)
             ),
             cls=str(tooltip_content)
@@ -120,7 +120,7 @@ def _render_source_row(
     )
     
     # Audio badge with tooltip showing full path
-    audio_tooltip_text = audio_path if audio_path else "No audio path"
+    audio_tooltip_text = media_path if media_path else "No audio path"
     audio_badge = Div(
         Div(
             Div(
@@ -142,8 +142,8 @@ def _render_source_row(
     return Tr(
         # Hidden cell for keyboard action data (must be in TD for valid HTML)
         Td(
-            Hidden(name="job_id", value=job_id),
-            Hidden(name="plugin_name", value=plugin_name),
+            Hidden(name="record_id", value=record_id),
+            Hidden(name="provider_id", value=provider_id),
             cls=str(display_tw.hidden)
         ),
         Td(
@@ -152,17 +152,17 @@ def _render_source_row(
                 checked="checked" if is_selected else None,
                 cls=combine_classes(checkbox, checkbox_sizes.sm),
                 hx_post=action_url,
-                hx_vals=json.dumps({"job_id": job_id, "plugin_name": plugin_name}),
+                hx_vals=json.dumps({"record_id": record_id, "provider_id": provider_id}),
                 hx_target=StructureDecompHtmlIds.as_selector(StructureDecompHtmlIds.QUEUE_CONTAINER),
                 hx_swap="outerHTML",
-                name=f"source_{job_id}"
+                name=f"source_{record_id}"
             ),
             cls=str(w(12))
         ),
         Td(
-            Span(job_id[:12] + "..." if len(job_id) > 12 else job_id, 
+            Span(record_id[:12] + "..." if len(record_id) > 12 else record_id, 
                  cls=combine_classes(font_size.xs, font_family.mono)),
-            title=job_id
+            title=record_id
         ),
         Td(model_badge),
         Td(
@@ -174,7 +174,7 @@ def _render_source_row(
             f"{word_count:,} words",
             cls=str(font_size.xs)
         ),
-        id=StructureDecompHtmlIds.source_row(job_id),
+        id=StructureDecompHtmlIds.source_row(record_id, provider_id),
         cls=combine_classes(
             bg_dui.primary.opacity(10) if is_selected else "",
             bg_dui.base_200.hover,
@@ -183,10 +183,10 @@ def _render_source_row(
         tabindex="0",
         data_selectable="true",
         data_focused="true" if is_first else "false",
-        data_job_id=job_id,
-        data_plugin_name=plugin_name,
+        data_record_id=record_id,
+        data_provider_id=provider_id,
         hx_get=preview_url,
-        hx_vals=json.dumps({"job_id": job_id, "plugin_name": plugin_name}),
+        hx_vals=json.dumps({"record_id": record_id, "provider_id": provider_id}),
         hx_target=StructureDecompHtmlIds.as_selector(StructureDecompHtmlIds.PREVIEW_PANEL),
         hx_swap="outerHTML",
         hx_trigger="click"
@@ -194,17 +194,17 @@ def _render_source_row(
 
 # %% ../../../nbs/components/step_selection/source_browser.ipynb #aa6d174d
 def _render_group_header(
-    group_key: str,  # The group key (audio_path or batch_id value)
+    group_key: str,  # The group key (media_path or batch_id value)
     record_count: int,  # Number of records in this group
     select_all_url: str,  # URL for selecting all in group
-    grouping_mode: str = "audio_path",  # Current grouping mode
+    grouping_mode: str = "media_path",  # Current grouping mode
 ) -> Any:  # Table row for group header
     """Render a group header row."""
     # Format display text based on grouping mode
     if grouping_mode == "batch_id":
         display_text = group_key  # batch_id is already formatted
     else:
-        # audio_path - extract filename
+        # media_path - extract filename
         display_text = format_audio_filename(group_key)
     
     return Tr(
@@ -228,12 +228,12 @@ def _render_group_header(
 
 # %% ../../../nbs/components/step_selection/source_browser.ipynb #nr40x6hhovg
 def _render_audio_group_header(
-    audio_path: str,  # Path to audio file
+    media_path: str,  # Path to audio file
     record_count: int,  # Number of records in this group
     select_all_url: str,  # URL for selecting all in group
 ) -> Any:  # Table row for group header
     """Render a group header row for an audio file (legacy wrapper)."""
-    return _render_group_header(audio_path, record_count, select_all_url, grouping_mode="audio_path")
+    return _render_group_header(media_path, record_count, select_all_url, grouping_mode="media_path")
 
 # %% ../../../nbs/components/step_selection/source_browser.ipynb #53aab8ca
 def _render_source_list(
@@ -243,7 +243,7 @@ def _render_source_list(
     remove_url: str,  # URL for removing from queue
     preview_url: str,  # URL for previewing content
     select_all_url: str,  # URL for selecting all in a group
-    grouping_mode: str = "audio_path",  # Grouping mode: "audio_path" or "batch_id"
+    grouping_mode: str = "media_path",  # Grouping mode: "media_path" or "batch_id"
     oob: bool = False,  # Whether to include hx-swap-oob for out-of-band swap
 ) -> Any:  # Source list container with table
     """Render the source list table with grouped rows."""
@@ -261,7 +261,7 @@ def _render_source_list(
         
         # Add record rows
         for record in records:
-            is_selected = is_source_selected(record.get("job_id", ""), selected_sources)
+            is_selected = is_source_selected(record.get("record_id", ""), selected_sources)
             table_rows.append(_render_source_row(
                 record, is_selected, add_url, remove_url, preview_url,
                 is_first=is_first_record
@@ -299,7 +299,7 @@ def _render_source_browser(
     preview_url: str,  # URL for previewing content
     select_all_url: str,  # URL for selecting all in a group
     filter_url: str,  # URL for filtering sources
-    grouping_mode: str = "audio_path",  # Current grouping mode
+    grouping_mode: str = "media_path",  # Current grouping mode
     grouping_change_url: str = "",  # URL for changing grouping mode
 ) -> Any:  # Source browser component
     """Render the source browser panel with search filtering and grouped table."""

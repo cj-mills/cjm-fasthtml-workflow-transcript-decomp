@@ -33,12 +33,12 @@ from ...core.html_ids import StructureDecompHtmlIds
 
 # %% ../../../nbs/components/step_selection/preview_panel.ipynb #adf55484
 def _render_preview_panel(
-    preview_job_id: Optional[str] = None,  # Job ID being previewed
+    preview_record_id: Optional[str] = None,  # Job ID being previewed
     preview_text: Optional[str] = None,  # Text content to preview
     is_open: bool = False,  # Whether the collapse should be open
 ) -> Any:  # Preview panel component (collapsible, full-width)
     """Render the collapsible preview panel for displaying selected content."""
-    has_preview = preview_job_id and preview_text
+    has_preview = preview_record_id and preview_text
     
     # Determine collapse state - open if content and is_open flag is True
     should_be_open = has_preview and is_open
@@ -58,7 +58,7 @@ def _render_preview_panel(
     preview_content = Div(
         # Job ID header
         H3(
-            preview_job_id,
+            preview_record_id,
             cls=combine_classes(font_size.xs, font_family.mono, text_dui.base_content.opacity(50), m.b(2))
         ),
         # Text content with scroll
@@ -79,9 +79,9 @@ def _render_preview_panel(
         Div(
             Span("Content Preview", cls=str(font_weight.semibold)),
             Span(
-                f"({preview_job_id[:12]}...)" if preview_job_id and len(preview_job_id) > 12 else f"({preview_job_id})" if preview_job_id else "",
+                f"({preview_record_id[:12]}...)" if preview_record_id and len(preview_record_id) > 12 else f"({preview_record_id})" if preview_record_id else "",
                 cls=combine_classes(font_size.xs, font_family.mono, text_dui.base_content.opacity(50), m.l(2))
-            ) if preview_job_id else None,
+            ) if preview_record_id else None,
             cls=combine_classes(collapse_title, font_size.sm)
         ),
         # Collapse content

@@ -109,28 +109,41 @@ class StructureDecompHtmlIds:
     SETTINGS_CONTAINER = "sd-settings-container"
 
     @staticmethod
+    def _safe_id(
+        value:str  # Raw value to sanitize for HTML ID use
+    ) -> str:  # Sanitized string safe for HTML IDs
+        """Sanitize a string for use in HTML IDs."""
+        return value.replace(":", "-").replace("_", "-")
+
+    @staticmethod
     def source_checkbox(
-        source_id:str  # Unique source identifier to generate ID for
+        record_id:str,  # Record identifier
+        provider_id:str  # Provider identifier
     ) -> str:  # HTML ID for the source checkbox
         """Generate HTML ID for a source selection checkbox."""
-        safe_id = source_id.replace(":", "-").replace("_", "-")
-        return f"sd-source-cb-{safe_id}"
+        safe_rec = StructureDecompHtmlIds._safe_id(record_id)
+        safe_prov = StructureDecompHtmlIds._safe_id(provider_id)
+        return f"sd-source-cb-{safe_prov}-{safe_rec}"
 
     @staticmethod
     def source_row(
-        job_id:str  # Job ID to generate row ID for
+        record_id:str,  # Record identifier
+        provider_id:str  # Provider identifier
     ) -> str:  # HTML ID for the source row
         """Generate HTML ID for a source browser row."""
-        safe_id = job_id.replace(":", "-").replace("_", "-")
-        return f"sd-source-row-{safe_id}"
+        safe_rec = StructureDecompHtmlIds._safe_id(record_id)
+        safe_prov = StructureDecompHtmlIds._safe_id(provider_id)
+        return f"sd-source-row-{safe_prov}-{safe_rec}"
 
     @staticmethod
     def queue_item(
-        job_id:str  # Job ID to generate queue item ID for
+        record_id:str,  # Record identifier
+        provider_id:str  # Provider identifier
     ) -> str:  # HTML ID for the queue item
         """Generate HTML ID for a queue item."""
-        safe_id = job_id.replace(":", "-").replace("_", "-")
-        return f"sd-queue-item-{safe_id}"
+        safe_rec = StructureDecompHtmlIds._safe_id(record_id)
+        safe_prov = StructureDecompHtmlIds._safe_id(provider_id)
+        return f"sd-queue-item-{safe_prov}-{safe_rec}"
 
     @staticmethod
     def segment_card(

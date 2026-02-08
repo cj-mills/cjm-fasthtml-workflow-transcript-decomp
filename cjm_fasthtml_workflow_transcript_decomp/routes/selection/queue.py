@@ -26,8 +26,8 @@ def _handle_selection_add(
     workflow: StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    job_id: str,  # Job ID to add
-    plugin_name: str,  # Plugin name for the source
+    record_id: str,  # Job ID to add
+    provider_id: str,  # Plugin name for the source
     urls: SelectionUrls,  # URL bundle for rendering
 ):  # Queue component with OOB stats, optionally with OOB source list
     """Add a source to the selection queue."""
@@ -36,8 +36,8 @@ def _handle_selection_add(
     selected_sources = step_state.get("selected_sources", [])
     
     # Check if already selected
-    if not any(s.get("job_id") == job_id for s in selected_sources):
-        selected_sources.append({"job_id": job_id, "plugin_name": plugin_name})
+    if not any(s.get("record_id") == record_id for s in selected_sources):
+        selected_sources.append({"record_id": record_id, "provider_id": provider_id})
         _update_step_state(workflow, session_id, selected_sources)
     
     return _build_queue_response(workflow, session_id, selected_sources, urls)
@@ -47,7 +47,7 @@ def _handle_selection_remove(
     workflow: StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    job_id: str,  # Job ID to remove
+    record_id: str,  # Job ID to remove
     urls: SelectionUrls,  # URL bundle for rendering
 ):  # Queue component with OOB stats, optionally with OOB source list
     """Remove a source from the selection queue."""
@@ -56,7 +56,7 @@ def _handle_selection_remove(
     selected_sources = step_state.get("selected_sources", [])
     
     # Remove the item
-    selected_sources = [s for s in selected_sources if s.get("job_id") != job_id]
+    selected_sources = [s for s in selected_sources if s.get("record_id") != record_id]
     _update_step_state(workflow, session_id, selected_sources)
     
     return _build_queue_response(workflow, session_id, selected_sources, urls)
@@ -104,7 +104,7 @@ def _handle_selection_select_all(
     request,  # FastHTML request object
     sess,  # FastHTML session object
     group_key: str,  # Group key to select all transcriptions for
-    grouping_mode: str,  # Current grouping mode: "audio_path" or "batch_id"
+    grouping_mode: str,  # Current grouping mode: "media_path" or "batch_id"
     urls: SelectionUrls,  # URL bundle for rendering
 ):  # Queue component with OOB stats, optionally with OOB source list
     """Select all transcriptions for a given group."""
@@ -125,24 +125,24 @@ def _handle_selection_select_all(
 def _handle_selection_preview(
     workflow: StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
-    job_id: str,  # Job ID to preview
-    plugin_name: str,  # Plugin name for the source
+    record_id: str,  # Job ID to preview
+    provider_id: str,  # Plugin name for the source
 ):  # Full preview panel component (collapsible, open with content)
     """Get preview panel for a selected source."""
     # Get the transcription from the source service
-    source_block = workflow.source_service.get_transcription_by_id(job_id, plugin_name)
+    source_block = workflow.source_service.get_transcription_by_id(record_id, provider_id)
     
     if not source_block:
         # Return preview panel with error state
         return _render_preview_panel(
-            preview_job_id=job_id,
+            preview_record_id=record_id,
             preview_text="Could not load preview content.",
             is_open=True
         )
     
     # Return the full preview panel with content and open state
     return _render_preview_panel(
-        preview_job_id=job_id,
+        preview_record_id=record_id,
         preview_text=source_block.text,
         is_open=True
     )

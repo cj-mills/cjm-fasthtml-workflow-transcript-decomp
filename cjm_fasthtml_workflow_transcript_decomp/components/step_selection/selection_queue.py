@@ -40,17 +40,17 @@ from ...core.html_ids import StructureDecompHtmlIds
 
 # %% ../../../nbs/components/step_selection/selection_queue.ipynb #ed14ee22
 def _render_queue_item(
-    source: Dict[str, str],  # Source dict with job_id and plugin_name
+    source: Dict[str, str],  # Source dict with record_id and provider_id
     index: int,  # Position in queue (1-based)
     remove_url: str,  # URL for removing from queue
 ) -> Any:  # Queue item element
     """Render a single item in the selection queue."""
-    job_id = source.get("job_id", "")
-    plugin_name = source.get("plugin_name", "")
+    record_id = source.get("record_id", "")
+    provider_id = source.get("provider_id", "")
     
     return Li(
         # Hidden input for form submission during reorder
-        Hidden(name="item", value=job_id),
+        Hidden(name="item", value=record_id),
         
         # Drag handle
         Span(
@@ -63,9 +63,9 @@ def _render_queue_item(
         
         # Job ID
         Span(
-            job_id[:10] + "..." if len(job_id) > 10 else job_id,
+            record_id[:10] + "..." if len(record_id) > 10 else record_id,
             cls=combine_classes(grow(), font_size.sm, font_family.mono, truncate),
-            title=job_id
+            title=record_id
         ),
         
         # Remove button
@@ -73,14 +73,14 @@ def _render_queue_item(
             lucide_icon("x", size=4, cls=str(text_dui.base_content.opacity(60))),
             cls=combine_classes(btn, btn_styles.ghost, btn_sizes.xs, m.l(1)),
             hx_post=remove_url,
-            hx_vals=json.dumps({"job_id": job_id}),
+            hx_vals=json.dumps({"record_id": record_id}),
             hx_target=StructureDecompHtmlIds.as_selector(StructureDecompHtmlIds.QUEUE_CONTAINER),
             hx_swap="outerHTML",
             data_action="remove",
             title="Remove from queue"
         ),
         
-        id=StructureDecompHtmlIds.queue_item(job_id),
+        id=StructureDecompHtmlIds.queue_item(record_id, provider_id),
         cls=combine_classes(
             "queue-item",
             flex_display,
@@ -88,13 +88,11 @@ def _render_queue_item(
             m.x(0),  # No horizontal margin
             m.y(1),  # Vertical margin for focus ring visibility
             p(3),    # Uniform padding
-            # border_dui.base_300,
-            # border.b(),
             bg_dui.base_100,
             bg_dui.base_200.hover
         ),
-        data_job_id=job_id,
-        data_plugin_name=plugin_name
+        data_record_id=record_id,
+        data_provider_id=provider_id
     )
 
 # %% ../../../nbs/components/step_selection/selection_queue.ipynb #b4058b20

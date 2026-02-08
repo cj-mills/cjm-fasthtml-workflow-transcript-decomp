@@ -12,11 +12,11 @@ from cjm_fasthtml_card_stack.core.models import CardStackState
 from cjm_fasthtml_card_stack.core.constants import DEFAULT_VISIBLE_COUNT, DEFAULT_CARD_WIDTH
 
 from cjm_fasthtml_interactions.core.state_store import get_session_id
+from cjm_workflow_state.history import push_history
+
 from cjm_fasthtml_workflow_transcript_decomp.core.models import (
     WorkingSegment, DecompositionStepState
 )
-from ...services.history import push_history
-
 from ...workflow.workflow import StructureDecompWorkflow
 
 # %% ../../../nbs/routes/decomposition/core.ipynb #dc-core-context
@@ -131,6 +131,7 @@ def _push_history(
     decomp_state = _get_decomp_state(workflow, session_id)
     history = decomp_state.get("history", [])
     
-    new_history = push_history(history, current_segments, focused_index, workflow.config.max_history_depth)
+    snapshot = {"segments": current_segments, "focused_index": focused_index}
+    new_history = push_history(history, snapshot, workflow.config.max_history_depth)
     _update_decomp_state(workflow, session_id, history=new_history)
     return len(new_history)

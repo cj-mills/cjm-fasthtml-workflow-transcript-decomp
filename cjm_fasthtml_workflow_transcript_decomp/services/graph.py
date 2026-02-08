@@ -53,7 +53,7 @@ class GraphService:
         segment: WorkingSegment  # Working segment with source info
     ) -> Optional[SourceRef]:  # SourceRef or None if no source info
         """Create a SourceRef from segment source information."""
-        if not segment.source_id or not segment.source_plugin:
+        if not segment.source_id or not segment.source_provider_id:
             return None
         
         # Build segment slice string
@@ -62,9 +62,10 @@ class GraphService:
             slice_str = f"char:{segment.start_char}-{segment.end_char}"
         
         return SourceRef(
-            plugin_name=segment.source_plugin,
+            plugin_name=segment.source_provider_id,
             table_name="transcriptions",
             row_id=segment.source_id,
+            content_hash=SourceRef.compute_hash(segment.text.encode()),
             segment_slice=slice_str
         )
     

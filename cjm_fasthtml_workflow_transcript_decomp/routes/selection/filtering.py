@@ -51,7 +51,7 @@ def _handle_grouping_change(
     workflow: StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    grouping_mode: str,  # New grouping mode: "audio_path" or "batch_id"
+    grouping_mode: str,  # New grouping mode: "media_path" or "batch_id"
     urls: SelectionUrls,  # URL bundle for rendering
 ):  # Updated source list component
     """Change the grouping mode and re-render the source list."""
@@ -82,8 +82,8 @@ def _handle_selection_toggle_focused(
     workflow: StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    job_id: str,  # Job ID from focused row (via hx-include)
-    plugin_name: str,  # Plugin name from focused row (via hx-include)
+    record_id: str,  # Job ID from focused row (via hx-include)
+    provider_id: str,  # Plugin name from focused row (via hx-include)
     urls: SelectionUrls,  # URL bundle for rendering
 ):  # Queue component with OOB stats, optionally with OOB source list
     """Toggle selection of the focused row (keyboard shortcut handler)."""
@@ -91,7 +91,7 @@ def _handle_selection_toggle_focused(
     step_state = _get_step_state(workflow, session_id)
     selected_sources = step_state.get("selected_sources", [])
     
-    selected_sources = toggle_source_selection(job_id, plugin_name, selected_sources)
+    selected_sources = toggle_source_selection(record_id, provider_id, selected_sources)
     _update_step_state(workflow, session_id, selected_sources)
     
     return _build_queue_response(workflow, session_id, selected_sources, urls)
@@ -101,7 +101,7 @@ def _handle_keyboard_reorder(
     workflow: StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    job_id: str,  # Job ID of item to move
+    record_id: str,  # Job ID of item to move
     direction: str,  # Direction to move: "up" or "down"
     urls: SelectionUrls,  # URL bundle for rendering
 ):  # Queue component, optionally with OOB source list
@@ -110,7 +110,7 @@ def _handle_keyboard_reorder(
     step_state = _get_step_state(workflow, session_id)
     selected_sources = step_state.get("selected_sources", [])
     
-    selected_sources = reorder_item(selected_sources, job_id, direction)
+    selected_sources = reorder_item(selected_sources, record_id, direction)
     _update_step_state(workflow, session_id, selected_sources)
     
     return _build_queue_response(
