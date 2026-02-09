@@ -41,11 +41,18 @@ class DecompositionStepState(TypedDict, total=False):
 # %% ../../nbs/core/models.ipynb #6849a2d6-56db-435e-9748-ea76b6c08c3b
 class AlignmentStepState(TypedDict, total=False):
     """State for Phase 2 (right column): Temporal Alignment."""
-    
+
+    # --- Workflow-specific ---
+    is_initialized: bool  # Whether VAD data has been fetched
     vad_chunks: List[Dict[str, Any]]  # VAD chunks (serialized VADChunk)
-    focused_chunk_index: Optional[int]  # Currently focused VAD chunk
-    focused_segment_index: Optional[int]  # Currently focused segment
-    alignment_history: List[Dict[str, Any]]  # History of alignment operations
+    media_path: Optional[str]  # Path to audio file for playback
+    audio_duration: Optional[float]  # Total audio duration in seconds
+
+    # --- Card stack view state ---
+    focused_chunk_index: int  # Currently focused VAD chunk (default 0)
+    visible_count: int  # Number of visible cards in viewport
+    card_width: int  # Card stack width in rem units
+    history: List[Dict[str, Any]]  # Undo history (generic snapshots)
 
 # %% ../../nbs/core/models.ipynb #2a1u6xderpe
 class ReviewStepState(TypedDict, total=False):

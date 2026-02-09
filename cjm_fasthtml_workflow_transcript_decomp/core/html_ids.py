@@ -9,6 +9,8 @@ __all__ = ['StructureDecompHtmlIds']
 # Framework-agnostic — no external imports needed
 
 # %% ../../nbs/core/html_ids.ipynb #80854959
+# Framework-agnostic — no external imports needed
+
 class StructureDecompHtmlIds:
     """HTML ID constants for structure decomposition workflow."""
 
@@ -92,24 +94,25 @@ class StructureDecompHtmlIds:
     SHARED_CONTROLS = "sd-shared-controls"
     SHARED_FOOTER = "sd-shared-footer"
 
-    # Phase 2: Combined Segment & Align - Column Containers
+    # Phase 2: Combined Segment & Align - Columns
     DECOMP_COLUMN = "sd-decomp-column"
     DECOMP_COLUMN_HEADER = "sd-decomp-column-header"
     DECOMP_COLUMN_CONTENT = "sd-decomp-column-content"
     DECOMP_MINI_STATS = "sd-decomp-mini-stats"
+
     ALIGNMENT_COLUMN = "sd-align-column"
     ALIGNMENT_COLUMN_HEADER = "sd-align-column-header"
+    ALIGNMENT_COLUMN_CONTENT = "sd-align-column-content"
     ALIGNMENT_MINI_STATS = "sd-align-mini-stats"
 
-    # Phase 2: Combined Segment & Align - Active Column State
     ACTIVE_COLUMN_INPUT = "sd-active-column"
 
-    # Phase 2: Temporal Alignment (sub-column IDs)
-    ALIGNMENT_CONTAINER = "sd-alignment-container"
-    TEXT_COLUMN = "sd-text-column"
-    VAD_COLUMN = "sd-vad-column"
+    # Phase 2: Temporal Alignment — Components
+    # (Card stack IDs provided by CardStackHtmlIds from cjm-fasthtml-card-stack with prefix "sd-align")
+    ALIGNMENT_TOOLBAR = "sd-align-toolbar"
+    ALIGNMENT_STATS = "sd-align-stats"
+    ALIGNMENT_FOOTER = "sd-align-footer"
     AUDIO_PLAYER = "sd-audio-player"
-    ACTIVE_SEGMENT = "sd-active-segment"
 
     # Phase 3: Review & Commit
     REVIEW_CONTAINER = "sd-review-container"

@@ -12,7 +12,14 @@ pip install cjm_fasthtml_workflow_transcript_decomp
 ## Project Structure
 
     nbs/
-    ├── components/ (15)
+    ├── components/ (21)
+    │   ├── step_alignment/ (6)
+    │   │   ├── callbacks.ipynb          # Focus change callback and audio playback JavaScript for the alignment card stack
+    │   │   ├── card_stack_config.ipynb  # Card stack configuration, HTML IDs, and button IDs for the VAD alignment card stack
+    │   │   ├── helpers.ipynb            # State getters for the alignment step from InteractionContext
+    │   │   ├── keyboard_config.ipynb    # Alignment-specific keyboard building blocks for assembly into a shared ZoneManager
+    │   │   ├── step_renderer.ipynb      # Composable render functions for the alignment card stack column
+    │   │   └── vad_card.ipynb           # VAD chunk card renderer for the alignment card stack
     │   ├── step_decomposition/ (6)
     │   │   ├── callbacks.ipynb          # JavaScript callback generators for Phase 2 decomposition keyboard interaction
     │   │   ├── card_stack_config.ipynb  # Card stack configuration constants for the Phase 2 decomposition UI
@@ -34,7 +41,11 @@ pip install cjm_fasthtml_workflow_transcript_decomp
     │   ├── config.ipynb    # Configuration dataclass for structure decomposition workflow
     │   ├── html_ids.ipynb  # Centralized HTML ID constants for structure decomposition workflow components
     │   └── models.ipynb    # Internal workflow data models for structure decomposition
-    ├── routes/ (11)
+    ├── routes/ (14)
+    │   ├── alignment/ (3)
+    │   │   ├── card_stack.ipynb  # Card stack operations for the alignment column: navigation, viewport update, width save
+    │   │   ├── core.ipynb        # Alignment state context, getters, and updaters for route handlers
+    │   │   └── handlers.ipynb    # Workflow-specific alignment handlers: init, assign/unassign, auto-align, undo
     │   ├── decomposition/ (3)
     │   │   ├── card_stack.ipynb  # Card stack UI operations — navigation, viewport, mode switching, and response builders
     │   │   ├── core.ipynb        # Decomposition step state management helpers
@@ -59,13 +70,19 @@ pip install cjm_fasthtml_workflow_transcript_decomp
     └── workflow/ (1)
         └── workflow.ipynb  # Main workflow class for structure decomposition
 
-Total: 37 notebooks across 5 directories
+Total: 46 notebooks across 5 directories
 
 ## Module Dependencies
 
 ``` mermaid
 graph LR
     components_keyboard_config[components.keyboard_config<br/>keyboard_config]
+    components_step_alignment_callbacks[components.step_alignment.callbacks<br/>callbacks]
+    components_step_alignment_card_stack_config[components.step_alignment.card_stack_config<br/>card_stack_config]
+    components_step_alignment_helpers[components.step_alignment.helpers<br/>helpers]
+    components_step_alignment_keyboard_config[components.step_alignment.keyboard_config<br/>keyboard_config]
+    components_step_alignment_step_renderer[components.step_alignment.step_renderer<br/>step_renderer]
+    components_step_alignment_vad_card[components.step_alignment.vad_card<br/>vad_card]
     components_step_combined[components.step_combined<br/>step_combined]
     components_step_decomposition_callbacks[components.step_decomposition.callbacks<br/>callbacks]
     components_step_decomposition_card_stack_config[components.step_decomposition.card_stack_config<br/>card_stack_config]
@@ -83,6 +100,9 @@ graph LR
     core_config[core.config<br/>config]
     core_html_ids[core.html_ids<br/>html_ids]
     core_models[core.models<br/>models]
+    routes_alignment_card_stack[routes.alignment.card_stack<br/>card_stack]
+    routes_alignment_core[routes.alignment.core<br/>core]
+    routes_alignment_handlers[routes.alignment.handlers<br/>handlers]
     routes_core[routes.core<br/>core]
     routes_decomposition_card_stack[routes.decomposition.card_stack<br/>card_stack]
     routes_decomposition_core[routes.decomposition.core<br/>core]
@@ -103,119 +123,143 @@ graph LR
     services_text_utils[services.text_utils<br/>text_utils]
     workflow_workflow[workflow.workflow<br/>workflow]
 
-    components_keyboard_config --> components_step_decomposition_keyboard_config
     components_keyboard_config --> components_step_decomposition_card_stack_config
+    components_keyboard_config --> components_step_decomposition_keyboard_config
     components_keyboard_config --> routes_models
-    components_step_combined --> core_html_ids
+    components_step_alignment_helpers --> core_models
+    components_step_alignment_step_renderer --> components_step_alignment_card_stack_config
+    components_step_alignment_step_renderer --> components_step_alignment_callbacks
+    components_step_alignment_step_renderer --> routes_models
+    components_step_alignment_step_renderer --> core_html_ids
+    components_step_alignment_step_renderer --> core_models
+    components_step_alignment_step_renderer --> components_step_alignment_vad_card
+    components_step_alignment_vad_card --> core_html_ids
+    components_step_alignment_vad_card --> core_models
+    components_step_alignment_vad_card --> services_formatting
     components_step_combined --> components_step_decomposition_step_renderer
-    components_step_combined --> components_step_decomposition_helpers
-    components_step_combined --> core_models
     components_step_combined --> components_keyboard_config
+    components_step_combined --> components_step_decomposition_helpers
     components_step_combined --> components_step_decomposition_card_stack_config
+    components_step_combined --> core_html_ids
     components_step_combined --> routes_models
+    components_step_combined --> core_models
     components_step_decomposition_helpers --> core_models
     components_step_decomposition_keyboard_config --> components_step_decomposition_card_stack_config
     components_step_decomposition_segment_card --> components_step_decomposition_card_stack_config
     components_step_decomposition_segment_card --> core_html_ids
     components_step_decomposition_segment_card --> core_models
     components_step_decomposition_step_renderer --> components_step_decomposition_card_stack_config
-    components_step_decomposition_step_renderer --> core_html_ids
-    components_step_decomposition_step_renderer --> core_models
     components_step_decomposition_step_renderer --> components_step_decomposition_callbacks
-    components_step_decomposition_step_renderer --> services_text_utils
     components_step_decomposition_step_renderer --> components_step_decomposition_segment_card
+    components_step_decomposition_step_renderer --> services_text_utils
+    components_step_decomposition_step_renderer --> core_html_ids
     components_step_decomposition_step_renderer --> routes_models
+    components_step_decomposition_step_renderer --> core_models
     components_step_selection_helpers --> core_models
-    components_step_selection_local_files --> core_html_ids
     components_step_selection_local_files --> components_step_selection_helpers
+    components_step_selection_local_files --> core_html_ids
     components_step_selection_preview_panel --> core_html_ids
     components_step_selection_selection_queue --> core_html_ids
-    components_step_selection_source_browser --> core_html_ids
-    components_step_selection_source_browser --> services_source_utils
     components_step_selection_source_browser --> services_formatting
+    components_step_selection_source_browser --> services_source_utils
+    components_step_selection_source_browser --> core_html_ids
     components_step_selection_source_browser --> services_text_utils
-    components_step_selection_step_renderer --> core_html_ids
-    components_step_selection_step_renderer --> components_step_selection_helpers
-    components_step_selection_step_renderer --> components_step_selection_source_browser
     components_step_selection_step_renderer --> components_step_selection_local_files
+    components_step_selection_step_renderer --> components_step_selection_helpers
     components_step_selection_step_renderer --> components_step_selection_preview_panel
-    components_step_selection_step_renderer --> services_text_utils
     components_step_selection_step_renderer --> routes_models
+    components_step_selection_step_renderer --> core_html_ids
+    components_step_selection_step_renderer --> services_text_utils
+    components_step_selection_step_renderer --> components_step_selection_source_browser
     components_step_selection_step_renderer --> components_step_selection_selection_queue
     components_steps --> core_html_ids
+    routes_alignment_card_stack --> routes_alignment_core
+    routes_alignment_card_stack --> components_step_alignment_card_stack_config
+    routes_alignment_card_stack --> routes_models
+    routes_alignment_card_stack --> components_step_alignment_vad_card
+    routes_alignment_core --> core_models
+    routes_alignment_handlers --> routes_alignment_core
+    routes_alignment_handlers --> components_step_alignment_step_renderer
+    routes_alignment_handlers --> components_step_alignment_card_stack_config
+    routes_alignment_handlers --> routes_alignment_card_stack
+    routes_alignment_handlers --> routes_models
+    routes_alignment_handlers --> services_alignment
+    routes_alignment_handlers --> core_html_ids
+    routes_alignment_handlers --> components_step_decomposition_step_renderer
+    routes_alignment_handlers --> core_models
     routes_core --> workflow_workflow
-    routes_decomposition_card_stack --> workflow_workflow
     routes_decomposition_card_stack --> routes_decomposition_core
     routes_decomposition_card_stack --> components_step_decomposition_segment_card
     routes_decomposition_card_stack --> components_step_decomposition_card_stack_config
     routes_decomposition_card_stack --> routes_models
+    routes_decomposition_card_stack --> workflow_workflow
     routes_decomposition_core --> workflow_workflow
     routes_decomposition_core --> core_models
-    routes_decomposition_handlers --> components_step_combined
-    routes_decomposition_handlers --> core_html_ids
-    routes_decomposition_handlers --> components_step_decomposition_step_renderer
-    routes_decomposition_handlers --> workflow_workflow
-    routes_decomposition_handlers --> routes_decomposition_core
-    routes_decomposition_handlers --> services_segmentation
-    routes_decomposition_handlers --> core_models
-    routes_decomposition_handlers --> components_keyboard_config
     routes_decomposition_handlers --> components_step_decomposition_card_stack_config
-    routes_decomposition_handlers --> routes_decomposition_card_stack
+    routes_decomposition_handlers --> services_segmentation
+    routes_decomposition_handlers --> components_step_decomposition_step_renderer
+    routes_decomposition_handlers --> components_step_combined
+    routes_decomposition_handlers --> routes_decomposition_core
     routes_decomposition_handlers --> services_text_utils
+    routes_decomposition_handlers --> core_html_ids
     routes_decomposition_handlers --> routes_models
-    routes_init --> routes_decomposition_card_stack
-    routes_init --> routes_selection_queue
+    routes_decomposition_handlers --> components_keyboard_config
+    routes_decomposition_handlers --> workflow_workflow
+    routes_decomposition_handlers --> routes_decomposition_card_stack
+    routes_decomposition_handlers --> core_models
     routes_init --> routes_decomposition_handlers
-    routes_init --> workflow_workflow
-    routes_init --> routes_selection_filtering
-    routes_init --> routes_selection_local_files
+    routes_init --> routes_selection_queue
     routes_init --> routes_selection_tabs
     routes_init --> routes_core
+    routes_init --> routes_selection_local_files
+    routes_init --> routes_decomposition_card_stack
+    routes_init --> routes_selection_filtering
     routes_init --> routes_models
-    routes_selection_core --> components_step_selection_source_browser
+    routes_init --> workflow_workflow
+    routes_selection_core --> workflow_workflow
     routes_selection_core --> routes_models
     routes_selection_core --> components_step_selection_selection_queue
     routes_selection_core --> components_step_selection_step_renderer
-    routes_selection_core --> workflow_workflow
-    routes_selection_filtering --> services_source_utils
+    routes_selection_core --> components_step_selection_source_browser
     routes_selection_filtering --> routes_selection_core
-    routes_selection_filtering --> components_step_selection_source_browser
-    routes_selection_filtering --> routes_models
+    routes_selection_filtering --> services_source_utils
     routes_selection_filtering --> workflow_workflow
-    routes_selection_local_files --> services_source
-    routes_selection_local_files --> routes_selection_core
-    routes_selection_local_files --> routes_models
-    routes_selection_local_files --> workflow_workflow
+    routes_selection_filtering --> routes_models
+    routes_selection_filtering --> components_step_selection_source_browser
     routes_selection_local_files --> components_step_selection_local_files
-    routes_selection_queue --> components_step_selection_preview_panel
+    routes_selection_local_files --> routes_selection_core
+    routes_selection_local_files --> workflow_workflow
+    routes_selection_local_files --> services_source
+    routes_selection_local_files --> routes_models
     routes_selection_queue --> routes_selection_core
-    routes_selection_queue --> routes_models
     routes_selection_queue --> workflow_workflow
+    routes_selection_queue --> components_step_selection_preview_panel
+    routes_selection_queue --> routes_models
     routes_selection_queue --> services_source_utils
-    routes_selection_tabs --> services_source_utils
     routes_selection_tabs --> routes_selection_core
-    routes_selection_tabs --> routes_models
+    routes_selection_tabs --> components_step_selection_local_files
     routes_selection_tabs --> workflow_workflow
+    routes_selection_tabs --> routes_models
+    routes_selection_tabs --> services_source_utils
     routes_selection_tabs --> routes_selection_local_files
     routes_selection_tabs --> components_step_selection_source_browser
     routes_selection_tabs --> components_step_selection_step_renderer
-    routes_selection_tabs --> components_step_selection_local_files
     services_alignment --> core_models
     services_graph --> core_models
     services_segmentation --> core_models
     services_text_utils --> core_models
     workflow_workflow --> components_steps
-    workflow_workflow --> services_graph
     workflow_workflow --> routes_models
     workflow_workflow --> services_source
-    workflow_workflow --> core_config
     workflow_workflow --> components_step_selection_step_renderer
-    workflow_workflow --> services_alignment
-    workflow_workflow --> services_segmentation
+    workflow_workflow --> core_config
     workflow_workflow --> components_step_combined
+    workflow_workflow --> services_alignment
+    workflow_workflow --> services_graph
+    workflow_workflow --> services_segmentation
 ```
 
-*110 cross-module dependencies detected*
+*134 cross-module dependencies detected*
 
 ## CLI Reference
 
@@ -332,6 +376,42 @@ class AlignmentService:
 
 ### callbacks (`callbacks.ipynb`)
 
+> Focus change callback and audio playback JavaScript for the alignment
+> card stack
+
+#### Import
+
+``` python
+from cjm_fasthtml_workflow_transcript_decomp.components.step_alignment.callbacks import (
+    generate_align_callbacks_script
+)
+```
+
+#### Functions
+
+``` python
+def _generate_align_focus_change_script(
+    focus_input_id:str,  # ID of hidden input for focused chunk index
+    audio_player_id:str,  # ID of the hidden audio element
+) -> str:  # JavaScript for focus change with audio playback and playing indicator
+    "Generate JS for VAD chunk focus change handling with audio audition and visual feedback."
+```
+
+``` python
+def generate_align_callbacks_script(
+    ids:CardStackHtmlIds,  # Card stack HTML IDs
+    button_ids:CardStackButtonIds,  # Card stack button IDs
+    config:CardStackConfig,  # Card stack configuration
+    urls:CardStackUrls,  # Card stack URL bundle
+    container_id:str,  # ID of the alignment container (parent of card stack)
+    focus_input_id:str,  # ID of hidden input for focused chunk index
+    audio_player_id:str,  # ID of the hidden audio element
+) -> any:  # Script element with all JavaScript callbacks
+    "Generate JavaScript for alignment card stack with audio audition."
+```
+
+### callbacks (`callbacks.ipynb`)
+
 > JavaScript callback generators for Phase 2 decomposition keyboard
 > interaction
 
@@ -367,6 +447,65 @@ def generate_decomp_callbacks_script(
     Delegates card-stack-generic JS to the library and injects the
     focus change callback via extra_scripts.
     """
+```
+
+### card_stack (`card_stack.ipynb`)
+
+> Card stack operations for the alignment column: navigation, viewport
+> update, width save
+
+#### Import
+
+``` python
+from cjm_fasthtml_workflow_transcript_decomp.routes.alignment.card_stack import *
+```
+
+#### Functions
+
+``` python
+def _make_renderer(
+    focused_segment_index:int=0,  # Currently focused text segment
+) -> Any:  # Card renderer callback
+    "Create a VAD card renderer with captured segment focus state."
+```
+
+``` python
+def _build_nav_response(
+    chunk_dicts:List[Dict[str, Any]],  # Serialized VAD chunks
+    state:CardStackState,  # Current card stack state
+    urls:AlignmentUrls,  # URL bundle
+    focused_segment_index:int=0,  # Currently focused text segment
+) -> Tuple:  # OOB response elements (slots + progress + focus)
+    "Build OOB response for navigation changes."
+```
+
+``` python
+def _handle_align_navigate(
+    workflow:Any,  # StructureDecompWorkflow instance
+    sess:Any,  # FastHTML session object
+    direction:str,  # Navigation direction: up/down/first/last/page_up/page_down
+    urls:AlignmentUrls,  # URL bundle
+) -> Tuple:  # OOB response elements (slots + progress + focus)
+    "Navigate the alignment card stack."
+```
+
+``` python
+def _handle_align_update_viewport(
+    workflow:Any,  # StructureDecompWorkflow instance
+    sess:Any,  # FastHTML session object
+    visible_count:int,  # New visible card count
+    urls:AlignmentUrls,  # URL bundle
+) -> Tuple:  # OOB section elements for viewport update
+    "Update viewport with new card count via OOB section swaps."
+```
+
+``` python
+def _handle_align_save_width(
+    workflow:Any,  # StructureDecompWorkflow instance
+    sess:Any,  # FastHTML session object
+    card_width:int,  # Card stack width in rem to save
+) -> None:  # No response body (swap=none on client)
+    "Save card stack width to server state with config bounds validation."
 ```
 
 ### card_stack (`card_stack.ipynb`)
@@ -473,6 +612,29 @@ def _handle_decomp_save_width(
 
 ### card_stack_config (`card_stack_config.ipynb`)
 
+> Card stack configuration, HTML IDs, and button IDs for the VAD
+> alignment card stack
+
+#### Import
+
+``` python
+from cjm_fasthtml_workflow_transcript_decomp.components.step_alignment.card_stack_config import (
+    ALIGN_CS_CONFIG,
+    ALIGN_CS_IDS,
+    ALIGN_CS_BTN_IDS
+)
+```
+
+#### Variables
+
+``` python
+ALIGN_CS_CONFIG
+ALIGN_CS_IDS
+ALIGN_CS_BTN_IDS
+```
+
+### card_stack_config (`card_stack_config.ipynb`)
+
 > Card stack configuration constants for the Phase 2 decomposition UI
 
 #### Import
@@ -548,6 +710,109 @@ class StructureDecompWorkflowConfig:
 
 ``` python
 DEFAULT_WORKFLOW_CONFIG_DIR
+```
+
+### core (`core.ipynb`)
+
+> Alignment state context, getters, and updaters for route handlers
+
+#### Import
+
+``` python
+from cjm_fasthtml_workflow_transcript_decomp.routes.alignment.core import (
+    AlignContext
+)
+```
+
+#### Functions
+
+``` python
+def _get_alignment_state(
+    workflow:Any,  # StructureDecompWorkflow instance
+    session_id:str,  # Session identifier
+) -> AlignmentStepState:  # Typed alignment step state
+    "Get the alignment step state from the workflow state store."
+```
+
+``` python
+def _load_alignment_context(
+    workflow:Any,  # StructureDecompWorkflow instance
+    session_id:str,  # Session identifier
+) -> AlignContext:  # Loaded context with all common alignment state
+    "Load commonly-needed alignment state values in a single call."
+```
+
+``` python
+def _update_alignment_state(
+    workflow:Any,  # StructureDecompWorkflow instance
+    session_id:str,  # Session identifier
+    vad_chunks=None,  # Updated VAD chunks (serialized)
+    focused_chunk_index=None,  # Updated focused chunk index
+    is_initialized=None,  # Initialization flag
+    history=None,  # Updated history
+    visible_count=None,  # Visible card count
+    card_width=None,  # Card stack width in rem
+    media_path=None,  # Audio file path
+    audio_duration=None,  # Audio duration
+) -> None
+    "Update the alignment step state in the workflow state store."
+```
+
+``` python
+def _push_alignment_history(
+    workflow:Any,  # StructureDecompWorkflow instance
+    session_id:str,  # Session identifier
+    current_chunks:List[Dict[str, Any]],  # Current chunk state to snapshot
+    focused_index:int,  # Current focused index to snapshot
+) -> int:  # New history depth after push
+    "Push current alignment state to history stack before making changes."
+```
+
+``` python
+def _to_vad_chunks(
+    chunk_dicts:List[Dict[str, Any]]  # Serialized VAD chunk dictionaries
+) -> List[VADChunk]:  # List of VADChunk objects
+    "Convert chunk dictionaries to VADChunk objects."
+```
+
+``` python
+def _build_card_stack_state(
+    ctx:AlignContext,  # Loaded alignment context
+    active_mode:str=None,  # Current interaction mode name (unused for alignment)
+) -> CardStackState:  # Card stack state for library functions
+    "Build a CardStackState from alignment context for library functions."
+```
+
+``` python
+def _get_decomp_segments(
+    workflow:Any,  # StructureDecompWorkflow instance
+    session_id:str,  # Session identifier
+) -> List[WorkingSegment]:  # List of WorkingSegment objects
+    "Get decomposition segments from state."
+```
+
+``` python
+def _update_decomp_segments(
+    workflow:Any,  # StructureDecompWorkflow instance
+    session_id:str,  # Session identifier
+    segments:List[WorkingSegment],  # Updated segments to save
+) -> None
+    "Update decomposition segments in state."
+```
+
+``` python
+def _get_decomp_focused_index(
+    workflow:Any,  # StructureDecompWorkflow instance
+    session_id:str,  # Session identifier
+) -> int:  # Currently focused segment index
+    "Get the decomposition focused segment index."
+```
+
+#### Classes
+
+``` python
+class AlignContext(NamedTuple):
+    "Common alignment state values loaded by handlers."
 ```
 
 ### core (`core.ipynb`)
@@ -780,6 +1045,7 @@ def _handle_keyboard_reorder(
 from cjm_fasthtml_workflow_transcript_decomp.services.formatting import (
     format_date,
     format_time,
+    format_time_precise,
     format_audio_filename
 )
 ```
@@ -798,6 +1064,13 @@ def format_time(
     seconds: Optional[float]  # Time in seconds
 ) -> str:  # Formatted time string (MM:SS)
     "Format seconds as MM:SS for display."
+```
+
+``` python
+def format_time_precise(
+    seconds: Optional[float]  # Time in seconds
+) -> str:  # Formatted time string (m:ss.s)
+    "Format seconds as m:ss.s for sub-second display."
 ```
 
 ``` python
@@ -865,6 +1138,87 @@ class GraphService:
             working_doc: WorkingDocument  # Working document to commit
         ) -> Dict[str, Any]:  # Result with document_id and segment_ids
         "Commit a working document synchronously."
+```
+
+### handlers (`handlers.ipynb`)
+
+> Workflow-specific alignment handlers: init, assign/unassign,
+> auto-align, undo
+
+#### Import
+
+``` python
+from cjm_fasthtml_workflow_transcript_decomp.routes.alignment.handlers import *
+```
+
+#### Functions
+
+``` python
+def _build_mutation_response(
+    chunk_dicts:List[Dict[str, Any]],  # Updated VAD chunks (serialized)
+    focused_index:int,  # Updated focused chunk index
+    visible_count:int,  # Visible card count
+    history_depth:int,  # Current history depth (for undo button state)
+    urls:AlignmentUrls,  # URL bundle
+    focused_segment_index:int=0,  # Currently focused text segment
+    segments:List[WorkingSegment]=None,  # Decomp segments (for cross-state mini-stats)
+) -> Tuple:  # OOB response tuple
+    "Build the standard OOB response for alignment mutation handlers."
+```
+
+``` python
+async def _handle_align_init(
+    workflow:Any,  # StructureDecompWorkflow instance
+    request:Any,  # FastHTML request object
+    sess:Any,  # FastHTML session object
+    urls:AlignmentUrls,  # URL bundle
+    kb_system:Any=None,  # Pre-built keyboard system (from combined renderer)
+    hints_content:Any=None,  # Pre-rendered hints content (from combined keyboard config)
+    visible_count:int=5,  # Initial visible card count
+    card_width:int=40,  # Initial card width in rem
+) -> tuple:  # (column_body, hints_oob, toolbar_oob, controls_oob, footer_oob, mini_stats_oob)
+    "Initialize alignment from audio file via VAD plugin."
+```
+
+``` python
+def _handle_align_toggle_assign(
+    workflow:Any,  # StructureDecompWorkflow instance
+    request:Any,  # FastHTML request object
+    sess:Any,  # FastHTML session object
+    chunk_index:int,  # Index of the VAD chunk to toggle
+    urls:AlignmentUrls,  # URL bundle
+) -> Tuple:  # OOB response tuple
+    "Toggle assignment of a VAD chunk to the focused text segment."
+```
+
+``` python
+def _handle_align_auto_align(
+    workflow:Any,  # StructureDecompWorkflow instance
+    request:Any,  # FastHTML request object
+    sess:Any,  # FastHTML session object
+    urls:AlignmentUrls,  # URL bundle
+) -> Tuple:  # OOB response tuple
+    "Auto-align all VAD chunks to segments using proportional distribution."
+```
+
+``` python
+def _handle_align_clear_assignments(
+    workflow:Any,  # StructureDecompWorkflow instance
+    request:Any,  # FastHTML request object
+    sess:Any,  # FastHTML session object
+    urls:AlignmentUrls,  # URL bundle
+) -> Tuple:  # OOB response tuple
+    "Clear all VAD chunk assignments."
+```
+
+``` python
+def _handle_align_undo(
+    workflow:Any,  # StructureDecompWorkflow instance
+    request:Any,  # FastHTML request object
+    sess:Any,  # FastHTML session object
+    urls:AlignmentUrls,  # URL bundle
+) -> Tuple:  # OOB response tuple
+    "Undo the last alignment operation."
 ```
 
 ### handlers (`handlers.ipynb`)
@@ -954,6 +1308,84 @@ async def _handle_decomp_ai_split(
     urls: DecompUrls,  # URL bundle for decomposition routes
 ):  # OOB slot updates with stats, progress, focus, and toolbar
     "Re-run AI (NLTK) sentence splitting on all current text."
+```
+
+### helpers (`helpers.ipynb`)
+
+> State getters for the alignment step from InteractionContext
+
+#### Import
+
+``` python
+from cjm_fasthtml_workflow_transcript_decomp.components.step_alignment.helpers import *
+```
+
+#### Functions
+
+``` python
+def _get_alignment_state(
+    ctx:InteractionContext  # Interaction context with state
+) -> AlignmentStepState:  # Typed alignment step state
+    "Get the full alignment step state from context."
+```
+
+``` python
+def _get_vad_chunks(
+    ctx:InteractionContext  # Interaction context with state
+) -> List[VADChunk]:  # List of VADChunk objects
+    "Get the list of VAD chunks from step state as VADChunk objects."
+```
+
+``` python
+def _is_alignment_initialized(
+    ctx:InteractionContext  # Interaction context with state
+) -> bool:  # True if VAD data has been fetched
+    "Check if alignment has been initialized."
+```
+
+``` python
+def _get_focused_chunk_index(
+    ctx:InteractionContext,  # Interaction context with state
+    default:int=0,  # Default focused chunk index
+) -> int:  # Currently focused VAD chunk index
+    "Get the currently focused VAD chunk index."
+```
+
+``` python
+def _get_alignment_visible_count(
+    ctx:InteractionContext,  # Interaction context with state
+    default:int=5,  # Default visible card count (compact cards)
+) -> int:  # Number of visible cards in viewport
+    "Get the stored visible card count."
+```
+
+``` python
+def _get_alignment_card_width(
+    ctx:InteractionContext,  # Interaction context with state
+    default:int=40,  # Default card width in rem (narrower for alignment)
+) -> int:  # Card stack width in rem
+    "Get the stored card stack width."
+```
+
+``` python
+def _get_alignment_history(
+    ctx:InteractionContext  # Interaction context with state
+) -> list:  # Undo history stack
+    "Get the undo history stack."
+```
+
+``` python
+def _get_media_path(
+    ctx:InteractionContext  # Interaction context with state
+) -> Optional[str]:  # Path to audio file or None
+    "Get the audio file path."
+```
+
+``` python
+def _get_audio_duration(
+    ctx:InteractionContext  # Interaction context with state
+) -> Optional[float]:  # Audio duration in seconds or None
+    "Get the total audio duration."
 ```
 
 ### helpers (`helpers.ipynb`)
@@ -1164,6 +1596,41 @@ def build_decomp_kb_system(
     urls:DecompUrls,  # URL bundle for decomposition routes
 ) -> Tuple[ZoneManager, Any]:  # (keyboard manager, rendered keyboard system)
     "Build the complete keyboard system for the decomposition column."
+```
+
+### keyboard_config (`keyboard_config.ipynb`)
+
+> Alignment-specific keyboard building blocks for assembly into a shared
+> ZoneManager
+
+#### Import
+
+``` python
+from cjm_fasthtml_workflow_transcript_decomp.components.step_alignment.keyboard_config import (
+    SD_ALIGN_TOGGLE_ASSIGN_BTN,
+    SD_ALIGN_AUTO_ALIGN_BTN,
+    SD_ALIGN_UNDO_BTN,
+    create_align_kb_parts
+)
+```
+
+#### Functions
+
+``` python
+def create_align_kb_parts(
+    ids:CardStackHtmlIds,  # Card stack HTML IDs
+    button_ids:CardStackButtonIds,  # Card stack button IDs for navigation
+    config:CardStackConfig,  # Card stack configuration
+) -> Tuple[FocusZone, tuple, tuple]:  # (zone, actions, modes)
+    "Create alignment-specific keyboard building blocks."
+```
+
+#### Variables
+
+``` python
+SD_ALIGN_TOGGLE_ASSIGN_BTN = 'sd-align-toggle-assign-btn'
+SD_ALIGN_AUTO_ALIGN_BTN = 'sd-align-auto-align-btn'
+SD_ALIGN_UNDO_BTN = 'sd-align-undo-btn'
 ```
 
 ### keyboard_config (`keyboard_config.ipynb`)
@@ -1497,7 +1964,8 @@ class WorkingDocument:
 ``` python
 from cjm_fasthtml_workflow_transcript_decomp.routes.models import (
     DecompUrls,
-    SelectionUrls
+    SelectionUrls,
+    AlignmentUrls
 )
 ```
 
@@ -1538,6 +2006,20 @@ class SelectionUrls:
     add_external: str = ''  # Add external .db source
     remove_external: str = ''  # Remove external .db source
     tab_switch: str = ''  # Switch source tabs
+```
+
+``` python
+@dataclass
+class AlignmentUrls:
+    "URL bundle for Phase 2 alignment route handlers and renderers."
+    
+    card_stack: CardStackUrls = field(...)
+    toggle_assign: str = ''  # Toggle chunk-to-segment assignment
+    auto_align: str = ''  # Auto-align all chunks to segments
+    clear_assignments: str = ''  # Clear all assignments
+    undo: str = ''  # Undo last alignment operation
+    init: str = ''  # Initialize alignment (fetch VAD data)
+    audio_src: str = ''  # Audio file serving URL base
 ```
 
 ### preview_panel (`preview_panel.ipynb`)
@@ -2383,6 +2865,73 @@ _DECOMP_COLUMN_CLS
 
 ### step_renderer (`step_renderer.ipynb`)
 
+> Composable render functions for the alignment card stack column
+
+#### Import
+
+``` python
+from cjm_fasthtml_workflow_transcript_decomp.components.step_alignment.step_renderer import (
+    render_align_toolbar,
+    render_align_stats,
+    render_align_column_body,
+    render_align_footer_content,
+    render_align_mini_stats_text
+)
+```
+
+#### Functions
+
+``` python
+def render_align_toolbar(
+    auto_align_url:str,  # URL for auto-align action
+    clear_url:str,  # URL for clear assignments action
+    undo_url:str,  # URL for undo action
+    can_undo:bool,  # Whether undo is available
+    visible_count:int=DEFAULT_VISIBLE_COUNT,  # Current visible card count
+    oob:bool=False,  # Whether to render as OOB swap
+) -> Any:  # Toolbar component
+    "Render the alignment toolbar with action buttons and card count selector."
+```
+
+``` python
+def render_align_stats(
+    chunks:List[VADChunk],  # Current VAD chunks
+    oob:bool=False,  # Whether to render as OOB swap
+) -> Any:  # Statistics component
+    "Render alignment statistics."
+```
+
+``` python
+def render_align_column_body(
+    chunks:List[VADChunk],  # VAD chunks to display
+    focused_index:int,  # Currently focused chunk index
+    visible_count:int,  # Number of visible cards in viewport
+    card_width:int,  # Card stack width in rem
+    urls:AlignmentUrls,  # URL bundle for alignment routes
+    kb_system:Any,  # Rendered keyboard system (from combined keyboard config)
+    media_path:Optional[str]=None,  # Path to audio file for playback
+    focused_segment_index:int=0,  # Currently focused text segment (from decomp state)
+) -> Any:  # Div with id=ALIGNMENT_COLUMN_CONTENT
+    "Render the alignment column content area with card stack viewport."
+```
+
+``` python
+def render_align_footer_content(
+    chunks:List[VADChunk],  # Current VAD chunks
+    focused_index:int,  # Currently focused chunk index
+) -> Any:  # Footer content with progress indicator and stats
+    "Render footer content with progress indicator and alignment statistics."
+```
+
+``` python
+def render_align_mini_stats_text(
+    chunks:List[VADChunk],  # Current VAD chunks
+) -> str:  # Compact stats string for column header badge
+    "Generate compact stats string for the alignment column header badge."
+```
+
+### step_renderer (`step_renderer.ipynb`)
+
 > Composable renderers for the Phase 2 decomposition column and shared
 > chrome
 
@@ -2664,6 +3213,37 @@ def calculate_segment_stats(
     segments: List[WorkingSegment]  # List of segments to analyze
 ) -> Dict[str, Any]:  # Statistics dictionary with total_words, total_segments
     "Calculate aggregate statistics for a list of segments."
+```
+
+### vad_card (`vad_card.ipynb`)
+
+> VAD chunk card renderer for the alignment card stack
+
+#### Import
+
+``` python
+from cjm_fasthtml_workflow_transcript_decomp.components.step_alignment.vad_card import (
+    render_vad_card,
+    create_vad_card_renderer
+)
+```
+
+#### Functions
+
+``` python
+def render_vad_card(
+    chunk:VADChunk,  # VAD chunk to render
+    card_role:CardRole,  # Role of this card in viewport ("focused" or "context")
+    focused_segment_index:int,  # Currently focused text segment index
+) -> Any:  # VAD chunk card component
+    "Render a single VAD chunk card with time range, assignment, and playing indicator."
+```
+
+``` python
+def create_vad_card_renderer(
+    focused_segment_index:int=0,  # Currently focused text segment index
+) -> Callable:  # Card renderer callback: (item, CardRenderContext) -> FT
+    "Create a card renderer callback for VAD chunk cards."
 ```
 
 ### workflow (`workflow.ipynb`)
