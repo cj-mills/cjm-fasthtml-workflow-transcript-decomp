@@ -8,19 +8,30 @@ __all__ = []
 # %% ../../../nbs/routes/decomposition/handlers.ipynb #dh-imports
 from typing import List, Dict, Any, Tuple
 
+from fasthtml.common import Div, Span
+
 from cjm_fasthtml_card_stack.core.models import CardStackState
+from cjm_fasthtml_card_stack.components.controls import render_width_slider
 from cjm_fasthtml_card_stack.core.constants import DEFAULT_VISIBLE_COUNT, DEFAULT_CARD_WIDTH
 
 from cjm_fasthtml_interactions.core.state_store import get_session_id
 from cjm_workflow_state.history import pop_history
 
+from ...core.html_ids import StructureDecompHtmlIds
 from ...core.models import WorkingSegment
 from ..models import DecompUrls
 from cjm_fasthtml_workflow_transcript_decomp.components.step_decomposition.step_renderer import (
-    _render_decomposition_content, render_decomp_stats, render_toolbar
+    render_decomp_column_body, render_decomp_stats, render_toolbar,
+    render_decomp_footer_content, render_decomp_mini_stats_text,
+)
+from cjm_fasthtml_workflow_transcript_decomp.components.step_combined import (
+    render_decomp_mini_stats_badge,
+)
+from cjm_fasthtml_workflow_transcript_decomp.components.keyboard_config import (
+    build_decomp_kb_system, render_keyboard_hints_collapsible,
 )
 from cjm_fasthtml_workflow_transcript_decomp.components.step_decomposition.card_stack_config import (
-    DECOMP_TS_IDS,
+    DECOMP_CS_CONFIG, DECOMP_CS_IDS, DECOMP_TS_IDS,
 )
 from cjm_fasthtml_workflow_transcript_decomp.services.text_utils import (
     word_index_to_char_position,
@@ -42,13 +53,13 @@ from ...workflow.workflow import StructureDecompWorkflow
 
 # %% ../../../nbs/routes/decomposition/handlers.ipynb #dh-mutation-response
 def _build_mutation_response(
-    segment_dicts: List[Dict[str, Any]],  # Serialized segments
-    focused_index: int,  # Currently focused segment index
-    visible_count: int,  # Number of visible cards
-    history_depth: int,  # Current undo history depth
-    urls: DecompUrls,  # URL bundle
-    is_split_mode: bool = False,  # Whether split mode is active
-) -> Tuple:  # OOB elements (slots + progress + focus + stats + toolbar)
+    segment_dicts:List[Dict[str, Any]],  # Serialized segments
+    focused_index:int,  # Currently focused segment index
+    visible_count:int,  # Number of visible cards
+    history_depth:int,  # Current undo history depth
+    urls:DecompUrls,  # URL bundle
+    is_split_mode:bool=False,  # Whether split mode is active
+) -> Tuple:  # OOB elements (slots + progress + focus + stats + toolbar + mini-stats)
     """Build the standard OOB response for mutation handlers."""
     state = CardStackState(
         focused_index=focused_index,
@@ -66,28 +77,31 @@ def _build_mutation_response(
         reset_url=urls.reset, ai_split_url=urls.ai_split, undo_url=urls.undo,
         can_undo=(history_depth > 0), visible_count=visible_count, oob=True,
     )
-    return (*nav_response, stats_oob, toolbar_oob)
+    mini_stats_oob = render_decomp_mini_stats_badge(segments, oob=True)
+
+    return (*nav_response, stats_oob, toolbar_oob, mini_stats_oob)
 
 # %% ../../../nbs/routes/decomposition/handlers.ipynb #dh-init
 async def _handle_decomp_init(
-    workflow: StructureDecompWorkflow,  # The workflow instance
+    workflow:StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    urls: DecompUrls,  # URL bundle for decomposition routes
-    visible_count: int = DEFAULT_VISIBLE_COUNT,  # Number of visible cards
-    card_width: int = DEFAULT_CARD_WIDTH,  # Card stack width in rem
-):  # Full decomposition step content with keyboard navigation
+    urls:DecompUrls,  # URL bundle for decomposition routes
+    visible_count:int=DEFAULT_VISIBLE_COUNT,  # Number of visible cards
+    card_width:int=DEFAULT_CARD_WIDTH,  # Card stack width in rem
+):  # Column body + OOB shared chrome swaps
     """Initialize segments from Phase 1 selected sources."""
     session_id = get_session_id(sess)
+
     # Get selected sources from Phase 1
     selection_state = _get_selection_state(workflow, session_id)
     selected_sources = selection_state.get("selected_sources", [])
-    
+
     # Read stored viewport preferences (may exist from previous session)
     decomp_state = _get_decomp_state(workflow, session_id)
     stored_visible_count = decomp_state.get("visible_count", visible_count)
     stored_card_width = decomp_state.get("card_width", card_width)
-    
+
     if not selected_sources:
         # No sources selected, initialize with empty state
         _update_decomp_state(
@@ -97,37 +111,73 @@ async def _handle_decomp_init(
             history=[], visible_count=stored_visible_count,
             card_width=stored_card_width,
         )
-        return _render_decomposition_content(
-            segments=[], focused_index=0, history_depth=0,
-            visible_count=stored_visible_count, card_width=stored_card_width,
-            urls=urls,
+        segments = []
+    else:
+        # Fetch source blocks via service API
+        source_blocks = workflow.source_service.get_source_blocks(selected_sources)
+
+        # Use segmentation service to split into sentences
+        working_segments = await workflow.segmentation_service.split_combined_sources_async(
+            source_blocks
         )
-    
-    # Fetch source blocks via service API
-    source_blocks = workflow.source_service.get_source_blocks(selected_sources)
-    
-    # Use segmentation service to split into sentences
-    working_segments = await workflow.segmentation_service.split_combined_sources_async(
-        source_blocks
-    )
-    segment_dicts = [s.to_dict() for s in working_segments]
-    
-    # Store in state
-    _update_decomp_state(
-        workflow, session_id,
-        segments=segment_dicts,
-        initial_segments=segment_dicts.copy(),
-        is_initialized=True, focused_index=0,
-        history=[], visible_count=stored_visible_count,
+        segment_dicts = [s.to_dict() for s in working_segments]
+
+        # Store in state
+        _update_decomp_state(
+            workflow, session_id,
+            segments=segment_dicts,
+            initial_segments=segment_dicts.copy(),
+            is_initialized=True, focused_index=0,
+            history=[], visible_count=stored_visible_count,
+            card_width=stored_card_width,
+        )
+        segments = _to_segments(segment_dicts)
+
+    focused_index = 0
+    history_depth = 0
+
+    # Build keyboard system
+    kb_manager, kb_system = build_decomp_kb_system(urls)
+
+    # Primary response: column body (outerHTML swap onto DECOMP_COLUMN_CONTENT)
+    column_body = render_decomp_column_body(
+        segments=segments,
+        focused_index=focused_index,
+        visible_count=stored_visible_count,
         card_width=stored_card_width,
-    )
-    
-    return _render_decomposition_content(
-        segments=_to_segments(segment_dicts),
-        focused_index=0, history_depth=0,
-        visible_count=stored_visible_count, card_width=stored_card_width,
         urls=urls,
+        kb_system=kb_system,
     )
+
+    # OOB swaps for shared chrome containers (innerHTML replaces children)
+    hints_oob = Div(
+        render_keyboard_hints_collapsible(kb_manager),
+        id=StructureDecompHtmlIds.SHARED_HINTS,
+        hx_swap_oob="innerHTML"
+    )
+    toolbar_oob = Div(
+        render_toolbar(
+            reset_url=urls.reset, ai_split_url=urls.ai_split, undo_url=urls.undo,
+            can_undo=(history_depth > 0), visible_count=stored_visible_count,
+        ),
+        id=StructureDecompHtmlIds.SHARED_TOOLBAR,
+        hx_swap_oob="innerHTML"
+    )
+    controls_oob = Div(
+        render_width_slider(DECOMP_CS_CONFIG, DECOMP_CS_IDS, card_width=stored_card_width),
+        id=StructureDecompHtmlIds.SHARED_CONTROLS,
+        hx_swap_oob="innerHTML"
+    )
+    footer_oob = Div(
+        render_decomp_footer_content(segments, focused_index),
+        id=StructureDecompHtmlIds.SHARED_FOOTER,
+        hx_swap_oob="innerHTML"
+    )
+
+    # Mini-stats badge (outerHTML replaces the badge Span)
+    mini_stats_oob = render_decomp_mini_stats_badge(segments, oob=True)
+
+    return (column_body, hints_oob, toolbar_oob, controls_oob, footer_oob, mini_stats_oob)
 
 # %% ../../../nbs/routes/decomposition/handlers.ipynb #dh-split
 async def _handle_decomp_split(

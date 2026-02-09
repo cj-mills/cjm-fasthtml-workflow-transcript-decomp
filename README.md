@@ -12,14 +12,14 @@ pip install cjm_fasthtml_workflow_transcript_decomp
 ## Project Structure
 
     nbs/
-    ├── components/ (14)
+    ├── components/ (15)
     │   ├── step_decomposition/ (6)
     │   │   ├── callbacks.ipynb          # JavaScript callback generators for Phase 2 decomposition keyboard interaction
     │   │   ├── card_stack_config.ipynb  # Card stack configuration constants for the Phase 2 decomposition UI
     │   │   ├── helpers.ipynb            # Shared helper functions for the step_decomposition module
-    │   │   ├── keyboard_config.ipynb    # Keyboard navigation configuration for the Phase 2 decomposition step
+    │   │   ├── keyboard_config.ipynb    # Decomposition-specific keyboard actions, modes, and zone configuration
     │   │   ├── segment_card.ipynb       # Segment card component with view and split modes
-    │   │   └── step_renderer.ipynb      # Phase 2 step renderer: Structural Decomposition with card stack UI and keyboard navigation
+    │   │   └── step_renderer.ipynb      # Composable renderers for the Phase 2 decomposition column and shared chrome
     │   ├── step_selection/ (6)
     │   │   ├── helpers.ipynb          # Shared helper functions for the step_selection module
     │   │   ├── local_files.ipynb      # Local files browser for importing external .db files
@@ -27,8 +27,9 @@ pip install cjm_fasthtml_workflow_transcript_decomp
     │   │   ├── selection_queue.ipynb  # Selection queue component with drag-drop reordering
     │   │   ├── source_browser.ipynb   # Source browser components for displaying and filtering transcription sources
     │   │   └── step_renderer.ipynb    # Phase 1 step renderer: Source Selection & Ordering with two-column layout and collapsible preview
-    │   ├── step_combined.ipynb  # Phase 2 combined step renderer: dual-column layout for Segment & Align
-    │   └── steps.ipynb          # Placeholder step renderers for the structure decomposition workflow
+    │   ├── keyboard_config.ipynb  # Shared keyboard navigation configuration for the combined Phase 2 step
+    │   ├── step_combined.ipynb    # Phase 2 combined step renderer: dual-column layout for Segment & Align
+    │   └── steps.ipynb            # Placeholder step renderers for the structure decomposition workflow
     ├── core/ (3)
     │   ├── config.ipynb    # Configuration dataclass for structure decomposition workflow
     │   ├── html_ids.ipynb  # Centralized HTML ID constants for structure decomposition workflow components
@@ -58,12 +59,13 @@ pip install cjm_fasthtml_workflow_transcript_decomp
     └── workflow/ (1)
         └── workflow.ipynb  # Main workflow class for structure decomposition
 
-Total: 36 notebooks across 5 directories
+Total: 37 notebooks across 5 directories
 
 ## Module Dependencies
 
 ``` mermaid
 graph LR
+    components_keyboard_config[components.keyboard_config<br/>keyboard_config]
     components_step_combined[components.step_combined<br/>step_combined]
     components_step_decomposition_callbacks[components.step_decomposition.callbacks<br/>callbacks]
     components_step_decomposition_card_stack_config[components.step_decomposition.card_stack_config<br/>card_stack_config]
@@ -101,39 +103,45 @@ graph LR
     services_text_utils[services.text_utils<br/>text_utils]
     workflow_workflow[workflow.workflow<br/>workflow]
 
-    components_step_combined --> routes_models
+    components_keyboard_config --> components_step_decomposition_card_stack_config
+    components_keyboard_config --> components_step_decomposition_keyboard_config
+    components_keyboard_config --> routes_models
+    components_step_combined --> components_step_decomposition_card_stack_config
+    components_step_combined --> components_step_decomposition_helpers
+    components_step_combined --> components_keyboard_config
     components_step_combined --> core_html_ids
+    components_step_combined --> core_models
+    components_step_combined --> components_step_decomposition_step_renderer
+    components_step_combined --> routes_models
     components_step_decomposition_helpers --> core_models
     components_step_decomposition_keyboard_config --> components_step_decomposition_card_stack_config
     components_step_decomposition_segment_card --> components_step_decomposition_card_stack_config
-    components_step_decomposition_segment_card --> core_models
     components_step_decomposition_segment_card --> core_html_ids
+    components_step_decomposition_segment_card --> core_models
     components_step_decomposition_step_renderer --> components_step_decomposition_card_stack_config
-    components_step_decomposition_step_renderer --> components_step_decomposition_helpers
-    components_step_decomposition_step_renderer --> components_step_decomposition_keyboard_config
-    components_step_decomposition_step_renderer --> components_step_decomposition_segment_card
-    components_step_decomposition_step_renderer --> routes_models
-    components_step_decomposition_step_renderer --> core_models
-    components_step_decomposition_step_renderer --> components_step_decomposition_callbacks
     components_step_decomposition_step_renderer --> services_text_utils
     components_step_decomposition_step_renderer --> core_html_ids
+    components_step_decomposition_step_renderer --> core_models
+    components_step_decomposition_step_renderer --> components_step_decomposition_callbacks
+    components_step_decomposition_step_renderer --> components_step_decomposition_segment_card
+    components_step_decomposition_step_renderer --> routes_models
     components_step_selection_helpers --> core_models
     components_step_selection_local_files --> components_step_selection_helpers
     components_step_selection_local_files --> core_html_ids
     components_step_selection_preview_panel --> core_html_ids
     components_step_selection_selection_queue --> core_html_ids
-    components_step_selection_source_browser --> services_source_utils
     components_step_selection_source_browser --> services_formatting
-    components_step_selection_source_browser --> services_text_utils
+    components_step_selection_source_browser --> services_source_utils
     components_step_selection_source_browser --> core_html_ids
-    components_step_selection_step_renderer --> components_step_selection_local_files
+    components_step_selection_source_browser --> services_text_utils
     components_step_selection_step_renderer --> components_step_selection_helpers
-    components_step_selection_step_renderer --> services_text_utils
+    components_step_selection_step_renderer --> components_step_selection_selection_queue
+    components_step_selection_step_renderer --> components_step_selection_local_files
     components_step_selection_step_renderer --> components_step_selection_source_browser
     components_step_selection_step_renderer --> components_step_selection_preview_panel
-    components_step_selection_step_renderer --> routes_models
-    components_step_selection_step_renderer --> components_step_selection_selection_queue
     components_step_selection_step_renderer --> core_html_ids
+    components_step_selection_step_renderer --> routes_models
+    components_step_selection_step_renderer --> services_text_utils
     components_steps --> core_html_ids
     routes_core --> workflow_workflow
     routes_decomposition_card_stack --> components_step_decomposition_card_stack_config
@@ -143,68 +151,71 @@ graph LR
     routes_decomposition_card_stack --> routes_models
     routes_decomposition_core --> core_models
     routes_decomposition_core --> workflow_workflow
-    routes_decomposition_handlers --> services_text_utils
     routes_decomposition_handlers --> routes_decomposition_card_stack
+    routes_decomposition_handlers --> components_step_combined
+    routes_decomposition_handlers --> components_step_decomposition_card_stack_config
     routes_decomposition_handlers --> workflow_workflow
-    routes_decomposition_handlers --> components_step_decomposition_step_renderer
+    routes_decomposition_handlers --> components_keyboard_config
     routes_decomposition_handlers --> services_segmentation
     routes_decomposition_handlers --> routes_decomposition_core
-    routes_decomposition_handlers --> components_step_decomposition_card_stack_config
+    routes_decomposition_handlers --> core_html_ids
+    routes_decomposition_handlers --> components_step_decomposition_step_renderer
+    routes_decomposition_handlers --> services_text_utils
     routes_decomposition_handlers --> routes_models
     routes_decomposition_handlers --> core_models
-    routes_init --> routes_decomposition_card_stack
-    routes_init --> routes_core
-    routes_init --> workflow_workflow
     routes_init --> routes_selection_queue
-    routes_init --> routes_selection_local_files
     routes_init --> routes_selection_tabs
     routes_init --> routes_decomposition_handlers
+    routes_init --> workflow_workflow
+    routes_init --> routes_decomposition_card_stack
     routes_init --> routes_selection_filtering
+    routes_init --> routes_core
     routes_init --> routes_models
-    routes_selection_core --> components_step_selection_selection_queue
-    routes_selection_core --> routes_models
-    routes_selection_core --> components_step_selection_source_browser
-    routes_selection_core --> workflow_workflow
+    routes_init --> routes_selection_local_files
     routes_selection_core --> components_step_selection_step_renderer
-    routes_selection_filtering --> routes_selection_core
+    routes_selection_core --> routes_models
+    routes_selection_core --> components_step_selection_selection_queue
+    routes_selection_core --> workflow_workflow
+    routes_selection_core --> components_step_selection_source_browser
     routes_selection_filtering --> services_source_utils
     routes_selection_filtering --> routes_models
-    routes_selection_filtering --> components_step_selection_source_browser
+    routes_selection_filtering --> routes_selection_core
     routes_selection_filtering --> workflow_workflow
-    routes_selection_local_files --> services_source
+    routes_selection_filtering --> components_step_selection_source_browser
     routes_selection_local_files --> components_step_selection_local_files
-    routes_selection_local_files --> routes_selection_core
     routes_selection_local_files --> routes_models
+    routes_selection_local_files --> services_source
     routes_selection_local_files --> workflow_workflow
-    routes_selection_queue --> routes_selection_core
-    routes_selection_queue --> components_step_selection_preview_panel
+    routes_selection_local_files --> routes_selection_core
     routes_selection_queue --> services_source_utils
     routes_selection_queue --> routes_models
+    routes_selection_queue --> routes_selection_core
     routes_selection_queue --> workflow_workflow
-    routes_selection_tabs --> routes_selection_local_files
+    routes_selection_queue --> components_step_selection_preview_panel
     routes_selection_tabs --> components_step_selection_local_files
-    routes_selection_tabs --> components_step_selection_source_browser
-    routes_selection_tabs --> routes_selection_core
     routes_selection_tabs --> routes_models
-    routes_selection_tabs --> components_step_selection_step_renderer
-    routes_selection_tabs --> workflow_workflow
     routes_selection_tabs --> services_source_utils
+    routes_selection_tabs --> workflow_workflow
+    routes_selection_tabs --> routes_selection_core
+    routes_selection_tabs --> components_step_selection_step_renderer
+    routes_selection_tabs --> routes_selection_local_files
+    routes_selection_tabs --> components_step_selection_source_browser
     services_alignment --> core_models
     services_graph --> core_models
     services_segmentation --> core_models
     services_text_utils --> core_models
-    workflow_workflow --> components_step_selection_step_renderer
-    workflow_workflow --> services_graph
     workflow_workflow --> services_segmentation
-    workflow_workflow --> routes_models
     workflow_workflow --> services_alignment
-    workflow_workflow --> core_config
-    workflow_workflow --> components_steps
     workflow_workflow --> services_source
+    workflow_workflow --> routes_models
+    workflow_workflow --> components_step_selection_step_renderer
+    workflow_workflow --> core_config
+    workflow_workflow --> services_graph
+    workflow_workflow --> components_steps
     workflow_workflow --> components_step_combined
 ```
 
-*101 cross-module dependencies detected*
+*110 cross-module dependencies detected*
 
 ## CLI Reference
 
@@ -871,25 +882,25 @@ from cjm_fasthtml_workflow_transcript_decomp.routes.decomposition.handlers impor
 
 ``` python
 def _build_mutation_response(
-    segment_dicts: List[Dict[str, Any]],  # Serialized segments
-    focused_index: int,  # Currently focused segment index
-    visible_count: int,  # Number of visible cards
-    history_depth: int,  # Current undo history depth
-    urls: DecompUrls,  # URL bundle
-    is_split_mode: bool = False,  # Whether split mode is active
-) -> Tuple:  # OOB elements (slots + progress + focus + stats + toolbar)
+    segment_dicts:List[Dict[str, Any]],  # Serialized segments
+    focused_index:int,  # Currently focused segment index
+    visible_count:int,  # Number of visible cards
+    history_depth:int,  # Current undo history depth
+    urls:DecompUrls,  # URL bundle
+    is_split_mode:bool=False,  # Whether split mode is active
+) -> Tuple:  # OOB elements (slots + progress + focus + stats + toolbar + mini-stats)
     "Build the standard OOB response for mutation handlers."
 ```
 
 ``` python
 async def _handle_decomp_init(
-    workflow: StructureDecompWorkflow,  # The workflow instance
+    workflow:StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    urls: DecompUrls,  # URL bundle for decomposition routes
-    visible_count: int = DEFAULT_VISIBLE_COUNT,  # Number of visible cards
-    card_width: int = DEFAULT_CARD_WIDTH,  # Card stack width in rem
-):  # Full decomposition step content with keyboard navigation
+    urls:DecompUrls,  # URL bundle for decomposition routes
+    visible_count:int=DEFAULT_VISIBLE_COUNT,  # Number of visible cards
+    card_width:int=DEFAULT_CARD_WIDTH,  # Card stack width in rem
+):  # Column body + OOB shared chrome swaps
     "Initialize segments from Phase 1 selected sources."
 ```
 
@@ -1126,7 +1137,38 @@ def init_router(
 
 ### keyboard_config (`keyboard_config.ipynb`)
 
-> Keyboard navigation configuration for the Phase 2 decomposition step
+> Shared keyboard navigation configuration for the combined Phase 2 step
+
+#### Import
+
+``` python
+from cjm_fasthtml_workflow_transcript_decomp.components.keyboard_config import (
+    render_keyboard_hints_collapsible,
+    build_decomp_kb_system
+)
+```
+
+#### Functions
+
+``` python
+def render_keyboard_hints_collapsible(
+    manager:ZoneManager,  # Keyboard zone manager with actions configured
+    container_id:str="sd-keyboard-hints",  # HTML ID for the hints container
+    include_zone_switch:bool=False,  # Whether to include zone switch hints
+) -> Any:  # Collapsible keyboard hints component
+    "Render keyboard shortcut hints in a collapsible DaisyUI collapse."
+```
+
+``` python
+def build_decomp_kb_system(
+    urls:DecompUrls,  # URL bundle for decomposition routes
+) -> Tuple[ZoneManager, Any]:  # (keyboard manager, rendered keyboard system)
+    "Build the complete keyboard system for the decomposition column."
+```
+
+### keyboard_config (`keyboard_config.ipynb`)
+
+> Decomposition-specific keyboard actions, modes, and zone configuration
 
 #### Import
 
@@ -1136,36 +1178,24 @@ from cjm_fasthtml_workflow_transcript_decomp.components.step_decomposition.keybo
     SD_DECOMP_EXIT_SPLIT_BTN,
     SD_DECOMP_SPLIT_BTN,
     SD_DECOMP_MERGE_BTN,
-    SD_DECOMP_UNDO_BTN
+    SD_DECOMP_UNDO_BTN,
+    create_decomp_kb_parts
 )
 ```
 
 #### Functions
 
 ``` python
-def _create_decomposition_keyboard_manager(
+def create_decomp_kb_parts(
     ids:CardStackHtmlIds,  # Card stack HTML IDs
     button_ids:CardStackButtonIds,  # Card stack button IDs for navigation
     config:CardStackConfig,  # Card stack configuration
-) -> ZoneManager:  # Configured keyboard zone manager
+) -> Tuple[FocusZone, tuple, tuple]:  # (zone, actions, modes)
     """
-    Create the keyboard zone manager for Phase 2 decomposition step.
+    Create decomposition-specific keyboard building blocks.
     
-    Composes library-provided card stack navigation actions with decomposition-specific
-    split mode, merge, undo, and token selector navigation actions.
-    """
-```
-
-``` python
-def _render_decomposition_keyboard_hints(
-    manager: ZoneManager,  # Keyboard zone manager with actions configured
-    container_id: str = "sd-decomp-keyboard-hints",  # HTML ID for the hints container
-) -> Any:  # Collapsible keyboard hints component
-    """
-    Render keyboard shortcut hints in a collapsible container.
-    
-    Card-stack generic: renders hints for any ZoneManager in a DaisyUI collapse.
-    The `container_id` parameter allows customization per workflow.
+    Returns a zone, actions tuple, and modes tuple for assembly into a shared
+    ZoneManager by the combined-level keyboard config.
     """
 ```
 
@@ -2279,6 +2309,7 @@ def validate_browse_path(
 
 ``` python
 from cjm_fasthtml_workflow_transcript_decomp.components.step_combined import (
+    render_decomp_mini_stats_badge,
     render_combined_step
 )
 ```
@@ -2290,20 +2321,43 @@ def _render_column_header(
     title:str,  # Column title (e.g., "Text Decomposition")
     stats_id:str,  # HTML ID for the mini-stats badge area
     header_id:str,  # HTML ID for the column header container
+    initial_text:str="--",  # Initial text for the mini-stats badge
 ) -> Any:  # Column header component
     "Render a column header with title and mini-stats badge."
 ```
 
 ``` python
-def _render_shared_chrome() -> tuple:  # (hints, toolbar, controls, footer)
-    "Render shared chrome containers with placeholder content."
+def render_decomp_mini_stats_badge(
+    segments:List[WorkingSegment],  # Current segments
+    oob:bool=False,  # Whether to render as OOB swap
+) -> Any:  # Mini-stats badge Span
+    "Render the decomposition mini-stats badge for the column header."
+```
+
+``` python
+def _placeholder(
+    text:str,  # Placeholder message
+) -> Any:  # Styled placeholder paragraph
+    "Render a placeholder text element for uninitialized chrome containers."
+```
+
+``` python
+def _render_shared_chrome(
+    decomp_state:dict=None,  # Decomp state dict (None = show placeholders)
+    urls:DecompUrls=None,  # Decomp URL bundle (required when decomp_state provided)
+    kb_manager:Any=None,  # Keyboard manager (required when decomp_state provided)
+) -> tuple:  # (hints, toolbar, controls, footer)
+    "Render shared chrome containers, populated with decomp content when initialized."
 ```
 
 ``` python
 def _render_decomp_column(
     is_active:bool=True,  # Whether this column is initially active
+    column_body:Any=None,  # Pre-rendered column body (None = not initialized)
+    mini_stats_text:str="--",  # Mini-stats badge text
+    init_url:str="",  # URL for auto-trigger initialization
 ) -> Any:  # Left column component
-    "Render the left decomposition column with placeholder content."
+    "Render the left decomposition column."
 ```
 
 ``` python
@@ -2321,10 +2375,16 @@ def render_combined_step(
     "Render Phase 2: Combined Segment & Align step with dual-column layout."
 ```
 
+#### Variables
+
+``` python
+_DECOMP_COLUMN_CLS
+```
+
 ### step_renderer (`step_renderer.ipynb`)
 
-> Phase 2 step renderer: Structural Decomposition with card stack UI and
-> keyboard navigation
+> Composable renderers for the Phase 2 decomposition column and shared
+> chrome
 
 #### Import
 
@@ -2332,7 +2392,9 @@ def render_combined_step(
 from cjm_fasthtml_workflow_transcript_decomp.components.step_decomposition.step_renderer import (
     render_toolbar,
     render_decomp_stats,
-    render_decomposition_step
+    render_decomp_column_body,
+    render_decomp_footer_content,
+    render_decomp_mini_stats_text
 )
 ```
 
@@ -2359,23 +2421,30 @@ def render_decomp_stats(
 ```
 
 ``` python
-def _render_decomposition_content(
+def render_decomp_column_body(
     segments:List[WorkingSegment],  # Segments to display
     focused_index:int,  # Currently focused segment index
-    history_depth:int,  # Undo history depth (for button state)
     visible_count:int,  # Number of visible cards in viewport
     card_width:int,  # Card stack width in rem
     urls:DecompUrls,  # URL bundle for all decomposition routes
-) -> Any:  # FastHTML component with full decomposition UI
-    "Render complete decomposition step content with keyboard navigation."
+    kb_system:Any,  # Rendered keyboard system (from build_decomp_kb_system)
+) -> Any:  # Div with id=DECOMP_COLUMN_CONTENT containing viewport + infrastructure
+    "Render the decomposition column content area with card stack viewport."
 ```
 
 ``` python
-def render_decomposition_step(
-    ctx: InteractionContext,  # Interaction context with state and data
-    urls: DecompUrls = None,  # URL bundle for decomposition routes
-) -> Any:  # FastHTML component
-    "Render Phase 2: Structural Decomposition step with segment viewport UI."
+def render_decomp_footer_content(
+    segments:List[WorkingSegment],  # Current segments
+    focused_index:int,  # Currently focused segment index
+) -> Any:  # Footer content with progress indicator and stats
+    "Render footer content with progress indicator and segment statistics."
+```
+
+``` python
+def render_decomp_mini_stats_text(
+    segments:List[WorkingSegment],  # Current segments
+) -> str:  # Compact stats string for column header badge
+    "Generate compact stats string for the decomposition column header badge."
 ```
 
 ### step_renderer (`step_renderer.ipynb`)

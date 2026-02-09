@@ -95,6 +95,7 @@ class StructureDecompHtmlIds:
     # Phase 2: Combined Segment & Align - Column Containers
     DECOMP_COLUMN = "sd-decomp-column"
     DECOMP_COLUMN_HEADER = "sd-decomp-column-header"
+    DECOMP_COLUMN_CONTENT = "sd-decomp-column-content"
     DECOMP_MINI_STATS = "sd-decomp-mini-stats"
     ALIGNMENT_COLUMN = "sd-align-column"
     ALIGNMENT_COLUMN_HEADER = "sd-align-column-header"
