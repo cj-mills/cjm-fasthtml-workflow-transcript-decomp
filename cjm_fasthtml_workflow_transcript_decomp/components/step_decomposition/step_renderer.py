@@ -179,11 +179,10 @@ def render_decomp_column_body(
     )
 
     # Generate JS: library card stack JS + focus change callback
-    # container_id must be the top-level step container (DECOMP_CONTAINER) — NOT
-    # this column content div.  The library's height algorithm collapses the card
-    # stack to 0px and measures the container's resulting height.  That only works
-    # when the container's height is *content-driven*.  DECOMP_COLUMN_CONTENT uses
-    # flex-grow, so its height is flex-determined and doesn't shrink on collapse.
+    # container_id is the top-level step container (DECOMP_CONTAINER).  The
+    # library's height algorithm uses a subtraction approach: it subtracts
+    # the card stack's current height from the container's total height to
+    # compute sibling space, avoiding layout distortion in flex-grow containers.
     callbacks_script = generate_decomp_callbacks_script(
         ids=DECOMP_CS_IDS,
         button_ids=DECOMP_CS_BTN_IDS,
@@ -218,7 +217,6 @@ def render_decomp_column_body(
         ts_script,
 
         id=StructureDecompHtmlIds.DECOMP_COLUMN_CONTENT,
-        # the wrapper during the card stack's collapse-and-measure height calc.
         cls=combine_classes(grow(), min_h(0), overflow.hidden, flex_display, flex_direction.col)
     )
 
