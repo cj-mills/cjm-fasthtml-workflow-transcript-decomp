@@ -14,7 +14,7 @@ from cjm_fasthtml_interactions.core.state_store import get_session_id
 from ..workflow.workflow import StructureDecompWorkflow
 
 # Debug flag for audio serving tracing (set False in production)
-DEBUG_AUDIO = True
+DEBUG_AUDIO = False
 
 # %% ../../nbs/routes/core.ipynb #3e37133b
 def _handle_current_status(

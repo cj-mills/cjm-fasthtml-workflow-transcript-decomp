@@ -23,7 +23,7 @@ from cjm_fasthtml_workflow_transcript_decomp.components.step_selection.step_rend
 from ...workflow.workflow import StructureDecompWorkflow
 
 # Debug flag for selection state tracing (set False in production)
-DEBUG_SELECTION_STATE = True
+DEBUG_SELECTION_STATE = False
 
 # %% ../../../nbs/routes/selection/core.ipynb #sel-core-getters
 def _get_step_state(

@@ -53,7 +53,7 @@ from cjm_fasthtml_workflow_transcript_decomp.components.step_alignment.callbacks
 )
 
 # Debug flag for alignment rendering tracing (set False in production)
-DEBUG_ALIGN_RENDER = True
+DEBUG_ALIGN_RENDER = False
 
 # %% ../../../nbs/components/step_alignment/step_renderer.ipynb #align-sr-toolbar
 def render_align_toolbar(

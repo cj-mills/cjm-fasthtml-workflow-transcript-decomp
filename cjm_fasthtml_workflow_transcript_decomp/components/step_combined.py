@@ -206,9 +206,9 @@ def _render_shared_chrome(
         footer_content,
         id=StructureDecompHtmlIds.SHARED_FOOTER,
         cls=combine_classes(
-            p(4), bg_dui.base_100,
+            p(1), bg_dui.base_100,
             border_dui.base_300, border.t(),
-            flex_display, justify.between, items.center
+            flex_display, justify.center, items.center
         )
     )
 
@@ -234,7 +234,7 @@ def _render_decomp_column(
     init_url:str="",  # URL for auto-trigger initialization
 ) -> Any:  # Left column component
     """Render the left decomposition column."""
-    active_cls = combine_classes(ring(2), ring_dui.primary) if is_active else str(opacity(70))
+    active_cls = combine_classes(ring(1), ring_dui.primary) if is_active else str(opacity(70))
 
     # Content area: initialized viewport or loading + auto-trigger
     if column_body is not None:
@@ -287,7 +287,7 @@ def _render_alignment_column(
     init_url:str="",  # URL for auto-trigger initialization
 ) -> Any:  # Right column component
     """Render the right alignment column."""
-    active_cls = combine_classes(ring(2), ring_dui.secondary) if is_active else str(opacity(70))
+    active_cls = combine_classes(ring(1), ring_dui.secondary) if is_active else str(opacity(70))
 
     # Content area: initialized viewport or loading + auto-trigger
     if column_body is not None:
@@ -434,7 +434,7 @@ def render_combined_step(
             H2("Segment & Align", cls=combine_classes(font_size._3xl, font_weight.bold)),
             P(
                 "Decompose text into segments and align with audio timestamps.",
-                cls=combine_classes(text_dui.base_content.opacity(70), m.b(4))
+                cls=combine_classes(text_dui.base_content.opacity(70), m.b(2))
             ),
         ),
 
@@ -471,6 +471,6 @@ def render_combined_step(
         cls=combine_classes(
             w.full, h.full,
             flex_display, flex_direction.col,
-            p(4)
+            p(4), p.x(2), p.b(0)
         )
     )

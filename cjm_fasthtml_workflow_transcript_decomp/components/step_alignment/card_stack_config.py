@@ -19,6 +19,8 @@ ALIGN_CS_CONFIG = CardStackConfig(
     style=CardStackStyleConfig(
         section_gap="0.75rem",     # Tighter spacing for compact cards
         slot_padding="0.125rem",
+        viewport_padding_x='0.0rem', 
+        viewport_padding_y='0.0rem'
     ),
 )
 

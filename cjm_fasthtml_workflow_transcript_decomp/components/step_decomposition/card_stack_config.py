@@ -6,7 +6,7 @@
 __all__ = ['DECOMP_CS_CONFIG', 'DECOMP_CS_IDS', 'DECOMP_CS_BTN_IDS', 'DECOMP_TS_CONFIG', 'DECOMP_TS_IDS']
 
 # %% ../../../nbs/components/step_decomposition/card_stack_config.ipynb #cs-cfg-constants
-from cjm_fasthtml_card_stack.core.config import CardStackConfig
+from cjm_fasthtml_card_stack.core.config import CardStackConfig, CardStackStyleConfig
 from cjm_fasthtml_card_stack.core.html_ids import CardStackHtmlIds
 from cjm_fasthtml_card_stack.core.button_ids import CardStackButtonIds
 
@@ -16,6 +16,10 @@ from cjm_fasthtml_token_selector.core.html_ids import TokenSelectorHtmlIds
 DECOMP_CS_CONFIG = CardStackConfig(
     prefix="sd-decomp",
     disable_scroll_in_modes=("split",),
+    style=CardStackStyleConfig(
+        viewport_padding_x='0.0rem', 
+        viewport_padding_y='0.0rem'
+    )
 )
 
 DECOMP_CS_IDS = CardStackHtmlIds(prefix=DECOMP_CS_CONFIG.prefix)

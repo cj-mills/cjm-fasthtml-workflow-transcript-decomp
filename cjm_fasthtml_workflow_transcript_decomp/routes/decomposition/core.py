@@ -20,7 +20,7 @@ from cjm_fasthtml_workflow_transcript_decomp.core.models import (
 from ...workflow.workflow import StructureDecompWorkflow
 
 # Debug flag for state update tracing (set False in production)
-DEBUG_DECOMP_STATE = True
+DEBUG_DECOMP_STATE = False
 
 # %% ../../../nbs/routes/decomposition/core.ipynb #dc-core-context
 class DecompContext(NamedTuple):

@@ -17,7 +17,7 @@ from cjm_fasthtml_workflow_transcript_decomp.core.models import (
 )
 
 # Debug flag for alignment state tracing (set False in production)
-DEBUG_ALIGN_STATE = True
+DEBUG_ALIGN_STATE = False
 
 # %% ../../../nbs/routes/alignment/core.ipynb #align-rc-ctx
 class AlignContext(NamedTuple):
