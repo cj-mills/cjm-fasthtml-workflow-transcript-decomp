@@ -52,5 +52,5 @@ def generate_decomp_callbacks_script(
         config=config,
         urls=urls,
         container_id=container_id,
-        extra_scripts=decomp_scripts,
+        extra_scripts=decomp_scripts
     )

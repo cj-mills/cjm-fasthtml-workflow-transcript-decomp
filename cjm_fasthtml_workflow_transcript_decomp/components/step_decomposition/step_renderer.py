@@ -178,17 +178,17 @@ def render_decomp_column_body(
         form_input_name="segment_index",
     )
 
-    # Generate JS: library card stack JS + focus change callback
-    # container_id is the top-level step container (DECOMP_CONTAINER).  The
-    # library's height algorithm uses a subtraction approach: it subtracts
-    # the card stack's current height from the container's total height to
-    # compute sibling space, avoiding layout distortion in flex-grow containers.
+    # Generate JS: library card stack JS + focus change callback.
+    # container_id is the column CONTENT area (DECOMP_COLUMN_CONTENT), which is
+    # the immediate parent of the card stack. The column header is accounted for
+    # by containerTop (content area starts below the header). This ensures the
+    # algorithm only measures actual siblings of the card stack.
     callbacks_script = generate_decomp_callbacks_script(
         ids=DECOMP_CS_IDS,
         button_ids=DECOMP_CS_BTN_IDS,
         config=DECOMP_CS_CONFIG,
         urls=urls.card_stack,
-        container_id=StructureDecompHtmlIds.DECOMP_CONTAINER,
+        container_id=StructureDecompHtmlIds.DECOMP_COLUMN_CONTENT,
         focus_input_id=DECOMP_CS_IDS.focused_index_input,
     )
 

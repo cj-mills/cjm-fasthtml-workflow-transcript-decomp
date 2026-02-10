@@ -87,5 +87,5 @@ def generate_align_callbacks_script(
         config=config,
         urls=urls,
         container_id=container_id,
-        extra_scripts=align_scripts,
+        extra_scripts=align_scripts
     )

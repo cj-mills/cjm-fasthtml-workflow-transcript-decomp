@@ -8,10 +8,9 @@ __all__ = ['SD_FOCUSED_RECORD_ID_INPUT', 'SD_FOCUSED_PROVIDER_ID_INPUT', 'SD_TOG
 
 # %% ../../../nbs/components/step_selection/step_renderer.ipynb #70e6ea45
 from typing import Any, Dict, List, Optional
-import json
 
 from fasthtml.common import (
-    Div, H2, P, Span, Input, Script, Hidden, Details, Summary
+    Div, H2, P, Span, Input, Script, Details, Summary
 )
 from cjm_fasthtml_interactions.core.context import InteractionContext
 
@@ -587,9 +586,6 @@ def render_selection_step(
         
         # Sortable initialization script (htmx integration)
         sortable_script,
-        
-        # Hidden input for selected sources (for form submission)
-        Hidden(name="selected_sources", value=json.dumps(selected_sources)),
         
         id=StructureDecompHtmlIds.SOURCE_SELECTOR,
         cls=combine_classes(

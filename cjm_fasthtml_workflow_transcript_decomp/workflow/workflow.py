@@ -23,7 +23,9 @@ from cjm_plugin_system.core.manager import PluginManager
 from cjm_workflow_state.state_store import SQLiteWorkflowStateStore
 
 from ..core.config import StructureDecompWorkflowConfig
-from ..routes.models import CardStackUrls, DecompUrls
+from cjm_fasthtml_workflow_transcript_decomp.routes.models import (
+    CardStackUrls, DecompUrls, AlignmentUrls,
+)
 from ..services.source import SourceService
 from ..services.segmentation import SegmentationService
 from ..services.alignment import AlignmentService
@@ -320,33 +322,15 @@ def _create_step_flow(
             urls=getattr(workflow, '_selection_urls', None),
         )
     
-    # Create render wrapper for combined step that injects URLs
+    # Create render wrapper for combined step that injects URL bundles
     def render_combined_step_with_urls(ctx: InteractionContext):
-        """Render combined segment & align step with URL bundle from workflow routes."""
-        routes = getattr(workflow, "_decomposition_routes", {})
-        
-        decomp_urls = DecompUrls(
-            card_stack=CardStackUrls(
-                nav_up=routes["nav_up"].to() if routes.get("nav_up") else "",
-                nav_down=routes["nav_down"].to() if routes.get("nav_down") else "",
-                nav_first=routes["nav_first"].to() if routes.get("nav_first") else "",
-                nav_last=routes["nav_last"].to() if routes.get("nav_last") else "",
-                nav_page_up=routes["nav_page_up"].to() if routes.get("nav_page_up") else "",
-                nav_page_down=routes["nav_page_down"].to() if routes.get("nav_page_down") else "",
-                update_viewport=routes["update_viewport"].to() if routes.get("update_viewport") else "",
-                save_width=routes["save_width"].to() if routes.get("save_width") else "",
-            ),
-            init=routes["init"].to() if routes.get("init") else "",
-            split=routes["split"].to() if routes.get("split") else "",
-            merge=routes["merge"].to() if routes.get("merge") else "",
-            enter_split=routes["enter_split"].to() if routes.get("enter_split") else "",
-            exit_split=routes["exit_split"].to() if routes.get("exit_split") else "",
-            reset=routes["reset"].to() if routes.get("reset") else "",
-            ai_split=routes["ai_split"].to() if routes.get("ai_split") else "",
-            undo=routes["undo"].to() if routes.get("undo") else "",
+        """Render combined segment & align step with URL bundles from workflow."""
+        return render_combined_step(
+            ctx=ctx,
+            decomp_urls=getattr(workflow, '_decomp_urls', DecompUrls()),
+            align_urls=getattr(workflow, '_align_urls', AlignmentUrls()),
+            switch_chrome_url=getattr(workflow, '_switch_chrome_url', ''),
         )
-        
-        return render_combined_step(ctx=ctx, decomp_urls=decomp_urls)
     
     return StepFlow(
         debug=True,

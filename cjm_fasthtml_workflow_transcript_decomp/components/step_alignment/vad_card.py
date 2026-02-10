@@ -11,7 +11,7 @@ from typing import Any, Callable, Optional
 from fasthtml.common import Div, Span
 
 # DaisyUI components
-from cjm_fasthtml_daisyui.components.data_display.badge import badge, badge_colors
+from cjm_fasthtml_daisyui.components.data_display.badge import badge, badge_styles
 from cjm_fasthtml_daisyui.components.data_display.card import card, card_body
 from cjm_fasthtml_daisyui.components.feedback.loading import loading, loading_styles, loading_sizes
 from cjm_fasthtml_daisyui.utilities.semantic_colors import bg_dui, text_dui
@@ -61,7 +61,7 @@ def render_vad_card(
     # Duration badge
     duration_badge = Span(
         f"{chunk.duration:.1f}s",
-        cls=combine_classes(badge, badge_colors.ghost, font_size.xs, font_family.mono)
+        cls=combine_classes(badge, badge_styles.ghost, font_size.xs, font_family.mono)
     )
 
     # Assignment indicator

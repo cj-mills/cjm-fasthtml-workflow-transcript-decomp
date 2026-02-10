@@ -10,13 +10,17 @@ from fasthtml.common import APIRouter
 
 from cjm_fasthtml_card_stack.core.models import CardStackUrls
 
-from .models import DecompUrls, SelectionUrls
+from cjm_fasthtml_workflow_transcript_decomp.routes.models import (
+    DecompUrls, SelectionUrls, AlignmentUrls,
+)
 
 # Import workflow-level handlers
 from cjm_fasthtml_workflow_transcript_decomp.routes.core import (
     _handle_current_status,
     _handle_reset,
     _handle_get_sources,
+    _handle_switch_chrome,
+    _handle_audio_src,
 )
 
 # Import Phase 1 (selection) handlers from sub-package
@@ -62,6 +66,22 @@ from cjm_fasthtml_workflow_transcript_decomp.routes.decomposition.handlers impor
     _handle_decomp_ai_split,
 )
 
+# Import Phase 2 (alignment) handlers — card stack UI operations
+from cjm_fasthtml_workflow_transcript_decomp.routes.alignment.card_stack import (
+    _handle_align_navigate,
+    _handle_align_update_viewport,
+    _handle_align_save_width,
+)
+
+# Import Phase 2 (alignment) handlers — workflow-specific operations
+from cjm_fasthtml_workflow_transcript_decomp.routes.alignment.handlers import (
+    _handle_align_init,
+    _handle_align_toggle_assign,
+    _handle_align_auto_align,
+    _handle_align_clear_assignments,
+    _handle_align_undo,
+)
+
 from ..workflow.workflow import StructureDecompWorkflow
 
 # %% ../../nbs/routes/init.ipynb #f962d5e9
@@ -89,6 +109,21 @@ def init_router(
     def get_sources(request, provider_id: str = None, limit: int = 50):
         """Get available transcription sources."""
         return _handle_get_sources(workflow, request, provider_id, limit)
+
+    # -------------------------------------------------------------------------
+    # Combined Step Routes (shared chrome switching, audio serving)
+    # Defined early so their .to() URLs are available for alignment URL bundle.
+    # -------------------------------------------------------------------------
+
+    @router
+    async def switch_chrome(request, sess):
+        """Switch shared chrome content based on active column."""
+        return await _handle_switch_chrome(workflow, request, sess)
+
+    @router
+    def audio_src(request, sess):
+        """Serve the audio file for alignment playback."""
+        return _handle_audio_src(workflow, sess)
 
     # -------------------------------------------------------------------------
     # Selection Management Routes
@@ -206,7 +241,6 @@ def init_router(
     # Phase 1: Cached URL Bundle
     # -------------------------------------------------------------------------
 
-    # Built once after all selection routes are registered — URLs are fixed
     _selection_urls = SelectionUrls(
         add=selection_add.to(),
         remove=selection_remove.to(),
@@ -287,7 +321,7 @@ def init_router(
         return _handle_decomp_save_width(workflow, sess, card_width)
 
     # -------------------------------------------------------------------------
-    # Phase 2: Navigation Routes
+    # Phase 2: Decomposition Navigation Routes
     # -------------------------------------------------------------------------
 
     @router
@@ -321,10 +355,9 @@ def init_router(
         return _handle_decomp_navigate(workflow, sess, direction="page_down", urls=_decomp_urls)
 
     # -------------------------------------------------------------------------
-    # Phase 2: Cached URL Bundle
+    # Phase 2: Decomposition Cached URL Bundle
     # -------------------------------------------------------------------------
 
-    # Built once after all decomp routes are registered — URLs are fixed
     _decomp_urls = DecompUrls(
         card_stack=CardStackUrls(
             nav_up=decomp_nav_up.to(),
@@ -347,13 +380,116 @@ def init_router(
     )
 
     # -------------------------------------------------------------------------
+    # Phase 2: Alignment — Route Definitions
+    # -------------------------------------------------------------------------
+
+    @router
+    async def align_init(request, sess):
+        """Initialize alignment from audio file via VAD plugin."""
+        return await _handle_align_init(workflow, request, sess, urls=_align_urls)
+
+    @router
+    def align_toggle_assign(request, sess, chunk_index: int):
+        """Toggle assignment of a VAD chunk to the focused text segment."""
+        return _handle_align_toggle_assign(
+            workflow, request, sess, chunk_index, urls=_align_urls,
+        )
+
+    @router
+    def align_auto_align(request, sess):
+        """Auto-align all VAD chunks to segments."""
+        return _handle_align_auto_align(workflow, request, sess, urls=_align_urls)
+
+    @router
+    def align_clear_assignments(request, sess):
+        """Clear all VAD chunk assignments."""
+        return _handle_align_clear_assignments(
+            workflow, request, sess, urls=_align_urls,
+        )
+
+    @router
+    def align_undo(request, sess):
+        """Undo the last alignment operation."""
+        return _handle_align_undo(workflow, request, sess, urls=_align_urls)
+
+    # -------------------------------------------------------------------------
+    # Phase 2: Alignment Navigation Routes
+    # -------------------------------------------------------------------------
+
+    @router
+    def align_nav_up(request, sess):
+        """Navigate to previous VAD chunk."""
+        return _handle_align_navigate(workflow, sess, direction="up", urls=_align_urls)
+
+    @router
+    def align_nav_down(request, sess):
+        """Navigate to next VAD chunk."""
+        return _handle_align_navigate(workflow, sess, direction="down", urls=_align_urls)
+
+    @router
+    def align_nav_first(request, sess):
+        """Navigate to first VAD chunk."""
+        return _handle_align_navigate(workflow, sess, direction="first", urls=_align_urls)
+
+    @router
+    def align_nav_last(request, sess):
+        """Navigate to last VAD chunk."""
+        return _handle_align_navigate(workflow, sess, direction="last", urls=_align_urls)
+
+    @router
+    def align_nav_page_up(request, sess):
+        """Navigate up by page in alignment."""
+        return _handle_align_navigate(workflow, sess, direction="page_up", urls=_align_urls)
+
+    @router
+    def align_nav_page_down(request, sess):
+        """Navigate down by page in alignment."""
+        return _handle_align_navigate(workflow, sess, direction="page_down", urls=_align_urls)
+
+    @router
+    def align_update_viewport(request, sess, visible_count: int):
+        """Update alignment viewport with new card count."""
+        return _handle_align_update_viewport(
+            workflow, sess, visible_count, urls=_align_urls,
+        )
+
+    @router
+    def align_save_width(request, sess, card_width: int):
+        """Save alignment card stack width to server state."""
+        return _handle_align_save_width(workflow, sess, card_width)
+
+    # -------------------------------------------------------------------------
+    # Phase 2: Alignment Cached URL Bundle
+    # -------------------------------------------------------------------------
+
+    _align_urls = AlignmentUrls(
+        card_stack=CardStackUrls(
+            nav_up=align_nav_up.to(),
+            nav_down=align_nav_down.to(),
+            nav_first=align_nav_first.to(),
+            nav_last=align_nav_last.to(),
+            nav_page_up=align_nav_page_up.to(),
+            nav_page_down=align_nav_page_down.to(),
+            update_viewport=align_update_viewport.to(),
+            save_width=align_save_width.to(),
+        ),
+        toggle_assign=align_toggle_assign.to(),
+        auto_align=align_auto_align.to(),
+        clear_assignments=align_clear_assignments.to(),
+        undo=align_undo.to(),
+        init=align_init.to(),
+        audio_src=audio_src.to(),
+    )
+
+    # -------------------------------------------------------------------------
     # Store Route References and URL Bundles
     # -------------------------------------------------------------------------
 
-    # Store URL bundles on workflow for use in step renderers
     workflow._selection_urls = _selection_urls
+    workflow._decomp_urls = _decomp_urls
+    workflow._align_urls = _align_urls
+    workflow._switch_chrome_url = switch_chrome.to()
 
-    # Store route references on workflow for debugging/introspection
     workflow._selection_routes = {
         "add": selection_add,
         "remove": selection_remove,
@@ -388,6 +524,22 @@ def init_router(
         "nav_last": decomp_nav_last,
         "nav_page_up": decomp_nav_page_up,
         "nav_page_down": decomp_nav_page_down,
+    }
+
+    workflow._alignment_routes = {
+        "init": align_init,
+        "toggle_assign": align_toggle_assign,
+        "auto_align": align_auto_align,
+        "clear_assignments": align_clear_assignments,
+        "undo": align_undo,
+        "nav_up": align_nav_up,
+        "nav_down": align_nav_down,
+        "nav_first": align_nav_first,
+        "nav_last": align_nav_last,
+        "nav_page_up": align_nav_page_up,
+        "nav_page_down": align_nav_page_down,
+        "update_viewport": align_update_viewport,
+        "save_width": align_save_width,
     }
 
     return router

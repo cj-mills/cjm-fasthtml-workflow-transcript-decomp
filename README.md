@@ -127,34 +127,37 @@ graph LR
     components_keyboard_config --> components_step_decomposition_keyboard_config
     components_keyboard_config --> routes_models
     components_step_alignment_helpers --> core_models
-    components_step_alignment_step_renderer --> components_step_alignment_card_stack_config
-    components_step_alignment_step_renderer --> components_step_alignment_callbacks
     components_step_alignment_step_renderer --> routes_models
-    components_step_alignment_step_renderer --> core_html_ids
-    components_step_alignment_step_renderer --> core_models
+    components_step_alignment_step_renderer --> components_step_alignment_card_stack_config
     components_step_alignment_step_renderer --> components_step_alignment_vad_card
-    components_step_alignment_vad_card --> core_html_ids
-    components_step_alignment_vad_card --> core_models
+    components_step_alignment_step_renderer --> components_step_alignment_callbacks
+    components_step_alignment_step_renderer --> core_models
+    components_step_alignment_step_renderer --> core_html_ids
     components_step_alignment_vad_card --> services_formatting
+    components_step_alignment_vad_card --> core_models
+    components_step_alignment_vad_card --> core_html_ids
     components_step_combined --> components_step_decomposition_step_renderer
-    components_step_combined --> components_keyboard_config
-    components_step_combined --> components_step_decomposition_helpers
-    components_step_combined --> components_step_decomposition_card_stack_config
-    components_step_combined --> core_html_ids
-    components_step_combined --> routes_models
+    components_step_combined --> components_step_alignment_step_renderer
     components_step_combined --> core_models
+    components_step_combined --> components_step_alignment_helpers
+    components_step_combined --> components_step_decomposition_card_stack_config
+    components_step_combined --> components_step_decomposition_helpers
+    components_step_combined --> routes_models
+    components_step_combined --> components_step_alignment_card_stack_config
+    components_step_combined --> components_keyboard_config
+    components_step_combined --> core_html_ids
     components_step_decomposition_helpers --> core_models
     components_step_decomposition_keyboard_config --> components_step_decomposition_card_stack_config
+    components_step_decomposition_segment_card --> core_models
     components_step_decomposition_segment_card --> components_step_decomposition_card_stack_config
     components_step_decomposition_segment_card --> core_html_ids
-    components_step_decomposition_segment_card --> core_models
-    components_step_decomposition_step_renderer --> components_step_decomposition_card_stack_config
-    components_step_decomposition_step_renderer --> components_step_decomposition_callbacks
-    components_step_decomposition_step_renderer --> components_step_decomposition_segment_card
-    components_step_decomposition_step_renderer --> services_text_utils
-    components_step_decomposition_step_renderer --> core_html_ids
-    components_step_decomposition_step_renderer --> routes_models
     components_step_decomposition_step_renderer --> core_models
+    components_step_decomposition_step_renderer --> components_step_decomposition_card_stack_config
+    components_step_decomposition_step_renderer --> components_step_decomposition_segment_card
+    components_step_decomposition_step_renderer --> routes_models
+    components_step_decomposition_step_renderer --> services_text_utils
+    components_step_decomposition_step_renderer --> components_step_decomposition_callbacks
+    components_step_decomposition_step_renderer --> core_html_ids
     components_step_selection_helpers --> core_models
     components_step_selection_local_files --> components_step_selection_helpers
     components_step_selection_local_files --> core_html_ids
@@ -162,104 +165,106 @@ graph LR
     components_step_selection_selection_queue --> core_html_ids
     components_step_selection_source_browser --> services_formatting
     components_step_selection_source_browser --> services_source_utils
-    components_step_selection_source_browser --> core_html_ids
     components_step_selection_source_browser --> services_text_utils
-    components_step_selection_step_renderer --> components_step_selection_local_files
+    components_step_selection_source_browser --> core_html_ids
     components_step_selection_step_renderer --> components_step_selection_helpers
     components_step_selection_step_renderer --> components_step_selection_preview_panel
+    components_step_selection_step_renderer --> components_step_selection_local_files
+    components_step_selection_step_renderer --> components_step_selection_source_browser
+    components_step_selection_step_renderer --> services_text_utils
+    components_step_selection_step_renderer --> components_step_selection_selection_queue
     components_step_selection_step_renderer --> routes_models
     components_step_selection_step_renderer --> core_html_ids
-    components_step_selection_step_renderer --> services_text_utils
-    components_step_selection_step_renderer --> components_step_selection_source_browser
-    components_step_selection_step_renderer --> components_step_selection_selection_queue
     components_steps --> core_html_ids
     routes_alignment_card_stack --> routes_alignment_core
-    routes_alignment_card_stack --> components_step_alignment_card_stack_config
     routes_alignment_card_stack --> routes_models
+    routes_alignment_card_stack --> components_step_alignment_card_stack_config
     routes_alignment_card_stack --> components_step_alignment_vad_card
     routes_alignment_core --> core_models
     routes_alignment_handlers --> routes_alignment_core
     routes_alignment_handlers --> components_step_alignment_step_renderer
+    routes_alignment_handlers --> core_models
+    routes_alignment_handlers --> services_alignment
+    routes_alignment_handlers --> routes_models
     routes_alignment_handlers --> components_step_alignment_card_stack_config
     routes_alignment_handlers --> routes_alignment_card_stack
-    routes_alignment_handlers --> routes_models
-    routes_alignment_handlers --> services_alignment
-    routes_alignment_handlers --> core_html_ids
     routes_alignment_handlers --> components_step_decomposition_step_renderer
-    routes_alignment_handlers --> core_models
+    routes_alignment_handlers --> core_html_ids
     routes_core --> workflow_workflow
-    routes_decomposition_card_stack --> routes_decomposition_core
-    routes_decomposition_card_stack --> components_step_decomposition_segment_card
     routes_decomposition_card_stack --> components_step_decomposition_card_stack_config
-    routes_decomposition_card_stack --> routes_models
+    routes_decomposition_card_stack --> routes_decomposition_core
     routes_decomposition_card_stack --> workflow_workflow
-    routes_decomposition_core --> workflow_workflow
+    routes_decomposition_card_stack --> components_step_decomposition_segment_card
+    routes_decomposition_card_stack --> routes_models
     routes_decomposition_core --> core_models
-    routes_decomposition_handlers --> components_step_decomposition_card_stack_config
-    routes_decomposition_handlers --> services_segmentation
+    routes_decomposition_core --> workflow_workflow
     routes_decomposition_handlers --> components_step_decomposition_step_renderer
-    routes_decomposition_handlers --> components_step_combined
-    routes_decomposition_handlers --> routes_decomposition_core
-    routes_decomposition_handlers --> services_text_utils
-    routes_decomposition_handlers --> core_html_ids
-    routes_decomposition_handlers --> routes_models
-    routes_decomposition_handlers --> components_keyboard_config
-    routes_decomposition_handlers --> workflow_workflow
-    routes_decomposition_handlers --> routes_decomposition_card_stack
     routes_decomposition_handlers --> core_models
+    routes_decomposition_handlers --> routes_decomposition_card_stack
+    routes_decomposition_handlers --> components_step_decomposition_card_stack_config
+    routes_decomposition_handlers --> services_text_utils
+    routes_decomposition_handlers --> routes_decomposition_core
+    routes_decomposition_handlers --> services_segmentation
+    routes_decomposition_handlers --> workflow_workflow
+    routes_decomposition_handlers --> components_keyboard_config
+    routes_decomposition_handlers --> routes_models
+    routes_decomposition_handlers --> components_step_combined
+    routes_decomposition_handlers --> core_html_ids
+    routes_init --> routes_selection_filtering
+    routes_init --> routes_core
     routes_init --> routes_decomposition_handlers
     routes_init --> routes_selection_queue
-    routes_init --> routes_selection_tabs
-    routes_init --> routes_core
+    routes_init --> routes_alignment_handlers
+    routes_init --> workflow_workflow
+    routes_init --> routes_models
+    routes_init --> routes_alignment_card_stack
     routes_init --> routes_selection_local_files
     routes_init --> routes_decomposition_card_stack
-    routes_init --> routes_selection_filtering
-    routes_init --> routes_models
-    routes_init --> workflow_workflow
-    routes_selection_core --> workflow_workflow
-    routes_selection_core --> routes_models
+    routes_init --> routes_selection_tabs
     routes_selection_core --> components_step_selection_selection_queue
-    routes_selection_core --> components_step_selection_step_renderer
     routes_selection_core --> components_step_selection_source_browser
+    routes_selection_core --> routes_models
+    routes_selection_core --> workflow_workflow
+    routes_selection_core --> components_step_selection_step_renderer
     routes_selection_filtering --> routes_selection_core
     routes_selection_filtering --> services_source_utils
-    routes_selection_filtering --> workflow_workflow
-    routes_selection_filtering --> routes_models
     routes_selection_filtering --> components_step_selection_source_browser
-    routes_selection_local_files --> components_step_selection_local_files
+    routes_selection_filtering --> routes_models
+    routes_selection_filtering --> workflow_workflow
     routes_selection_local_files --> routes_selection_core
-    routes_selection_local_files --> workflow_workflow
+    routes_selection_local_files --> components_step_selection_local_files
     routes_selection_local_files --> services_source
     routes_selection_local_files --> routes_models
+    routes_selection_local_files --> workflow_workflow
     routes_selection_queue --> routes_selection_core
-    routes_selection_queue --> workflow_workflow
-    routes_selection_queue --> components_step_selection_preview_panel
-    routes_selection_queue --> routes_models
     routes_selection_queue --> services_source_utils
-    routes_selection_tabs --> routes_selection_core
+    routes_selection_queue --> routes_models
+    routes_selection_queue --> components_step_selection_preview_panel
+    routes_selection_queue --> workflow_workflow
+    routes_selection_tabs --> components_step_selection_source_browser
+    routes_selection_tabs --> routes_selection_local_files
     routes_selection_tabs --> components_step_selection_local_files
-    routes_selection_tabs --> workflow_workflow
     routes_selection_tabs --> routes_models
     routes_selection_tabs --> services_source_utils
-    routes_selection_tabs --> routes_selection_local_files
-    routes_selection_tabs --> components_step_selection_source_browser
+    routes_selection_tabs --> workflow_workflow
     routes_selection_tabs --> components_step_selection_step_renderer
+    routes_selection_tabs --> routes_selection_core
     services_alignment --> core_models
     services_graph --> core_models
     services_segmentation --> core_models
     services_text_utils --> core_models
-    workflow_workflow --> components_steps
-    workflow_workflow --> routes_models
     workflow_workflow --> services_source
-    workflow_workflow --> components_step_selection_step_renderer
-    workflow_workflow --> core_config
-    workflow_workflow --> components_step_combined
-    workflow_workflow --> services_alignment
     workflow_workflow --> services_graph
+    workflow_workflow --> core_config
+    workflow_workflow --> services_alignment
+    workflow_workflow --> routes_models
+    workflow_workflow --> components_step_combined
+    workflow_workflow --> components_steps
+    workflow_workflow --> components_step_selection_step_renderer
     workflow_workflow --> services_segmentation
 ```
 
-*134 cross-module dependencies detected*
+*139 cross-module dependencies detected*
 
 ## CLI Reference
 
@@ -720,6 +725,7 @@ DEFAULT_WORKFLOW_CONFIG_DIR
 
 ``` python
 from cjm_fasthtml_workflow_transcript_decomp.routes.alignment.core import (
+    DEBUG_ALIGN_STATE,
     AlignContext
 )
 ```
@@ -815,6 +821,12 @@ class AlignContext(NamedTuple):
     "Common alignment state values loaded by handlers."
 ```
 
+#### Variables
+
+``` python
+DEBUG_ALIGN_STATE = True
+```
+
 ### core (`core.ipynb`)
 
 > Workflow-level route handlers for status, reset, and source retrieval
@@ -822,7 +834,9 @@ class AlignContext(NamedTuple):
 #### Import
 
 ``` python
-from cjm_fasthtml_workflow_transcript_decomp.routes.core import *
+from cjm_fasthtml_workflow_transcript_decomp.routes.core import (
+    DEBUG_AUDIO
+)
 ```
 
 #### Functions
@@ -855,6 +869,34 @@ def _handle_get_sources(
     "Get available transcription sources."
 ```
 
+``` python
+async def _handle_switch_chrome(
+    workflow:StructureDecompWorkflow,  # The workflow instance
+    request,  # FastHTML request object
+    sess,  # FastHTML session object
+) -> tuple:  # OOB swaps for shared chrome containers
+    """
+    Switch shared chrome content based on active column.
+    
+    Reads `active_column` from form data and returns OOB swaps for
+    toolbar, controls, and footer. Full implementation in sub-step 4d.
+    """
+```
+
+``` python
+def _handle_audio_src(
+    workflow:StructureDecompWorkflow,  # The workflow instance
+    sess,  # FastHTML session object
+):  # Audio file response or 404
+    "Serve the audio file for the current alignment session."
+```
+
+#### Variables
+
+``` python
+DEBUG_AUDIO = True
+```
+
 ### core (`core.ipynb`)
 
 > Decomposition step state management helpers
@@ -863,6 +905,7 @@ def _handle_get_sources(
 
 ``` python
 from cjm_fasthtml_workflow_transcript_decomp.routes.decomposition.core import (
+    DEBUG_DECOMP_STATE,
     DecompContext
 )
 ```
@@ -930,6 +973,12 @@ class DecompContext(NamedTuple):
     "Common decomposition state values loaded by handlers."
 ```
 
+#### Variables
+
+``` python
+DEBUG_DECOMP_STATE = True
+```
+
 ### core (`core.ipynb`)
 
 > Selection step state management helpers
@@ -937,7 +986,9 @@ class DecompContext(NamedTuple):
 #### Import
 
 ``` python
-from cjm_fasthtml_workflow_transcript_decomp.routes.selection.core import *
+from cjm_fasthtml_workflow_transcript_decomp.routes.selection.core import (
+    DEBUG_SELECTION_STATE
+)
 ```
 
 #### Functions
@@ -974,6 +1025,12 @@ def _build_queue_response(
 ``` python
 def _update_step_state(
     "Update the selection step state in the workflow state store."
+```
+
+#### Variables
+
+``` python
+DEBUG_SELECTION_STATE = True
 ```
 
 ### filtering (`filtering.ipynb`)
@@ -1148,7 +1205,9 @@ class GraphService:
 #### Import
 
 ``` python
-from cjm_fasthtml_workflow_transcript_decomp.routes.alignment.handlers import *
+from cjm_fasthtml_workflow_transcript_decomp.routes.alignment.handlers import (
+    DEBUG_ALIGNMENT
+)
 ```
 
 #### Functions
@@ -1172,11 +1231,9 @@ async def _handle_align_init(
     request:Any,  # FastHTML request object
     sess:Any,  # FastHTML session object
     urls:AlignmentUrls,  # URL bundle
-    kb_system:Any=None,  # Pre-built keyboard system (from combined renderer)
-    hints_content:Any=None,  # Pre-rendered hints content (from combined keyboard config)
     visible_count:int=5,  # Initial visible card count
     card_width:int=40,  # Initial card width in rem
-) -> tuple:  # (column_body, hints_oob, toolbar_oob, controls_oob, footer_oob, mini_stats_oob)
+) -> tuple:  # (column_body, mini_stats_oob)
     "Initialize alignment from audio file via VAD plugin."
 ```
 
@@ -1219,6 +1276,12 @@ def _handle_align_undo(
     urls:AlignmentUrls,  # URL bundle
 ) -> Tuple:  # OOB response tuple
     "Undo the last alignment operation."
+```
+
+#### Variables
+
+``` python
+DEBUG_ALIGNMENT = True
 ```
 
 ### handlers (`handlers.ipynb`)
@@ -2792,6 +2855,7 @@ def validate_browse_path(
 ``` python
 from cjm_fasthtml_workflow_transcript_decomp.components.step_combined import (
     render_decomp_mini_stats_badge,
+    render_align_mini_stats_badge,
     render_combined_step
 )
 ```
@@ -2814,6 +2878,14 @@ def render_decomp_mini_stats_badge(
     oob:bool=False,  # Whether to render as OOB swap
 ) -> Any:  # Mini-stats badge Span
     "Render the decomposition mini-stats badge for the column header."
+```
+
+``` python
+def render_align_mini_stats_badge(
+    chunks:List[VADChunk],  # Current VAD chunks
+    oob:bool=False,  # Whether to render as OOB swap
+) -> Any:  # Mini-stats badge Span
+    "Render the alignment mini-stats badge for the column header."
 ```
 
 ``` python
@@ -2845,14 +2917,19 @@ def _render_decomp_column(
 ``` python
 def _render_alignment_column(
     is_active:bool=False,  # Whether this column is initially active
+    column_body:Any=None,  # Pre-rendered column body (None = not initialized)
+    mini_stats_text:str="--",  # Mini-stats badge text
+    init_url:str="",  # URL for auto-trigger initialization
 ) -> Any:  # Right column component
-    "Render the right alignment column with placeholder content."
+    "Render the right alignment column."
 ```
 
 ``` python
 def render_combined_step(
     ctx:InteractionContext,  # Interaction context with state and data
     decomp_urls:DecompUrls=None,  # URL bundle for decomposition routes
+    align_urls:AlignmentUrls=None,  # URL bundle for alignment routes
+    switch_chrome_url:str="",  # URL for chrome switching route (unused until 4d)
 ) -> Any:  # FastHTML component with full dual-column layout
     "Render Phase 2: Combined Segment & Align step with dual-column layout."
 ```
@@ -2861,6 +2938,7 @@ def render_combined_step(
 
 ``` python
 _DECOMP_COLUMN_CLS
+_ALIGNMENT_COLUMN_CLS
 ```
 
 ### step_renderer (`step_renderer.ipynb`)
@@ -2871,6 +2949,7 @@ _DECOMP_COLUMN_CLS
 
 ``` python
 from cjm_fasthtml_workflow_transcript_decomp.components.step_alignment.step_renderer import (
+    DEBUG_ALIGN_RENDER,
     render_align_toolbar,
     render_align_stats,
     render_align_column_body,
@@ -2908,7 +2987,7 @@ def render_align_column_body(
     visible_count:int,  # Number of visible cards in viewport
     card_width:int,  # Card stack width in rem
     urls:AlignmentUrls,  # URL bundle for alignment routes
-    kb_system:Any,  # Rendered keyboard system (from combined keyboard config)
+    kb_system:Any=None,  # Rendered keyboard system (None when KB managed externally)
     media_path:Optional[str]=None,  # Path to audio file for playback
     focused_segment_index:int=0,  # Currently focused text segment (from decomp state)
 ) -> Any:  # Div with id=ALIGNMENT_COLUMN_CONTENT
@@ -2928,6 +3007,12 @@ def render_align_mini_stats_text(
     chunks:List[VADChunk],  # Current VAD chunks
 ) -> str:  # Compact stats string for column header badge
     "Generate compact stats string for the alignment column header badge."
+```
+
+#### Variables
+
+``` python
+DEBUG_ALIGN_RENDER = True
 ```
 
 ### step_renderer (`step_renderer.ipynb`)
