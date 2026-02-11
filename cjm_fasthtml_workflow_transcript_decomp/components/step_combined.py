@@ -57,7 +57,7 @@ from cjm_fasthtml_workflow_transcript_decomp.components.step_decomposition.step_
 # Alignment state getters
 from cjm_fasthtml_workflow_transcript_decomp.components.step_alignment.helpers import (
     _is_alignment_initialized, _get_vad_chunks, _get_focused_chunk_index,
-    _get_alignment_visible_count, _get_alignment_card_width, _get_playback_media_path,
+    _get_alignment_visible_count, _get_alignment_card_width, _get_media_path,
 )
 
 # Alignment composable renderers
@@ -431,12 +431,12 @@ def render_combined_step(
         align_focused = _get_focused_chunk_index(ctx)
         align_visible = _get_alignment_visible_count(ctx, default=5)
         align_width = _get_alignment_card_width(ctx, default=40)
-        # Use CBR-converted audio path for accurate browser seeking
-        playback_path = _get_playback_media_path(ctx)
+        # Web Audio API handles accurate seeking
+        media_path = _get_media_path(ctx)
         decomp_focused = _get_focused_index(ctx) if is_decomp_init else 0
 
         if DEBUG_COMBINED_RENDER:
-            print(f"[COMBINED_RENDER] playback_path: {playback_path}")
+            print(f"[COMBINED_RENDER] media_path: {media_path}")
 
         align_body = render_align_column_body(
             chunks=chunks,
@@ -445,7 +445,7 @@ def render_combined_step(
             card_width=align_width,
             urls=align_urls,
             kb_system=None,  # KB system is in stable container
-            media_path=playback_path,
+            media_path=media_path,
             focused_segment_index=decomp_focused,
         )
         align_mini_text = render_align_mini_stats_text(chunks)

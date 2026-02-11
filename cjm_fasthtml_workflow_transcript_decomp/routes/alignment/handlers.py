@@ -25,9 +25,6 @@ from cjm_fasthtml_workflow_transcript_decomp.services.alignment import (
     assign_chunk_to_segment, unassign_chunk_from_segment,
     auto_align_sequential,
 )
-from cjm_fasthtml_workflow_transcript_decomp.services.audio_conversion import (
-    ensure_cbr_audio,
-)
 
 # Alignment components
 from cjm_fasthtml_workflow_transcript_decomp.components.step_alignment.card_stack_config import (
@@ -160,21 +157,7 @@ async def _handle_align_init(
     if DEBUG_ALIGNMENT:
         print(f"[ALIGN_INIT] extracted media_path: {media_path}")
 
-    # Convert audio to CBR for accurate browser seeking
-    # Use .cjm/data/audio_cache relative to current working directory
-    cbr_media_path = None
-    if media_path:
-        cache_dir = Path.cwd() / ".cjm" / "data" / "audio_cache"
-        
-        if DEBUG_ALIGNMENT:
-            print(f"[ALIGN_INIT] Converting audio to CBR, cache_dir: {cache_dir}")
-        
-        cbr_media_path = ensure_cbr_audio(media_path, cache_dir=cache_dir)
-        
-        if DEBUG_ALIGNMENT:
-            print(f"[ALIGN_INIT] CBR audio path: {cbr_media_path}")
-
-    # Fetch VAD data (use original media_path for VAD analysis)
+    # Fetch VAD data
     chunks = []
     audio_duration = 0.0
     if media_path and workflow.alignment_service.is_available():
@@ -184,7 +167,7 @@ async def _handle_align_init(
         if DEBUG_ALIGNMENT:
             print(f"[ALIGN_INIT] VAD returned {len(chunks)} chunks, duration: {audio_duration:.2f}s")
 
-    # Serialize and store (save both original and CBR paths)
+    # Serialize and store
     chunk_dicts = [c.to_dict() for c in chunks]
     _update_alignment_state(
         workflow, session_id,
@@ -195,16 +178,13 @@ async def _handle_align_init(
         visible_count=visible_count,
         card_width=card_width,
         media_path=media_path,
-        cbr_media_path=cbr_media_path,
         audio_duration=audio_duration,
     )
 
     # Get decomp focused segment for card rendering
     focused_seg = _get_decomp_focused_index(workflow, session_id)
 
-    # Render column body using CBR path for audio (falls back to original if conversion failed)
-    playback_path = cbr_media_path or media_path
-    
+    # Render column body (Web Audio API handles accurate seeking)
     column_body = render_align_column_body(
         chunks=chunks,
         focused_index=0,
@@ -212,7 +192,7 @@ async def _handle_align_init(
         card_width=card_width,
         urls=urls,
         kb_system=None,
-        media_path=playback_path,
+        media_path=media_path,
         focused_segment_index=focused_seg,
     )
 
