@@ -57,6 +57,15 @@ def _get_card_width(
     state = _get_decomposition_state(ctx)
     return state.get("card_width", default)
 
+
+#| export
+def _get_is_auto_mode(
+    ctx: InteractionContext,  # Interaction context with state
+) -> bool:  # Whether card count is in auto-adjust mode
+    """Get whether the card count is in auto-adjust mode."""
+    state = _get_decomposition_state(ctx)
+    return state.get("is_auto_mode", False)
+
 # %% ../../../nbs/components/step_decomposition/helpers.ipynb #5qlapc1birw
 def _get_history(
     ctx: InteractionContext  # Interaction context with state

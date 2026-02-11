@@ -28,6 +28,7 @@ class DecompContext(NamedTuple):
     segment_dicts: List[Dict[str, Any]]  # Serialized working segments
     focused_index: int  # Currently focused segment index
     visible_count: int  # Number of visible cards in viewport
+    is_auto_mode: bool  # Whether card count is in auto-adjust mode
     card_width: int  # Card stack width in rem
     history: list  # Undo history stack
 
@@ -82,6 +83,7 @@ def _load_decomp_context(
         segment_dicts=decomp_state.get("segments", []),
         focused_index=decomp_state.get("focused_index", 0),
         visible_count=decomp_state.get("visible_count", DEFAULT_VISIBLE_COUNT),
+        is_auto_mode=decomp_state.get("is_auto_mode", False),
         card_width=decomp_state.get("card_width", DEFAULT_CARD_WIDTH),
         history=decomp_state.get("history", []),
     )
@@ -96,6 +98,7 @@ def _update_decomp_state(
     is_initialized: bool = None,  # Initialization flag (None = don't change)
     history: List[Dict[str, Any]] = None,  # Updated history (None = don't change)
     visible_count: int = None,  # Visible card count (None = don't change)
+    is_auto_mode: bool = None,  # Auto-adjust mode flag (None = don't change)
     card_width: int = None,  # Card stack width in rem (None = don't change)
 ) -> None:
     """Update the decomposition step state in the workflow state store."""
@@ -123,6 +126,8 @@ def _update_decomp_state(
         decomp_state["history"] = history
     if visible_count is not None:
         decomp_state["visible_count"] = visible_count
+    if is_auto_mode is not None:
+        decomp_state["is_auto_mode"] = is_auto_mode
     if card_width is not None:
         decomp_state["card_width"] = card_width
     

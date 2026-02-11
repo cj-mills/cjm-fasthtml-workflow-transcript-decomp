@@ -129,6 +129,7 @@ async def _handle_switch_chrome(
         history = decomp_state.get("history", [])
         focused_index = decomp_state.get("focused_index", 0)
         visible_count = decomp_state.get("visible_count", DEFAULT_VISIBLE_COUNT)
+        is_auto_mode = decomp_state.get("is_auto_mode", False)
         card_width = decomp_state.get("card_width", DEFAULT_CARD_WIDTH)
 
         hints_content = render_keyboard_hints_collapsible(kb_manager, include_zone_switch=True)
@@ -138,6 +139,7 @@ async def _handle_switch_chrome(
             undo_url=decomp_urls.undo,
             can_undo=(len(history) > 0),
             visible_count=visible_count,
+            is_auto_mode=is_auto_mode,
         )
         controls_content = render_width_slider(DECOMP_CS_CONFIG, DECOMP_CS_IDS, card_width=card_width)
         footer_content = render_decomp_footer_content(segments, focused_index)
@@ -147,6 +149,7 @@ async def _handle_switch_chrome(
         history = align_state.get("history", [])
         focused_index = align_state.get("focused_chunk_index", 0)
         visible_count = align_state.get("visible_count", 5)
+        is_auto_mode = align_state.get("is_auto_mode", False)
         card_width = align_state.get("card_width", 40)
 
         hints_content = render_keyboard_hints_collapsible(kb_manager, include_zone_switch=True)
@@ -156,6 +159,7 @@ async def _handle_switch_chrome(
             undo_url=align_urls.undo,
             can_undo=(len(history) > 0),
             visible_count=visible_count,
+            is_auto_mode=is_auto_mode,
         )
         controls_content = render_width_slider(ALIGN_CS_CONFIG, ALIGN_CS_IDS, card_width=card_width)
         footer_content = render_align_footer_content(chunks, focused_index)

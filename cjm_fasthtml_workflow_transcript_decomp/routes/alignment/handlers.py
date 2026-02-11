@@ -64,6 +64,7 @@ def _build_mutation_response(
     visible_count:int,  # Visible card count
     history_depth:int,  # Current history depth (for undo button state)
     urls:AlignmentUrls,  # URL bundle
+    is_auto_mode:bool=False,  # Whether card count is in auto-adjust mode
     focused_segment_index:int=0,  # Currently focused text segment
     segments:List[WorkingSegment]=None,  # Decomp segments (for cross-state mini-stats)
 ) -> Tuple:  # OOB response tuple
@@ -89,6 +90,7 @@ def _build_mutation_response(
         undo_url=urls.undo,
         can_undo=(history_depth > 0),
         visible_count=visible_count,
+        is_auto_mode=is_auto_mode,
         oob=True,
     )
 
@@ -260,6 +262,7 @@ def _handle_align_toggle_assign(
         visible_count=ctx.visible_count,
         history_depth=len(history),
         urls=urls,
+        is_auto_mode=ctx.is_auto_mode,
         focused_segment_index=focused_seg_idx,
         segments=segments,
     )
@@ -306,6 +309,7 @@ def _handle_align_auto_align(
         visible_count=ctx.visible_count,
         history_depth=len(history),
         urls=urls,
+        is_auto_mode=ctx.is_auto_mode,
         focused_segment_index=focused_seg_idx,
         segments=segments,
     )
@@ -349,6 +353,7 @@ def _handle_align_clear_assignments(
         visible_count=ctx.visible_count,
         history_depth=len(history),
         urls=urls,
+        is_auto_mode=ctx.is_auto_mode,
         focused_segment_index=focused_seg_idx,
         segments=segments,
     )
@@ -410,6 +415,7 @@ def _handle_align_undo(
         visible_count=ctx.visible_count,
         history_depth=len(new_history),
         urls=urls,
+        is_auto_mode=ctx.is_auto_mode,
         focused_segment_index=focused_seg_idx,
         segments=segments,
     )

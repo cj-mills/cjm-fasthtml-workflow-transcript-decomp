@@ -65,6 +65,7 @@ def _build_mutation_response(
     history_depth:int,  # Current undo history depth
     urls:DecompUrls,  # URL bundle
     is_split_mode:bool=False,  # Whether split mode is active
+    is_auto_mode:bool=False,  # Whether card count is in auto-adjust mode
 ) -> Tuple:  # OOB elements (slots + progress + focus + stats + toolbar + mini-stats)
     """Build the standard OOB response for mutation handlers."""
     state = CardStackState(
@@ -81,7 +82,8 @@ def _build_mutation_response(
     stats_oob = render_decomp_stats(segments, oob=True)
     toolbar_oob = render_toolbar(
         reset_url=urls.reset, ai_split_url=urls.ai_split, undo_url=urls.undo,
-        can_undo=(history_depth > 0), visible_count=visible_count, oob=True,
+        can_undo=(history_depth > 0), visible_count=visible_count,
+        is_auto_mode=is_auto_mode, oob=True,
     )
     mini_stats_oob = render_decomp_mini_stats_badge(segments, oob=True)
 
@@ -109,6 +111,7 @@ async def _handle_decomp_init(
     # Read stored viewport preferences (may exist from previous session)
     decomp_state = _get_decomp_state(workflow, session_id)
     stored_visible_count = decomp_state.get("visible_count", visible_count)
+    stored_is_auto_mode = decomp_state.get("is_auto_mode", False)
     stored_card_width = decomp_state.get("card_width", card_width)
 
     if not selected_sources:
@@ -197,7 +200,7 @@ async def _handle_decomp_init(
     toolbar_oob = Div(
         render_toolbar(
             reset_url=urls.reset, ai_split_url=urls.ai_split, undo_url=urls.undo,
-            can_undo=(history_depth > 0), visible_count=stored_visible_count,
+            can_undo=(history_depth > 0), visible_count=stored_visible_count, is_auto_mode=stored_is_auto_mode,
         ),
         id=StructureDecompHtmlIds.SHARED_TOOLBAR,
         hx_swap_oob="innerHTML"
@@ -253,7 +256,7 @@ async def _handle_decomp_split(
     # Can't split at beginning or end
     if char_position <= 0 or char_position >= len(segment.text):
         return _build_mutation_response(
-            ctx.segment_dicts, segment_index, ctx.visible_count, history_depth, urls,
+            ctx.segment_dicts, segment_index, ctx.visible_count, history_depth, urls, is_auto_mode=ctx.is_auto_mode,
         )
 
     # Split the segment
@@ -275,7 +278,7 @@ async def _handle_decomp_split(
     )
 
     return _build_mutation_response(
-        new_segment_dicts, new_focused_index, ctx.visible_count, history_depth, urls,
+        new_segment_dicts, new_focused_index, ctx.visible_count, history_depth, urls, is_auto_mode=ctx.is_auto_mode,
     )
 
 # %% ../../../nbs/routes/decomposition/handlers.ipynb #dh-merge
@@ -318,7 +321,7 @@ def _handle_decomp_merge(
     )
     
     return _build_mutation_response(
-        new_segment_dicts, new_focused_index, ctx.visible_count, history_depth, urls,
+        new_segment_dicts, new_focused_index, ctx.visible_count, history_depth, urls, is_auto_mode=ctx.is_auto_mode,
     )
 
 # %% ../../../nbs/routes/decomposition/handlers.ipynb #dh-undo
@@ -347,7 +350,7 @@ def _handle_decomp_undo(
     )
     
     return _build_mutation_response(
-        previous_segments, new_focused_index, ctx.visible_count, len(remaining_history), urls,
+        previous_segments, new_focused_index, ctx.visible_count, len(remaining_history), urls, is_auto_mode=ctx.is_auto_mode,
     )
 
 # %% ../../../nbs/routes/decomposition/handlers.ipynb #dh-reset
@@ -374,7 +377,7 @@ def _handle_decomp_reset(
     )
     
     return _build_mutation_response(
-        initial_segments, 0, ctx.visible_count, history_depth, urls,
+        initial_segments, 0, ctx.visible_count, history_depth, urls, is_auto_mode=ctx.is_auto_mode,
     )
 
 # %% ../../../nbs/routes/decomposition/handlers.ipynb #dh-ai-split
@@ -410,5 +413,5 @@ async def _handle_decomp_ai_split(
     )
     
     return _build_mutation_response(
-        new_segment_dicts, 0, ctx.visible_count, history_depth, urls,
+        new_segment_dicts, 0, ctx.visible_count, history_depth, urls, is_auto_mode=ctx.is_auto_mode,
     )

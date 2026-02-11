@@ -209,18 +209,32 @@ def generate_zone_change_js(
     decomp_zone_id = DECOMP_CS_IDS.card_stack
     align_zone_id = ALIGN_CS_IDS.card_stack
 
+    # Card stack prefixes for syncCountDropdown calls
+    decomp_prefix = DECOMP_CS_CONFIG.prefix
+    align_prefix = ALIGN_CS_CONFIG.prefix
+
     # Column container IDs
     decomp_col_id = StructureDecompHtmlIds.DECOMP_COLUMN
     align_col_id = StructureDecompHtmlIds.ALIGNMENT_COLUMN
     active_input_id = StructureDecompHtmlIds.ACTIVE_COLUMN_INPUT
 
-    # Chrome swap trigger (optional)
+    # Chrome swap trigger with dropdown sync (optional)
     chrome_swap_js = ""
     if switch_chrome_url:
         chrome_swap_js = f"""
             // Trigger chrome swap via hidden HTMX button
             const chromeSwitchBtn = document.getElementById('{SWITCH_CHROME_BTN_ID}');
             if (chromeSwitchBtn) {{
+                // Add one-time listener to sync dropdown after chrome swap settles
+                function onChromeSettle(evt) {{
+                    // Sync the active card stack's dropdown from localStorage
+                    const activePrefix = (newZoneId === decomp_zone_id) ? '{decomp_prefix}' : '{align_prefix}';
+                    if (window.cardStacks?.[activePrefix]?.syncCountDropdown) {{
+                        window.cardStacks[activePrefix].syncCountDropdown();
+                    }}
+                    document.body.removeEventListener('htmx:afterSettle', onChromeSettle);
+                }}
+                document.body.addEventListener('htmx:afterSettle', onChromeSettle);
                 chromeSwitchBtn.click();
             }}
         """

@@ -53,6 +53,13 @@ def _get_alignment_visible_count(
     state = _get_alignment_state(ctx)
     return state.get("visible_count", default)
 
+def _get_alignment_is_auto_mode(
+    ctx:InteractionContext,  # Interaction context with state
+) -> bool:  # Whether card count is in auto-adjust mode
+    """Get whether the card count is in auto-adjust mode."""
+    state = _get_alignment_state(ctx)
+    return state.get("is_auto_mode", False)
+
 def _get_alignment_card_width(
     ctx:InteractionContext,  # Interaction context with state
     default:int=40,  # Default card width in rem (narrower for alignment)

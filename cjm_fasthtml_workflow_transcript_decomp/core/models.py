@@ -35,6 +35,7 @@ class DecompositionStepState(TypedDict, total=False):
     # --- Card stack view state (extractable to cjm-fasthtml-card-stack) ---
     focused_index: int  # Currently focused item index (default 0)
     visible_count: int  # Number of visible cards in viewport
+    is_auto_mode: bool  # Whether card count is in auto-adjust mode
     card_width: int  # Card stack width in rem units
     history: List[List[Dict[str, Any]]]  # Stack of previous item state snapshots
 
@@ -51,6 +52,7 @@ class AlignmentStepState(TypedDict, total=False):
     # --- Card stack view state ---
     focused_chunk_index: int  # Currently focused VAD chunk (default 0)
     visible_count: int  # Number of visible cards in viewport
+    is_auto_mode: bool  # Whether card count is in auto-adjust mode
     card_width: int  # Card stack width in rem units
     history: List[Dict[str, Any]]  # Undo history (generic snapshots)
 

@@ -86,8 +86,9 @@ def _handle_align_navigate(
     return result
 
 # %% ../../../nbs/routes/alignment/card_stack.ipynb #align-cs-viewport
-def _handle_align_update_viewport(
+async def _handle_align_update_viewport(
     workflow:Any,  # StructureDecompWorkflow instance
+    request:Any,  # FastHTML request object
     sess:Any,  # FastHTML session object
     visible_count:int,  # New visible card count
     urls:AlignmentUrls,  # URL bundle
@@ -111,7 +112,16 @@ def _handle_align_update_viewport(
         render_card=renderer,
     )
 
-    _update_alignment_state(workflow, session_id, visible_count=state.visible_count)
+    # Read is_auto from form data (passed by client JS)
+    form_data = await request.form()
+    is_auto_str = form_data.get("is_auto", "false")
+    is_auto_mode = is_auto_str.lower() == "true"
+
+    _update_alignment_state(
+        workflow, session_id,
+        visible_count=state.visible_count,
+        is_auto_mode=is_auto_mode,
+    )
     return result
 
 # %% ../../../nbs/routes/alignment/card_stack.ipynb #align-cs-save-width

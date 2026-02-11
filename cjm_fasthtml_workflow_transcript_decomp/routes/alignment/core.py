@@ -25,6 +25,7 @@ class AlignContext(NamedTuple):
     chunk_dicts: List[Dict[str, Any]]  # Serialized VAD chunks
     focused_chunk_index: int  # Currently focused VAD chunk index
     visible_count: int  # Number of visible cards in viewport
+    is_auto_mode: bool  # Whether card count is in auto-adjust mode
     card_width: int  # Card stack width in rem
     history: list  # Undo history stack
     media_path: Optional[str]  # Path to original audio file
@@ -50,6 +51,7 @@ def _load_alignment_context(
         chunk_dicts=state.get("vad_chunks", []),
         focused_chunk_index=state.get("focused_chunk_index", 0),
         visible_count=state.get("visible_count", 5),
+        is_auto_mode=state.get("is_auto_mode", False),
         card_width=state.get("card_width", 40),
         history=state.get("history", []),
         media_path=state.get("media_path"),
@@ -64,6 +66,7 @@ def _update_alignment_state(
     is_initialized=None,  # Initialization flag
     history=None,  # Updated history
     visible_count=None,  # Visible card count
+    is_auto_mode=None,  # Auto-adjust mode flag
     card_width=None,  # Card stack width in rem
     media_path=None,  # Original audio file path
     audio_duration=None,  # Audio duration
@@ -94,6 +97,8 @@ def _update_alignment_state(
         align_state["history"] = history
     if visible_count is not None:
         align_state["visible_count"] = visible_count
+    if is_auto_mode is not None:
+        align_state["is_auto_mode"] = is_auto_mode
     if card_width is not None:
         align_state["card_width"] = card_width
     if media_path is not None:

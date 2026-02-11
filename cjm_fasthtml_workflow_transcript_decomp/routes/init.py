@@ -314,10 +314,10 @@ def init_router(
         return _handle_decomp_exit_split_mode(workflow, request, sess, urls=_decomp_urls)
 
     @router
-    def decomp_update_viewport(request, sess, visible_count: int):
+    async def decomp_update_viewport(request, sess, visible_count: int):
         """Update viewport with new card count (full outerHTML swap)."""
-        return _handle_decomp_update_viewport(
-            workflow, sess, visible_count, urls=_decomp_urls,
+        return await _handle_decomp_update_viewport(
+            workflow, request, sess, visible_count, urls=_decomp_urls,
         )
 
     @router
@@ -452,10 +452,10 @@ def init_router(
         return _handle_align_navigate(workflow, sess, direction="page_down", urls=_align_urls)
 
     @router
-    def align_update_viewport(request, sess, visible_count: int):
+    async def align_update_viewport(request, sess, visible_count: int):
         """Update alignment viewport with new card count."""
-        return _handle_align_update_viewport(
-            workflow, sess, visible_count, urls=_align_urls,
+        return await _handle_align_update_viewport(
+            workflow, request, sess, visible_count, urls=_align_urls,
         )
 
     @router

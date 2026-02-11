@@ -65,6 +65,7 @@ def render_toolbar(
     undo_url: str,  # URL for undo action
     can_undo: bool,  # Whether undo is available
     visible_count: int = DEFAULT_VISIBLE_COUNT,  # Current visible card count
+    is_auto_mode: bool = False,  # Whether card count is in auto-adjust mode
     oob: bool = False,  # Whether to render as OOB swap
 ) -> Any:  # Toolbar component
     """Render the decomposition toolbar with action buttons and card count selector."""
@@ -90,7 +91,11 @@ def render_toolbar(
                 "Cards:",
                 cls=combine_classes(font_size.sm, text_dui.base_content.opacity(70), m.r(2))
             ),
-            render_card_count_select(DECOMP_CS_CONFIG, DECOMP_CS_IDS, current_count=visible_count),
+            render_card_count_select(
+                DECOMP_CS_CONFIG, DECOMP_CS_IDS,
+                current_count=visible_count,
+                is_auto_mode=is_auto_mode,
+            ),
             cls=combine_classes(flex_display, items.center)
         ),
 

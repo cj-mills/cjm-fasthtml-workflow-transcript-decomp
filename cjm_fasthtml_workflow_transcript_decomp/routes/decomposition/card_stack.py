@@ -144,8 +144,9 @@ def _handle_decomp_exit_split_mode(
     return _build_slots_oob(ctx.segment_dicts, state, urls)
 
 # %% ../../../nbs/routes/decomposition/card_stack.ipynb #cs-viewport
-def _handle_decomp_update_viewport(
+async def _handle_decomp_update_viewport(
     workflow: StructureDecompWorkflow,  # The workflow instance
+    request,  # FastHTML request object
     sess,  # FastHTML session object
     visible_count: int,  # New number of visible cards
     urls: DecompUrls,  # URL bundle for decomposition routes
@@ -153,7 +154,7 @@ def _handle_decomp_update_viewport(
     """Update the viewport with a new card count.
 
     Does a full viewport swap because the number of slots changes.
-    Saves the new visible_count to state for subsequent operations.
+    Saves the new visible_count and is_auto_mode to state.
     """
     session_id = get_session_id(sess)
     ctx = _load_decomp_context(workflow, session_id)
@@ -172,7 +173,16 @@ def _handle_decomp_update_viewport(
         render_card=renderer,
     )
     
-    _update_decomp_state(workflow, session_id, visible_count=state.visible_count)
+    # Read is_auto from form data (passed by client JS)
+    form_data = await request.form()
+    is_auto_str = form_data.get("is_auto", "false")
+    is_auto_mode = is_auto_str.lower() == "true"
+    
+    _update_decomp_state(
+        workflow, session_id,
+        visible_count=state.visible_count,
+        is_auto_mode=is_auto_mode,
+    )
     return result
 
 # %% ../../../nbs/routes/decomposition/card_stack.ipynb #cs-save-width
