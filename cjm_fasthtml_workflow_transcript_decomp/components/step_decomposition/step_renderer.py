@@ -7,7 +7,7 @@ __all__ = ['render_toolbar', 'render_decomp_stats', 'render_decomp_column_body',
            'render_decomp_mini_stats_text']
 
 # %% ../../../nbs/components/step_decomposition/step_renderer.ipynb #c3d4e5f6
-from typing import Any, List
+from typing import Any, List, Optional
 
 from fasthtml.common import Div, Button, Span
 
@@ -149,7 +149,7 @@ def render_decomp_column_body(
     visible_count:int,  # Number of visible cards in viewport
     card_width:int,  # Card stack width in rem
     urls:DecompUrls,  # URL bundle for all decomposition routes
-    kb_system:Any,  # Rendered keyboard system (from build_decomp_kb_system)
+    kb_system:Optional[Any]=None,  # Rendered keyboard system (None when KB managed externally)
 ) -> Any:  # Div with id=DECOMP_COLUMN_CONTENT containing viewport + infrastructure
     """Render the decomposition column content area with card stack viewport."""
     # Create card renderer callback
@@ -195,14 +195,17 @@ def render_decomp_column_body(
     # Token selector JS (caret navigation, display, key repeat)
     ts_script = generate_token_selector_js(DECOMP_TS_CONFIG, DECOMP_TS_IDS)
 
+    # Keyboard system elements (optional — may be managed at combined-step level)
+    kb_elements = ()
+    if kb_system is not None:
+        kb_elements = (kb_system.script, kb_system.hidden_inputs, kb_system.action_buttons)
+
     return Div(
         # Card stack viewport
         viewport,
 
-        # Keyboard navigation system
-        kb_system.script,
-        kb_system.hidden_inputs,
-        kb_system.action_buttons,
+        # Keyboard navigation system (when provided)
+        *kb_elements,
 
         # Hidden action buttons for JS-triggered card stack nav
         render_card_stack_action_buttons(DECOMP_CS_BTN_IDS, urls.card_stack, DECOMP_CS_IDS),

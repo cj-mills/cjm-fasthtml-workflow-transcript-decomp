@@ -47,21 +47,25 @@ def create_align_kb_parts(
         config=config,
     )
 
-    # Alignment-specific actions
+    # Alignment-specific actions (zone-restricted to prevent firing when decomp zone is active)
+    align_zone_ids = (zone_id,)
+
     align_actions = (
         # Toggle assign (Space)
         KeyAction(
             key=" ",
             htmx_trigger=SD_ALIGN_TOGGLE_ASSIGN_BTN,
+            zone_ids=align_zone_ids,
             description="Assign/unassign chunk",
             hint_group="Alignment",
         ),
 
-        # Undo (Ctrl+Z)
+        # Undo (Ctrl+Z, zone-restricted)
         KeyAction(
             key="z",
             modifiers=frozenset({"ctrl"}),
             htmx_trigger=SD_ALIGN_UNDO_BTN,
+            zone_ids=align_zone_ids,
             description="Undo",
             hint_group="General",
         ),

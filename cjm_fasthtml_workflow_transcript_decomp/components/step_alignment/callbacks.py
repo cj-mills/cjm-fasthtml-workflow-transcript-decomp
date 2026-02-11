@@ -15,10 +15,152 @@ from cjm_fasthtml_card_stack.js.core import generate_card_stack_js
 # %% ../../../nbs/components/step_alignment/callbacks.ipynb #align-cb-focus-script
 def _generate_align_focus_change_script(
     focus_input_id:str,  # ID of hidden input for focused chunk index
-    audio_player_id:str,  # ID of the hidden audio element
+    audio_player_id:str,  # ID of the hidden audio element (for src URL extraction)
+    card_stack_id:str,  # ID of the alignment card stack container
 ) -> str:  # JavaScript for focus change with audio playback and playing indicator
-    """Generate JS for VAD chunk focus change handling with audio audition and visual feedback."""
+    """Generate JS for VAD chunk focus change handling with Web Audio API playback."""
     return f"""
+        // Track the last played chunk index to avoid replaying on non-navigation swaps
+        window._alignLastPlayedIndex = null;
+
+        // Web Audio API state
+        window._alignAudioCtx = null;
+        window._alignAudioBuffer = null;
+        window._alignCurrentSource = null;
+        window._alignAudioLoading = false;
+        window._alignAudioError = null;
+
+        // Pending playback (for when audio is still loading)
+        window._alignPendingPlay = null;
+
+        // Debug flag — set window.DEBUG_ALIGN_AUDIO = true in browser console to enable
+        // Logs: chunk index, start/end times, duration, Web Audio API operations
+
+        // Initialize Web Audio API and load audio buffer
+        window.initAlignAudio = async function() {{
+            if (window._alignAudioBuffer || window._alignAudioLoading) return;
+            
+            // Get audio URL from the hidden audio element
+            var audioEl = document.getElementById('{audio_player_id}');
+            if (!audioEl || !audioEl.src) {{
+                if (window.DEBUG_ALIGN_AUDIO) {{
+                    console.log('[ALIGN_AUDIO] No audio element or src found');
+                }}
+                return;
+            }}
+            
+            window._alignAudioLoading = true;
+            if (window.DEBUG_ALIGN_AUDIO) {{
+                console.log('[ALIGN_AUDIO] Loading audio via Web Audio API:', audioEl.src);
+            }}
+            
+            try {{
+                // Create AudioContext
+                window._alignAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Fetch and decode audio
+                var response = await fetch(audioEl.src);
+                var arrayBuffer = await response.arrayBuffer();
+                window._alignAudioBuffer = await window._alignAudioCtx.decodeAudioData(arrayBuffer);
+                
+                if (window.DEBUG_ALIGN_AUDIO) {{
+                    console.log('[ALIGN_AUDIO] Audio loaded. Duration:', window._alignAudioBuffer.duration.toFixed(2) + 's',
+                        '| Sample rate:', window._alignAudioBuffer.sampleRate + 'Hz',
+                        '| Channels:', window._alignAudioBuffer.numberOfChannels);
+                }}
+                
+                // Play pending segment if any
+                if (window._alignPendingPlay) {{
+                    var pending = window._alignPendingPlay;
+                    window._alignPendingPlay = null;
+                    if (window.DEBUG_ALIGN_AUDIO) {{
+                        console.log('[ALIGN_AUDIO] Playing pending segment after load');
+                    }}
+                    window.playAlignSegment(pending.start, pending.end, pending.indicator);
+                }}
+            }} catch (e) {{
+                window._alignAudioError = e;
+                console.error('[ALIGN_AUDIO] Failed to load audio:', e);
+            }} finally {{
+                window._alignAudioLoading = false;
+            }}
+        }};
+
+        // Stop any currently playing audio
+        window.stopAlignAudio = function() {{
+            if (window._alignCurrentSource) {{
+                try {{
+                    window._alignCurrentSource.stop();
+                }} catch (e) {{
+                    // Already stopped
+                }}
+                window._alignCurrentSource = null;
+            }}
+            if (window._alignPlayTimeout) {{
+                clearTimeout(window._alignPlayTimeout);
+                window._alignPlayTimeout = null;
+            }}
+        }};
+
+        // Play a specific time range using Web Audio API
+        window.playAlignSegment = function(start, end, indicator) {{
+            // If audio not loaded yet, trigger load and queue this playback
+            if (!window._alignAudioBuffer) {{
+                if (!window._alignAudioLoading) {{
+                    if (window.DEBUG_ALIGN_AUDIO) {{
+                        console.log('[ALIGN_AUDIO] Audio not loaded, triggering load...');
+                    }}
+                    window._alignPendingPlay = {{ start: start, end: end, indicator: indicator }};
+                    window.initAlignAudio();
+                }} else {{
+                    if (window.DEBUG_ALIGN_AUDIO) {{
+                        console.log('[ALIGN_AUDIO] Audio loading, queueing playback...');
+                    }}
+                    window._alignPendingPlay = {{ start: start, end: end, indicator: indicator }};
+                }}
+                return;
+            }}
+            
+            // Resume AudioContext if suspended (browser autoplay policy)
+            if (window._alignAudioCtx.state === 'suspended') {{
+                window._alignAudioCtx.resume();
+            }}
+            
+            // Stop previous playback
+            window.stopAlignAudio();
+            
+            // Clamp values
+            var duration = end - start;
+            if (start < 0) start = 0;
+            if (end > window._alignAudioBuffer.duration) end = window._alignAudioBuffer.duration;
+            if (duration <= 0) return;
+            
+            // Create buffer source
+            var source = window._alignAudioCtx.createBufferSource();
+            source.buffer = window._alignAudioBuffer;
+            source.connect(window._alignAudioCtx.destination);
+            window._alignCurrentSource = source;
+            
+            // Play segment (start at context time 0, offset into buffer at 'start', for 'duration')
+            source.start(0, start, duration);
+            
+            if (window.DEBUG_ALIGN_AUDIO) {{
+                console.log('[ALIGN_AUDIO] Playing segment:', start.toFixed(2) + 's ->', end.toFixed(2) + 's',
+                    '| duration:', duration.toFixed(2) + 's');
+            }}
+            
+            // Hide indicator after duration
+            window._alignPlayTimeout = setTimeout(function() {{
+                if (indicator) {{
+                    indicator.classList.add('invisible');
+                    indicator.classList.remove('visible');
+                }}
+                if (window.DEBUG_ALIGN_AUDIO) {{
+                    console.log('[ALIGN_AUDIO] Playback completed');
+                }}
+            }}, duration * 1000);
+        }};
+
         // Called when card focus changes in the alignment zone
         window.onAlignFocusChange = function(item, index, zoneId) {{
             // Update hidden input with focused chunk index
@@ -27,23 +169,32 @@ def _generate_align_focus_change_script(
                 input.value = item.dataset.chunkIndex || index;
             }}
 
+            // Check if this is a new card (navigation) vs same card (assign/unassign)
+            var currentIndex = parseInt(item.dataset.chunkIndex || index, 10);
+            if (window._alignLastPlayedIndex === currentIndex) {{
+                if (window.DEBUG_ALIGN_AUDIO) {{
+                    console.log('[ALIGN_AUDIO] Same card, skipping replay. Index:', currentIndex);
+                }}
+                return;
+            }}
+            window._alignLastPlayedIndex = currentIndex;
+
             // Hide all playing indicators
             document.querySelectorAll('.vad-playing-indicator').forEach(function(el) {{
                 el.classList.add('invisible');
                 el.classList.remove('visible');
             }});
 
-            // Audio audition — play the chunk's time range
-            var player = document.getElementById('{audio_player_id}');
-            if (!player || !player.src || !item) return;
+            if (!item) return;
 
             var start = parseFloat(item.dataset.startTime || 0);
             var end = parseFloat(item.dataset.endTime || 0);
+            
+            if (window.DEBUG_ALIGN_AUDIO) {{
+                console.log('[ALIGN_AUDIO] Chunk', currentIndex, '| start:', start.toFixed(2) + 's', '| end:', end.toFixed(2) + 's');
+            }}
+            
             if (end <= start) return;
-
-            // Cancel previous playback
-            if (window._alignPlayTimeout) clearTimeout(window._alignPlayTimeout);
-            player.pause();
 
             // Show playing indicator on current card
             var indicator = item.querySelector('.vad-playing-indicator');
@@ -52,18 +203,45 @@ def _generate_align_focus_change_script(
                 indicator.classList.add('visible');
             }}
 
-            // Play chunk time range
-            player.currentTime = start;
-            player.play().catch(function() {{}});
-            window._alignPlayTimeout = setTimeout(function() {{
-                player.pause();
-                // Hide indicator when playback ends
-                if (indicator) {{
-                    indicator.classList.add('invisible');
-                    indicator.classList.remove('visible');
-                }}
-            }}, (end - start) * 1000);
+            // Play using Web Audio API (will auto-init if needed)
+            window.playAlignSegment(start, end, indicator);
         }};
+
+        // HTMX afterSettle listener — trigger focus change callback after navigation swaps
+        (function() {{
+            var handlerKey = '_alignFocusSettleHandler';
+            
+            if (window[handlerKey]) {{
+                document.body.removeEventListener('htmx:afterSettle', window[handlerKey]);
+            }}
+            
+            function afterSettleHandler(evt) {{
+                var target = evt.detail.target;
+                if (!target) return;
+                
+                var cardStack = document.getElementById('{card_stack_id}');
+                if (!cardStack) return;
+                
+                var isAlignSwap = (
+                    target.id === '{card_stack_id}' ||
+                    cardStack.contains(target)
+                );
+                if (!isAlignSwap) return;
+                
+                var state = window.kbNav && window.kbNav.getState && window.kbNav.getState();
+                var isAlignActive = state && state.activeZoneId === '{card_stack_id}';
+                if (!isAlignActive) return;
+                
+                var focusedCard = cardStack.querySelector('[data-card-role="focused"]');
+                if (focusedCard && window.onAlignFocusChange) {{
+                    var index = parseInt(focusedCard.dataset.chunkIndex || '0', 10);
+                    window.onAlignFocusChange(focusedCard, index, '{card_stack_id}');
+                }}
+            }}
+            
+            window[handlerKey] = afterSettleHandler;
+            document.body.addEventListener('htmx:afterSettle', afterSettleHandler);
+        }})();
     """
 
 # %% ../../../nbs/components/step_alignment/callbacks.ipynb #align-cb-gen
@@ -78,7 +256,11 @@ def generate_align_callbacks_script(
 ) -> any:  # Script element with all JavaScript callbacks
     """Generate JavaScript for alignment card stack with audio audition."""
     align_scripts = (
-        _generate_align_focus_change_script(focus_input_id, audio_player_id),
+        _generate_align_focus_change_script(
+            focus_input_id=focus_input_id,
+            audio_player_id=audio_player_id,
+            card_stack_id=ids.card_stack,
+        ),
     )
 
     return generate_card_stack_js(

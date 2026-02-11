@@ -27,7 +27,8 @@ class AlignContext(NamedTuple):
     visible_count: int  # Number of visible cards in viewport
     card_width: int  # Card stack width in rem
     history: list  # Undo history stack
-    media_path: Optional[str]  # Path to audio file
+    media_path: Optional[str]  # Path to original audio file
+    cbr_media_path: Optional[str]  # Path to CBR-converted audio for browser playback
     audio_duration: Optional[float]  # Total audio duration
 
 # %% ../../../nbs/routes/alignment/core.ipynb #align-rc-state
@@ -53,6 +54,7 @@ def _load_alignment_context(
         card_width=state.get("card_width", 40),
         history=state.get("history", []),
         media_path=state.get("media_path"),
+        cbr_media_path=state.get("cbr_media_path"),
         audio_duration=state.get("audio_duration"),
     )
 
@@ -65,7 +67,8 @@ def _update_alignment_state(
     history=None,  # Updated history
     visible_count=None,  # Visible card count
     card_width=None,  # Card stack width in rem
-    media_path=None,  # Audio file path
+    media_path=None,  # Original audio file path
+    cbr_media_path=None,  # CBR-converted audio file path
     audio_duration=None,  # Audio duration
 ) -> None:
     """Update the alignment step state in the workflow state store."""
@@ -98,6 +101,8 @@ def _update_alignment_state(
         align_state["card_width"] = card_width
     if media_path is not None:
         align_state["media_path"] = media_path
+    if cbr_media_path is not None:
+        align_state["cbr_media_path"] = cbr_media_path
     if audio_duration is not None:
         align_state["audio_duration"] = audio_duration
 

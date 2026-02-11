@@ -81,11 +81,15 @@ def create_decomp_kb_parts(
     )
 
     # --- Consumer-specific: decomposition operation actions ---
+    # All decomp actions are zone-restricted to prevent firing when alignment zone is active
+    decomp_zone_ids = (zone_id,)
+
     decomp_actions = (
         # Enter split mode (Enter or Space when NOT in split mode)
         KeyAction(
             key="Enter",
             htmx_trigger=SD_DECOMP_ENTER_SPLIT_BTN,
+            zone_ids=decomp_zone_ids,
             mode_enter="split",
             not_modes=("split",),
             description="Enter split mode",
@@ -94,6 +98,7 @@ def create_decomp_kb_parts(
         KeyAction(
             key=" ",
             htmx_trigger=SD_DECOMP_ENTER_SPLIT_BTN,
+            zone_ids=decomp_zone_ids,
             mode_enter="split",
             not_modes=("split",),
             description="Enter split mode",
@@ -105,6 +110,7 @@ def create_decomp_kb_parts(
         KeyAction(
             key="Enter",
             htmx_trigger=SD_DECOMP_SPLIT_BTN,
+            zone_ids=decomp_zone_ids,
             mode_exit=True,
             mode_names=("split",),
             description="Split at caret",
@@ -113,6 +119,7 @@ def create_decomp_kb_parts(
         KeyAction(
             key=" ",
             htmx_trigger=SD_DECOMP_SPLIT_BTN,
+            zone_ids=decomp_zone_ids,
             mode_exit=True,
             mode_names=("split",),
             description="Split at caret",
@@ -124,6 +131,7 @@ def create_decomp_kb_parts(
         KeyAction(
             key="Escape",
             htmx_trigger=SD_DECOMP_EXIT_SPLIT_BTN,
+            zone_ids=decomp_zone_ids,
             mode_exit=True,
             mode_names=("split",),
             description="Exit split mode",
@@ -134,16 +142,18 @@ def create_decomp_kb_parts(
         KeyAction(
             key="Backspace",
             htmx_trigger=SD_DECOMP_MERGE_BTN,
+            zone_ids=decomp_zone_ids,
             not_modes=("split",),
             description="Merge with previous",
             hint_group="Decomposition",
         ),
 
-        # Undo (Ctrl+Z in any mode)
+        # Undo (Ctrl+Z in any mode, but zone-restricted)
         KeyAction(
             key="z",
             modifiers=frozenset({"ctrl"}),
             htmx_trigger=SD_DECOMP_UNDO_BTN,
+            zone_ids=decomp_zone_ids,
             description="Undo",
             hint_group="General",
         ),

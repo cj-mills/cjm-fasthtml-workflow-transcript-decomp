@@ -212,7 +212,7 @@ def render_align_column_body(
         Audio(
             id=StructureDecompHtmlIds.AUDIO_PLAYER,
             src=audio_src,
-            preload="auto",
+            preload="metadata",
             cls=str(display_tw.hidden),
         ),
 

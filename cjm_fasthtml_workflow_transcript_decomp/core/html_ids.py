@@ -107,6 +107,9 @@ class StructureDecompHtmlIds:
 
     ACTIVE_COLUMN_INPUT = "sd-active-column"
 
+    # Phase 2: Combined Segment & Align - Keyboard System (stable container)
+    KEYBOARD_SYSTEM = "sd-keyboard-system"
+
     # Phase 2: Temporal Alignment — Components
     # (Card stack IDs provided by CardStackHtmlIds from cjm-fasthtml-card-stack with prefix "sd-align")
     ALIGNMENT_TOOLBAR = "sd-align-toolbar"

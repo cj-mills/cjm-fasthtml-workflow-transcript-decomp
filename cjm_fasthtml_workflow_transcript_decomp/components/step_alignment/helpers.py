@@ -70,10 +70,26 @@ def _get_alignment_history(
 
 def _get_media_path(
     ctx:InteractionContext  # Interaction context with state
-) -> Optional[str]:  # Path to audio file or None
-    """Get the audio file path."""
+) -> Optional[str]:  # Path to original audio file or None
+    """Get the original audio file path."""
     state = _get_alignment_state(ctx)
     return state.get("media_path")
+
+def _get_cbr_media_path(
+    ctx:InteractionContext  # Interaction context with state
+) -> Optional[str]:  # Path to CBR-converted audio or None
+    """Get the CBR-converted audio file path for browser playback."""
+    state = _get_alignment_state(ctx)
+    return state.get("cbr_media_path")
+
+def _get_playback_media_path(
+    ctx:InteractionContext  # Interaction context with state
+) -> Optional[str]:  # Path to audio for playback (CBR preferred, fallback to original)
+    """Get the audio path for browser playback, preferring CBR version."""
+    cbr_path = _get_cbr_media_path(ctx)
+    if cbr_path:
+        return cbr_path
+    return _get_media_path(ctx)
 
 def _get_audio_duration(
     ctx:InteractionContext  # Interaction context with state

@@ -118,7 +118,12 @@ def init_router(
     @router
     async def switch_chrome(request, sess):
         """Switch shared chrome content based on active column."""
-        return await _handle_switch_chrome(workflow, request, sess)
+        # URL bundles accessed via workflow attributes (set later in this function)
+        return await _handle_switch_chrome(
+            workflow, request, sess,
+            decomp_urls=workflow._decomp_urls,
+            align_urls=workflow._align_urls,
+        )
 
     @router
     def audio_src(request, sess):

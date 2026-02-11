@@ -7,33 +7,44 @@ __all__ = ['DEBUG_ALIGNMENT']
 
 # %% ../../../nbs/routes/alignment/handlers.ipynb #align-hd-imports
 from typing import Any, Dict, List, Tuple
+from pathlib import Path
 
-from fasthtml.common import Div, Span
+from fasthtml.common import Div, Span, Button
 
 from cjm_fasthtml_interactions.core.state_store import get_session_id
 from cjm_fasthtml_card_stack.core.models import CardStackState
+from cjm_fasthtml_card_stack.components.controls import render_width_slider
+from cjm_fasthtml_card_stack.core.constants import DEFAULT_VISIBLE_COUNT, DEFAULT_CARD_WIDTH
 from cjm_workflow_state.history import pop_history
 
 from ...core.html_ids import StructureDecompHtmlIds
 from ...core.models import VADChunk, WorkingSegment
-from ..models import AlignmentUrls
+from ..models import AlignmentUrls, DecompUrls
+
 from cjm_fasthtml_workflow_transcript_decomp.services.alignment import (
     assign_chunk_to_segment, unassign_chunk_from_segment,
     auto_align_sequential,
 )
+from cjm_fasthtml_workflow_transcript_decomp.services.audio_conversion import (
+    ensure_cbr_audio,
+)
 
 # Alignment components
 from cjm_fasthtml_workflow_transcript_decomp.components.step_alignment.card_stack_config import (
-    ALIGN_CS_IDS,
+    ALIGN_CS_CONFIG, ALIGN_CS_IDS,
 )
 from cjm_fasthtml_workflow_transcript_decomp.components.step_alignment.step_renderer import (
     render_align_toolbar, render_align_stats, render_align_column_body,
     render_align_footer_content, render_align_mini_stats_text,
 )
 
-# Decomposition mini-stats for cross-state OOB updates
+# Decomposition components for shared chrome
+from cjm_fasthtml_workflow_transcript_decomp.components.step_decomposition.card_stack_config import (
+    DECOMP_CS_CONFIG, DECOMP_CS_IDS,
+)
 from cjm_fasthtml_workflow_transcript_decomp.components.step_decomposition.step_renderer import (
-    render_decomp_mini_stats_text,
+    render_decomp_mini_stats_text, render_toolbar as render_decomp_toolbar,
+    render_decomp_footer_content,
 )
 
 # Route core helpers
@@ -113,7 +124,11 @@ async def _handle_align_init(
     visible_count:int=5,  # Initial visible card count
     card_width:int=40,  # Initial card width in rem
 ) -> tuple:  # (column_body, mini_stats_oob)
-    """Initialize alignment from audio file via VAD plugin."""
+    """Initialize alignment from audio file via VAD plugin.
+    
+    Note: KB system is always built by decomp init handler. This handler
+    only returns column body and mini-stats OOB update.
+    """
     session_id = get_session_id(sess)
 
     if DEBUG_ALIGNMENT:
@@ -128,8 +143,6 @@ async def _handle_align_init(
 
     if DEBUG_ALIGNMENT:
         print(f"[ALIGN_INIT] selected_sources count: {len(selected_sources)}")
-        if selected_sources:
-            print(f"[ALIGN_INIT] first_source: {selected_sources[0]}")
 
     # Extract media_path from first selected source's source block
     media_path = None
@@ -139,21 +152,29 @@ async def _handle_align_init(
             record_id=first_source["record_id"],
             provider_id=first_source["provider_id"],
         )
-        if DEBUG_ALIGNMENT:
-            print(f"[ALIGN_INIT] source_block retrieved: {block is not None}")
-            if block:
-                print(f"[ALIGN_INIT] block.id: {block.id}")
-                print(f"[ALIGN_INIT] block.media_path: {block.media_path}")
-                print(f"[ALIGN_INIT] block.metadata keys: {list(block.metadata.keys()) if block.metadata else []}")
+        if DEBUG_ALIGNMENT and block:
+            print(f"[ALIGN_INIT] block.media_path: {block.media_path}")
         if block:
-            # Use top-level media_path attribute (not nested in metadata)
             media_path = block.media_path
 
     if DEBUG_ALIGNMENT:
         print(f"[ALIGN_INIT] extracted media_path: {media_path}")
-        print(f"[ALIGN_INIT] alignment_service.is_available(): {workflow.alignment_service.is_available()}")
 
-    # Fetch VAD data
+    # Convert audio to CBR for accurate browser seeking
+    # Use .cjm/data/audio_cache relative to current working directory
+    cbr_media_path = None
+    if media_path:
+        cache_dir = Path.cwd() / ".cjm" / "data" / "audio_cache"
+        
+        if DEBUG_ALIGNMENT:
+            print(f"[ALIGN_INIT] Converting audio to CBR, cache_dir: {cache_dir}")
+        
+        cbr_media_path = ensure_cbr_audio(media_path, cache_dir=cache_dir)
+        
+        if DEBUG_ALIGNMENT:
+            print(f"[ALIGN_INIT] CBR audio path: {cbr_media_path}")
+
+    # Fetch VAD data (use original media_path for VAD analysis)
     chunks = []
     audio_duration = 0.0
     if media_path and workflow.alignment_service.is_available():
@@ -162,11 +183,8 @@ async def _handle_align_init(
         chunks, audio_duration = await workflow.alignment_service.analyze_audio_async(media_path)
         if DEBUG_ALIGNMENT:
             print(f"[ALIGN_INIT] VAD returned {len(chunks)} chunks, duration: {audio_duration:.2f}s")
-    else:
-        if DEBUG_ALIGNMENT:
-            print(f"[ALIGN_INIT] Skipping VAD: media_path={media_path}, service_available={workflow.alignment_service.is_available()}")
 
-    # Serialize and store
+    # Serialize and store (save both original and CBR paths)
     chunk_dicts = [c.to_dict() for c in chunks]
     _update_alignment_state(
         workflow, session_id,
@@ -177,16 +195,16 @@ async def _handle_align_init(
         visible_count=visible_count,
         card_width=card_width,
         media_path=media_path,
+        cbr_media_path=cbr_media_path,
         audio_duration=audio_duration,
     )
-
-    if DEBUG_ALIGNMENT:
-        print(f"[ALIGN_INIT] State updated: {len(chunk_dicts)} chunks stored, media_path={media_path}")
 
     # Get decomp focused segment for card rendering
     focused_seg = _get_decomp_focused_index(workflow, session_id)
 
-    # Render column body (no keyboard system — managed at combined-step level)
+    # Render column body using CBR path for audio (falls back to original if conversion failed)
+    playback_path = cbr_media_path or media_path
+    
     column_body = render_align_column_body(
         chunks=chunks,
         focused_index=0,
@@ -194,7 +212,7 @@ async def _handle_align_init(
         card_width=card_width,
         urls=urls,
         kb_system=None,
-        media_path=media_path,
+        media_path=playback_path,
         focused_segment_index=focused_seg,
     )
 
@@ -206,7 +224,7 @@ async def _handle_align_init(
     )
 
     if DEBUG_ALIGNMENT:
-        print(f"[ALIGN_INIT] Returning column_body and mini_stats_oob")
+        print(f"[ALIGN_INIT] Returning column_body + mini_stats_oob")
 
     return (column_body, mini_stats_oob)
 

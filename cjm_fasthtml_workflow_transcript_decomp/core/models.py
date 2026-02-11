@@ -45,7 +45,8 @@ class AlignmentStepState(TypedDict, total=False):
     # --- Workflow-specific ---
     is_initialized: bool  # Whether VAD data has been fetched
     vad_chunks: List[Dict[str, Any]]  # VAD chunks (serialized VADChunk)
-    media_path: Optional[str]  # Path to audio file for playback
+    media_path: Optional[str]  # Path to original audio file
+    cbr_media_path: Optional[str]  # Path to CBR-converted audio for browser playback
     audio_duration: Optional[float]  # Total audio duration in seconds
 
     # --- Card stack view state ---
