@@ -38,6 +38,11 @@ from cjm_fasthtml_workflow_transcript_decomp.components.step_alignment.card_stac
     ALIGN_CS_CONFIG, ALIGN_CS_IDS,
 )
 
+# Footer helper
+from cjm_fasthtml_workflow_transcript_decomp.components.step_combined import (
+    render_footer_inner_content,
+)
+
 # Keyboard config
 from cjm_fasthtml_workflow_transcript_decomp.components.keyboard_config import (
     build_combined_kb_system, render_keyboard_hints_collapsible,
@@ -120,6 +125,10 @@ async def _handle_switch_chrome(
     decomp_state = step_states.get("decomposition", {})
     align_state = step_states.get("alignment", {})
 
+    # Get counts for alignment status
+    segment_count = len(decomp_state.get("segments", []))
+    chunk_count = len(align_state.get("vad_chunks", []))
+
     # Build combined KB manager for hints
     kb_manager, _ = build_combined_kb_system(decomp_urls, align_urls)
 
@@ -142,7 +151,7 @@ async def _handle_switch_chrome(
             is_auto_mode=is_auto_mode,
         )
         controls_content = render_width_slider(DECOMP_CS_CONFIG, DECOMP_CS_IDS, card_width=card_width)
-        footer_content = render_decomp_footer_content(segments, focused_index)
+        column_footer = render_decomp_footer_content(segments, focused_index)
     else:
         # Alignment chrome
         chunks = [VADChunk.from_dict(c) for c in align_state.get("vad_chunks", [])]
@@ -157,7 +166,7 @@ async def _handle_switch_chrome(
             is_auto_mode=is_auto_mode,
         )
         controls_content = render_width_slider(ALIGN_CS_CONFIG, ALIGN_CS_IDS, card_width=card_width)
-        footer_content = render_align_footer_content(chunks, focused_index)
+        column_footer = render_align_footer_content(chunks, focused_index)
 
     if DEBUG_SWITCH_CHROME:
         print(f"[SWITCH_CHROME] returning OOB swaps for {active_column}")
@@ -179,7 +188,7 @@ async def _handle_switch_chrome(
         hx_swap_oob="innerHTML"
     )
     footer_oob = Div(
-        footer_content,
+        render_footer_inner_content(column_footer, segment_count, chunk_count),
         id=StructureDecompHtmlIds.SHARED_FOOTER,
         hx_swap_oob="innerHTML"
     )

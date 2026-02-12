@@ -28,6 +28,7 @@ from cjm_fasthtml_workflow_transcript_decomp.components.step_decomposition.step_
 )
 from cjm_fasthtml_workflow_transcript_decomp.components.step_combined import (
     render_decomp_mini_stats_badge, _render_keyboard_system_container,
+    render_alignment_status, render_footer_inner_content,
 )
 from cjm_fasthtml_workflow_transcript_decomp.components.keyboard_config import (
     build_combined_kb_system, render_keyboard_hints_collapsible,
@@ -46,7 +47,7 @@ from cjm_fasthtml_workflow_transcript_decomp.services.segmentation import (
 from cjm_fasthtml_workflow_transcript_decomp.routes.decomposition.core import (
     _to_segments, _load_decomp_context, _get_decomp_state,
     _get_selection_state, _update_decomp_state, _push_history,
-    _build_card_stack_state, _try_auto_populate_times,
+    _build_card_stack_state, _try_auto_populate_times, _get_vad_chunks,
 )
 from cjm_fasthtml_workflow_transcript_decomp.routes.decomposition.card_stack import (
     _build_slots_oob, _build_nav_response
@@ -64,9 +65,10 @@ def _build_mutation_response(
     visible_count:int,  # Number of visible cards
     history_depth:int,  # Current undo history depth
     urls:DecompUrls,  # URL bundle
+    chunk_count:int=0,  # Number of VAD chunks (for alignment status)
     is_split_mode:bool=False,  # Whether split mode is active
     is_auto_mode:bool=False,  # Whether card count is in auto-adjust mode
-) -> Tuple:  # OOB elements (slots + progress + focus + stats + toolbar + mini-stats)
+) -> Tuple:  # OOB elements (slots + progress + focus + stats + toolbar + mini-stats + alignment-status)
     """Build the standard OOB response for mutation handlers."""
     state = CardStackState(
         focused_index=focused_index,
@@ -86,8 +88,15 @@ def _build_mutation_response(
         is_auto_mode=is_auto_mode, oob=True,
     )
     mini_stats_oob = render_decomp_mini_stats_badge(segments, oob=True)
+    
+    # Alignment status OOB
+    alignment_status_oob = render_alignment_status(
+        segment_count=len(segment_dicts),
+        chunk_count=chunk_count,
+        oob=True,
+    )
 
-    return (*nav_response, stats_oob, toolbar_oob, mini_stats_oob)
+    return (*nav_response, stats_oob, toolbar_oob, mini_stats_oob, alignment_status_oob)
 
 # %% ../../../nbs/routes/decomposition/handlers.ipynb #dh-init
 async def _handle_decomp_init(
@@ -113,6 +122,10 @@ async def _handle_decomp_init(
     stored_visible_count = decomp_state.get("visible_count", visible_count)
     stored_is_auto_mode = decomp_state.get("is_auto_mode", False)
     stored_card_width = decomp_state.get("card_width", card_width)
+    
+    # Get VAD chunk count for alignment status (may be populated if alignment init ran first)
+    vad_chunks = _get_vad_chunks(workflow, session_id)
+    chunk_count = len(vad_chunks)
 
     if not selected_sources:
         # No sources selected, initialize with empty state
@@ -124,6 +137,7 @@ async def _handle_decomp_init(
             card_width=stored_card_width,
         )
         segments = []
+        segment_count = 0
     else:
         # Fetch source blocks via service API
         source_blocks = workflow.source_service.get_source_blocks(selected_sources)
@@ -147,6 +161,7 @@ async def _handle_decomp_init(
             card_width=stored_card_width,
         )
         segments = _to_segments(segment_dicts)
+        segment_count = len(segment_dicts)
 
     focused_index = 0
     history_depth = 0
@@ -214,18 +229,24 @@ async def _handle_decomp_init(
         hx_swap_oob="innerHTML"
     )
     footer_oob = Div(
-        render_decomp_footer_content(segments, focused_index),
+        render_footer_inner_content(
+            render_decomp_footer_content(segments, focused_index),
+            segment_count, chunk_count
+        ),
         id=StructureDecompHtmlIds.SHARED_FOOTER,
         hx_swap_oob="innerHTML"
     )
     mini_stats_oob = render_decomp_mini_stats_badge(segments, oob=True)
+    
+    # Send alignment status as separate OOB swap (handles race with alignment init)
+    alignment_status_oob = render_alignment_status(segment_count, chunk_count, oob=True)
 
     if DEBUG_DECOMP_HANDLERS:
         print("[DECOMP_HANDLERS] Returning column_body + combined KB OOB swaps")
 
     return (
         column_body, kb_system_oob, zone_change_js, chrome_switch_btn, hints_oob,
-        toolbar_oob, controls_oob, footer_oob, mini_stats_oob
+        toolbar_oob, controls_oob, footer_oob, mini_stats_oob, alignment_status_oob
     )
 
 # %% ../../../nbs/routes/decomposition/handlers.ipynb #dh-split
@@ -239,6 +260,10 @@ async def _handle_decomp_split(
     """Split a segment at the specified word position."""
     session_id = get_session_id(sess)
     ctx = _load_decomp_context(workflow, session_id)
+    
+    # Get VAD chunk count for alignment status
+    vad_chunks = _get_vad_chunks(workflow, session_id)
+    chunk_count = len(vad_chunks)
 
     # Extract word index from token selector hidden input
     form = await request.form()
@@ -259,7 +284,8 @@ async def _handle_decomp_split(
     # Can't split at beginning or end
     if char_position <= 0 or char_position >= len(segment.text):
         return _build_mutation_response(
-            ctx.segment_dicts, segment_index, ctx.visible_count, history_depth, urls, is_auto_mode=ctx.is_auto_mode,
+            ctx.segment_dicts, segment_index, ctx.visible_count, history_depth, urls,
+            chunk_count=chunk_count, is_auto_mode=ctx.is_auto_mode,
         )
 
     # Split the segment
@@ -284,7 +310,8 @@ async def _handle_decomp_split(
     )
 
     return _build_mutation_response(
-        new_segment_dicts, new_focused_index, ctx.visible_count, history_depth, urls, is_auto_mode=ctx.is_auto_mode,
+        new_segment_dicts, new_focused_index, ctx.visible_count, history_depth, urls,
+        chunk_count=chunk_count, is_auto_mode=ctx.is_auto_mode,
     )
 
 # %% ../../../nbs/routes/decomposition/handlers.ipynb #dh-merge
@@ -298,6 +325,10 @@ def _handle_decomp_merge(
     """Merge a segment with the previous segment."""
     session_id = get_session_id(sess)
     ctx = _load_decomp_context(workflow, session_id)
+    
+    # Get VAD chunk count for alignment status
+    vad_chunks = _get_vad_chunks(workflow, session_id)
+    chunk_count = len(vad_chunks)
     
     # Can't merge first segment (nothing before it)
     if segment_index <= 0 or segment_index >= len(ctx.segment_dicts):
@@ -330,7 +361,8 @@ def _handle_decomp_merge(
     )
     
     return _build_mutation_response(
-        new_segment_dicts, new_focused_index, ctx.visible_count, history_depth, urls, is_auto_mode=ctx.is_auto_mode,
+        new_segment_dicts, new_focused_index, ctx.visible_count, history_depth, urls,
+        chunk_count=chunk_count, is_auto_mode=ctx.is_auto_mode,
     )
 
 # %% ../../../nbs/routes/decomposition/handlers.ipynb #dh-undo
@@ -343,6 +375,10 @@ def _handle_decomp_undo(
     """Undo the last operation by restoring previous state from history."""
     session_id = get_session_id(sess)
     ctx = _load_decomp_context(workflow, session_id)
+    
+    # Get VAD chunk count for alignment status
+    vad_chunks = _get_vad_chunks(workflow, session_id)
+    chunk_count = len(vad_chunks)
     
     result = pop_history(ctx.history)
     if result is None:
@@ -362,7 +398,8 @@ def _handle_decomp_undo(
     )
     
     return _build_mutation_response(
-        previous_segments, new_focused_index, ctx.visible_count, len(remaining_history), urls, is_auto_mode=ctx.is_auto_mode,
+        previous_segments, new_focused_index, ctx.visible_count, len(remaining_history), urls,
+        chunk_count=chunk_count, is_auto_mode=ctx.is_auto_mode,
     )
 
 # %% ../../../nbs/routes/decomposition/handlers.ipynb #dh-reset
@@ -377,6 +414,10 @@ def _handle_decomp_reset(
     ctx = _load_decomp_context(workflow, session_id)
     decomp_state = _get_decomp_state(workflow, session_id)
     initial_segments = decomp_state.get("initial_segments", [])
+    
+    # Get VAD chunk count for alignment status
+    vad_chunks = _get_vad_chunks(workflow, session_id)
+    chunk_count = len(vad_chunks)
     
     # Push current state to history before reset
     history_depth = 0
@@ -393,7 +434,8 @@ def _handle_decomp_reset(
     )
     
     return _build_mutation_response(
-        initial_segments_copy, 0, ctx.visible_count, history_depth, urls, is_auto_mode=ctx.is_auto_mode,
+        initial_segments_copy, 0, ctx.visible_count, history_depth, urls,
+        chunk_count=chunk_count, is_auto_mode=ctx.is_auto_mode,
     )
 
 # %% ../../../nbs/routes/decomposition/handlers.ipynb #dh-ai-split
@@ -406,6 +448,10 @@ async def _handle_decomp_ai_split(
     """Re-run AI (NLTK) sentence splitting on all current text."""
     session_id = get_session_id(sess)
     ctx = _load_decomp_context(workflow, session_id)
+    
+    # Get VAD chunk count for alignment status
+    vad_chunks = _get_vad_chunks(workflow, session_id)
+    chunk_count = len(vad_chunks)
     
     if not ctx.segment_dicts:
         state = _build_card_stack_state(ctx)
@@ -432,5 +478,6 @@ async def _handle_decomp_ai_split(
     )
     
     return _build_mutation_response(
-        new_segment_dicts, 0, ctx.visible_count, history_depth, urls, is_auto_mode=ctx.is_auto_mode,
+        new_segment_dicts, 0, ctx.visible_count, history_depth, urls,
+        chunk_count=chunk_count, is_auto_mode=ctx.is_auto_mode,
     )

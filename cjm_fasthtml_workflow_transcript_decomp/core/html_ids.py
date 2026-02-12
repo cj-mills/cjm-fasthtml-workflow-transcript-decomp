@@ -93,6 +93,7 @@ class StructureDecompHtmlIds:
     SHARED_TOOLBAR = "sd-shared-toolbar"
     SHARED_CONTROLS = "sd-shared-controls"
     SHARED_FOOTER = "sd-shared-footer"
+    ALIGNMENT_STATUS = "sd-alignment-status"
 
     # Phase 2: Combined Segment & Align - Columns
     DECOMP_COLUMN = "sd-decomp-column"
