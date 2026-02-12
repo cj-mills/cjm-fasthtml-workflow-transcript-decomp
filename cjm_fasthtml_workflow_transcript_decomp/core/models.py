@@ -91,10 +91,9 @@ class WorkingSegment:
     start_char: Optional[int] = None  # Start character index in source
     end_char: Optional[int] = None  # End character index in source
     
-    # Temporal coordinates (from VAD alignment)
+    # Temporal coordinates (populated when segment count matches VAD chunk count)
     start_time: Optional[float] = None  # Start time in seconds
     end_time: Optional[float] = None  # End time in seconds
-    vad_chunk_indices: List[int] = field(default_factory=list)  # Linked VAD chunk indices
     
     def to_dict(self) -> Dict[str, Any]:  # Dictionary representation
         """Convert to dictionary for JSON serialization."""
@@ -107,6 +106,8 @@ class WorkingSegment:
     ) -> "WorkingSegment":  # Reconstructed WorkingSegment
         """Create from dictionary."""
         data = data.copy()
+        # Remove legacy fields if present
+        data.pop("vad_chunk_indices", None)
         return cls(**data)
 
 # %% ../../nbs/core/models.ipynb #6557c735
@@ -117,7 +118,6 @@ class VADChunk:
     index: int  # Chunk index in sequence
     start_time: float  # Start time in seconds
     end_time: float  # End time in seconds
-    assigned_segment: Optional[int] = None  # Index of assigned segment (if any)
     
     @property
     def duration(self) -> float:  # Duration in seconds
@@ -134,6 +134,9 @@ class VADChunk:
         data: Dict[str, Any]  # Dictionary representation
     ) -> "VADChunk":  # Reconstructed VADChunk
         """Create from dictionary."""
+        data = data.copy()
+        # Remove legacy fields if present
+        data.pop("assigned_segment", None)
         return cls(**data)
 
 # %% ../../nbs/core/models.ipynb #ec8dbcd0

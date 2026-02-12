@@ -169,10 +169,6 @@ def merge_segments(
     start_time = first.start_time
     end_time = second.end_time if second.end_time is not None else first.end_time
     
-    # Combine VAD chunk indices
-    vad_indices = list(set(first.vad_chunk_indices + second.vad_chunk_indices))
-    vad_indices.sort()
-    
     return WorkingSegment(
         index=first.index,
         text=merged_text,
@@ -182,7 +178,6 @@ def merge_segments(
         end_char=end_char,
         start_time=start_time,
         end_time=end_time,
-        vad_chunk_indices=vad_indices
     )
 
 # %% ../../nbs/services/segmentation.ipynb #9eb1119f
