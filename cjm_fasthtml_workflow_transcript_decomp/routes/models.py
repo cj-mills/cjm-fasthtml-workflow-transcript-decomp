@@ -72,8 +72,6 @@ class AlignmentUrls:
 
     # Workflow-specific: chunk operations
     toggle_assign: str = ""  # Toggle chunk-to-segment assignment
-    auto_align: str = ""  # Auto-align all chunks to segments
-    clear_assignments: str = ""  # Clear all assignments
     undo: str = ""  # Undo last alignment operation
 
     # Workflow-specific: initialization
@@ -81,3 +79,4 @@ class AlignmentUrls:
 
     # Audio serving
     audio_src: str = ""  # Audio file serving URL base
+

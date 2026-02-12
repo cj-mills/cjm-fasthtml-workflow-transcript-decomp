@@ -77,12 +77,11 @@ from cjm_fasthtml_workflow_transcript_decomp.routes.alignment.card_stack import 
 from cjm_fasthtml_workflow_transcript_decomp.routes.alignment.handlers import (
     _handle_align_init,
     _handle_align_toggle_assign,
-    _handle_align_auto_align,
-    _handle_align_clear_assignments,
     _handle_align_undo,
 )
 
 from ..workflow.workflow import StructureDecompWorkflow
+
 
 # %% ../../nbs/routes/init.ipynb #f962d5e9
 def init_router(
@@ -401,18 +400,6 @@ def init_router(
         )
 
     @router
-    def align_auto_align(request, sess):
-        """Auto-align all VAD chunks to segments."""
-        return _handle_align_auto_align(workflow, request, sess, urls=_align_urls)
-
-    @router
-    def align_clear_assignments(request, sess):
-        """Clear all VAD chunk assignments."""
-        return _handle_align_clear_assignments(
-            workflow, request, sess, urls=_align_urls,
-        )
-
-    @router
     def align_undo(request, sess):
         """Undo the last alignment operation."""
         return _handle_align_undo(workflow, request, sess, urls=_align_urls)
@@ -479,8 +466,6 @@ def init_router(
             save_width=align_save_width.to(),
         ),
         toggle_assign=align_toggle_assign.to(),
-        auto_align=align_auto_align.to(),
-        clear_assignments=align_clear_assignments.to(),
         undo=align_undo.to(),
         init=align_init.to(),
         audio_src=audio_src.to(),
@@ -534,8 +519,6 @@ def init_router(
     workflow._alignment_routes = {
         "init": align_init,
         "toggle_assign": align_toggle_assign,
-        "auto_align": align_auto_align,
-        "clear_assignments": align_clear_assignments,
         "undo": align_undo,
         "nav_up": align_nav_up,
         "nav_down": align_nav_down,
@@ -548,3 +531,4 @@ def init_router(
     }
 
     return router
+

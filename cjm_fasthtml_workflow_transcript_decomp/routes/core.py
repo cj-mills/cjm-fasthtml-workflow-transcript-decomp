@@ -154,8 +154,6 @@ async def _handle_switch_chrome(
 
         hints_content = render_keyboard_hints_collapsible(kb_manager, include_zone_switch=True)
         toolbar_content = render_align_toolbar(
-            auto_align_url=align_urls.auto_align,
-            clear_url=align_urls.clear_assignments,
             undo_url=align_urls.undo,
             can_undo=(len(history) > 0),
             visible_count=visible_count,
@@ -190,6 +188,7 @@ async def _handle_switch_chrome(
     )
 
     return (hints_oob, toolbar_oob, controls_oob, footer_oob)
+
 
 # %% ../../nbs/routes/core.ipynb #afholvakfp5
 def _handle_audio_src(

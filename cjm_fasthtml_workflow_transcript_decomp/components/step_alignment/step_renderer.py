@@ -57,15 +57,13 @@ DEBUG_ALIGN_RENDER = False
 
 # %% ../../../nbs/components/step_alignment/step_renderer.ipynb #align-sr-toolbar
 def render_align_toolbar(
-    auto_align_url:str,  # URL for auto-align action
-    clear_url:str,  # URL for clear assignments action
     undo_url:str,  # URL for undo action
     can_undo:bool,  # Whether undo is available
     visible_count:int=DEFAULT_VISIBLE_COUNT,  # Current visible card count
     is_auto_mode:bool=False,  # Whether card count is in auto-adjust mode
     oob:bool=False,  # Whether to render as OOB swap
 ) -> Any:  # Toolbar component
-    """Render the alignment toolbar with action buttons and card count selector."""
+    """Render the alignment toolbar with undo button and card count selector."""
     return Div(
         # Left group: Undo button
         Button(
@@ -77,10 +75,10 @@ def render_align_toolbar(
             hx_swap="none"
         ),
 
-        # Left spacer
+        # Spacer
         Div(cls=str(grow())),
 
-        # Center: Card count selector
+        # Right: Card count selector
         Div(
             Span(
                 "Cards:",
@@ -94,32 +92,11 @@ def render_align_toolbar(
             cls=combine_classes(flex_display, items.center)
         ),
 
-        # Right spacer
-        Div(cls=str(grow())),
-
-        # Right group: Auto-align and Clear buttons
-        Div(
-            Button(
-                lucide_icon("wand-sparkles", size=4, cls=str(m.r(2))),
-                "Auto-Align",
-                cls=combine_classes(btn, btn_colors.secondary, btn_sizes.sm),
-                hx_post=auto_align_url,
-                hx_swap="none"
-            ),
-            Button(
-                lucide_icon("x", size=4, cls=str(m.r(2))),
-                "Clear",
-                cls=combine_classes(btn, btn_styles.ghost, btn_sizes.sm),
-                hx_post=clear_url,
-                hx_swap="none"
-            ),
-            cls=combine_classes(flex_display, gap(2))
-        ),
-
         id=StructureDecompHtmlIds.ALIGNMENT_TOOLBAR,
         cls=combine_classes(flex_display, gap(2), items.center),
         hx_swap_oob="true" if oob else None
     )
+
 
 # %% ../../../nbs/components/step_alignment/step_renderer.ipynb #align-sr-stats
 def render_align_stats(
