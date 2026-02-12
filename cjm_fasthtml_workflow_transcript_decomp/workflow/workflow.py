@@ -293,12 +293,17 @@ def _create_step_flow(
         return len(selected_sources) > 0
     
     def validate_decomposition(state: Dict[str, Any]) -> bool:
-        """Validate that decomposition is complete."""
+        """Validate that decomposition and alignment are complete (1:1)."""
         step_states = state.get("step_states", {})
+
         decomp_state = step_states.get("decomposition", {})
         segments = decomp_state.get("segments", [])
-        # Must have at least one segment
-        return len(segments) > 0
+
+        alignment_state = step_states.get("alignment", {})
+        vad_chunks = alignment_state.get("vad_chunks", [])
+
+        # Must have segments, VAD chunks, and counts must match (1:1 alignment)
+        return len(segments) > 0 and len(vad_chunks) > 0 and len(segments) == len(vad_chunks)
     
     def validate_review(state: Dict[str, Any]) -> bool:
         """Validate review step."""
