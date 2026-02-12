@@ -76,11 +76,9 @@ from cjm_fasthtml_workflow_transcript_decomp.routes.alignment.card_stack import 
 # Import Phase 2 (alignment) handlers — workflow-specific operations
 from cjm_fasthtml_workflow_transcript_decomp.routes.alignment.handlers import (
     _handle_align_init,
-    _handle_align_undo,
 )
 
 from ..workflow.workflow import StructureDecompWorkflow
-
 
 # %% ../../nbs/routes/init.ipynb #f962d5e9
 def init_router(
@@ -391,11 +389,6 @@ def init_router(
         """Initialize alignment from audio file via VAD plugin."""
         return await _handle_align_init(workflow, request, sess, urls=_align_urls)
 
-    @router
-    def align_undo(request, sess):
-        """Undo the last alignment operation."""
-        return _handle_align_undo(workflow, request, sess, urls=_align_urls)
-
     # -------------------------------------------------------------------------
     # Phase 2: Alignment Navigation Routes
     # -------------------------------------------------------------------------
@@ -457,7 +450,6 @@ def init_router(
             update_viewport=align_update_viewport.to(),
             save_width=align_save_width.to(),
         ),
-        undo=align_undo.to(),
         init=align_init.to(),
         audio_src=audio_src.to(),
     )
@@ -509,7 +501,6 @@ def init_router(
 
     workflow._alignment_routes = {
         "init": align_init,
-        "undo": align_undo,
         "nav_up": align_nav_up,
         "nav_down": align_nav_down,
         "nav_first": align_nav_first,
@@ -521,4 +512,3 @@ def init_router(
     }
 
     return router
-

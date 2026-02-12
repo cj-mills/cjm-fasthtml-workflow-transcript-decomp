@@ -10,10 +10,9 @@ from typing import Any, Dict, List, Optional, NamedTuple
 
 from cjm_fasthtml_interactions.core.state_store import get_session_id
 from cjm_fasthtml_card_stack.core.models import CardStackState
-from cjm_workflow_state.history import push_history, pop_history
 
 from cjm_fasthtml_workflow_transcript_decomp.core.models import (
-    VADChunk, WorkingSegment, AlignmentStepState
+    VADChunk, AlignmentStepState
 )
 
 # Debug flag for alignment state tracing (set False in production)
@@ -27,7 +26,6 @@ class AlignContext(NamedTuple):
     visible_count: int  # Number of visible cards in viewport
     is_auto_mode: bool  # Whether card count is in auto-adjust mode
     card_width: int  # Card stack width in rem
-    history: list  # Undo history stack
     media_path: Optional[str]  # Path to original audio file
     audio_duration: Optional[float]  # Total audio duration
 
@@ -53,7 +51,6 @@ def _load_alignment_context(
         visible_count=state.get("visible_count", 5),
         is_auto_mode=state.get("is_auto_mode", False),
         card_width=state.get("card_width", 40),
-        history=state.get("history", []),
         media_path=state.get("media_path"),
         audio_duration=state.get("audio_duration"),
     )
@@ -64,7 +61,6 @@ def _update_alignment_state(
     vad_chunks=None,  # Updated VAD chunks (serialized)
     focused_chunk_index=None,  # Updated focused chunk index
     is_initialized=None,  # Initialization flag
-    history=None,  # Updated history
     visible_count=None,  # Visible card count
     is_auto_mode=None,  # Auto-adjust mode flag
     card_width=None,  # Card stack width in rem
@@ -93,8 +89,6 @@ def _update_alignment_state(
         align_state["focused_chunk_index"] = focused_chunk_index
     if is_initialized is not None:
         align_state["is_initialized"] = is_initialized
-    if history is not None:
-        align_state["history"] = history
     if visible_count is not None:
         align_state["visible_count"] = visible_count
     if is_auto_mode is not None:
@@ -118,26 +112,6 @@ def _update_alignment_state(
         verify_state = workflow.state_store.get_state(workflow.config.workflow_id, session_id)
         print(f"[ALIGN_STATE] VERIFY: step_states keys = {list(verify_state.get('step_states', {}).keys())}")
 
-# %% ../../../nbs/routes/alignment/core.ipynb #align-rc-history
-def _push_alignment_history(
-    workflow:Any,  # StructureDecompWorkflow instance
-    session_id:str,  # Session identifier
-    current_chunks:List[Dict[str, Any]],  # Current chunk state to snapshot
-    focused_index:int,  # Current focused index to snapshot
-) -> int:  # New history depth after push
-    """Push current alignment state to history stack before making changes."""
-    state = _get_alignment_state(workflow, session_id)
-    history = state.get("history", [])
-
-    snapshot = {"vad_chunks": current_chunks, "focused_chunk_index": focused_index}
-    new_history = push_history(
-        history, snapshot,
-        max_depth=workflow.config.max_history_depth
-    )
-
-    _update_alignment_state(workflow, session_id, history=new_history)
-    return len(new_history)
-
 # %% ../../../nbs/routes/alignment/core.ipynb #align-rc-conversion
 def _to_vad_chunks(
     chunk_dicts:List[Dict[str, Any]]  # Serialized VAD chunk dictionaries
@@ -156,43 +130,3 @@ def _build_card_stack_state(
         card_width=ctx.card_width,
         active_mode=active_mode,
     )
-
-# %% ../../../nbs/routes/alignment/core.ipynb #align-rc-cross
-def _get_decomp_segments(
-    workflow:Any,  # StructureDecompWorkflow instance
-    session_id:str,  # Session identifier
-) -> List[WorkingSegment]:  # List of WorkingSegment objects
-    """Get decomposition segments from state."""
-    state = workflow.state_store.get_state(workflow.config.workflow_id, session_id)
-    step_states = state.get("step_states", {})
-    decomp_state = step_states.get("decomposition", {})
-    segment_dicts = decomp_state.get("segments", [])
-    return [WorkingSegment.from_dict(s) for s in segment_dicts]
-
-def _update_decomp_segments(
-    workflow:Any,  # StructureDecompWorkflow instance
-    session_id:str,  # Session identifier
-    segments:List[WorkingSegment],  # Updated segments to save
-) -> None:
-    """Update decomposition segments in state."""
-    # Read full state to preserve sibling step states
-    workflow_state = workflow.state_store.get_state(workflow.config.workflow_id, session_id)
-    step_states = workflow_state.get("step_states", {})
-    decomp_state = step_states.get("decomposition", {})
-
-    # Update segments
-    decomp_state["segments"] = [s.to_dict() for s in segments]
-
-    step_states["decomposition"] = decomp_state
-    workflow_state["step_states"] = step_states
-    workflow.state_store.update_state(workflow.config.workflow_id, session_id, workflow_state)
-
-def _get_decomp_focused_index(
-    workflow:Any,  # StructureDecompWorkflow instance
-    session_id:str,  # Session identifier
-) -> int:  # Currently focused segment index
-    """Get the decomposition focused segment index."""
-    state = workflow.state_store.get_state(workflow.config.workflow_id, session_id)
-    step_states = state.get("step_states", {})
-    decomp_state = step_states.get("decomposition", {})
-    return decomp_state.get("focused_index", 0)

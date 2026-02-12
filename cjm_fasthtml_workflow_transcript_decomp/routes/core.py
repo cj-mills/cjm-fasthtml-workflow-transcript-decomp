@@ -146,7 +146,6 @@ async def _handle_switch_chrome(
     else:
         # Alignment chrome
         chunks = [VADChunk.from_dict(c) for c in align_state.get("vad_chunks", [])]
-        history = align_state.get("history", [])
         focused_index = align_state.get("focused_chunk_index", 0)
         visible_count = align_state.get("visible_count", 5)
         is_auto_mode = align_state.get("is_auto_mode", False)
@@ -154,8 +153,6 @@ async def _handle_switch_chrome(
 
         hints_content = render_keyboard_hints_collapsible(kb_manager, include_zone_switch=True)
         toolbar_content = render_align_toolbar(
-            undo_url=align_urls.undo,
-            can_undo=(len(history) > 0),
             visible_count=visible_count,
             is_auto_mode=is_auto_mode,
         )
@@ -188,7 +185,6 @@ async def _handle_switch_chrome(
     )
 
     return (hints_oob, toolbar_oob, controls_oob, footer_oob)
-
 
 # %% ../../nbs/routes/core.ipynb #afholvakfp5
 def _handle_audio_src(

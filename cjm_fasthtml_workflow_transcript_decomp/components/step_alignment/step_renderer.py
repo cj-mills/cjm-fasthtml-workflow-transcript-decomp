@@ -9,10 +9,9 @@ __all__ = ['DEBUG_ALIGN_RENDER', 'render_align_toolbar', 'render_align_stats', '
 # %% ../../../nbs/components/step_alignment/step_renderer.ipynb #align-sr-imports
 from typing import Any, List, Optional
 
-from fasthtml.common import Div, Button, Span, Audio
+from fasthtml.common import Div, Span, Audio
 
 # DaisyUI components
-from cjm_fasthtml_daisyui.components.actions.button import btn, btn_sizes, btn_styles, btn_colors
 from cjm_fasthtml_daisyui.utilities.semantic_colors import text_dui
 
 # Tailwind utilities
@@ -24,9 +23,6 @@ from cjm_fasthtml_tailwind.utilities.flexbox_and_grid import (
     flex_display, flex_direction, justify, items, gap, grow
 )
 from cjm_fasthtml_tailwind.core.base import combine_classes
-
-# Lucide icons
-from cjm_fasthtml_lucide_icons.factory import lucide_icon
 
 # Card stack library
 from cjm_fasthtml_card_stack.components.viewport import render_viewport
@@ -57,24 +53,12 @@ DEBUG_ALIGN_RENDER = False
 
 # %% ../../../nbs/components/step_alignment/step_renderer.ipynb #align-sr-toolbar
 def render_align_toolbar(
-    undo_url:str,  # URL for undo action
-    can_undo:bool,  # Whether undo is available
     visible_count:int=DEFAULT_VISIBLE_COUNT,  # Current visible card count
     is_auto_mode:bool=False,  # Whether card count is in auto-adjust mode
     oob:bool=False,  # Whether to render as OOB swap
 ) -> Any:  # Toolbar component
-    """Render the alignment toolbar with undo button and card count selector."""
+    """Render the alignment toolbar with card count selector."""
     return Div(
-        # Left group: Undo button
-        Button(
-            lucide_icon("undo-2", size=4, cls=str(m.r(2))),
-            "Undo",
-            cls=combine_classes(btn, btn_styles.ghost, btn_sizes.sm),
-            disabled=None if can_undo else "disabled",
-            hx_post=undo_url,
-            hx_swap="none"
-        ),
-
         # Spacer
         Div(cls=str(grow())),
 
@@ -96,7 +80,6 @@ def render_align_toolbar(
         cls=combine_classes(flex_display, gap(2), items.center),
         hx_swap_oob="true" if oob else None
     )
-
 
 # %% ../../../nbs/components/step_alignment/step_renderer.ipynb #align-sr-stats
 def render_align_stats(

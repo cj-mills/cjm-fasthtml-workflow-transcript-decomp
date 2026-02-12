@@ -70,12 +70,8 @@ class AlignmentUrls:
     # Card stack navigation and viewport (from cjm-fasthtml-card-stack library)
     card_stack: CardStackUrls = field(default_factory=CardStackUrls)
 
-    # Workflow-specific: operations
-    undo: str = ""  # Undo last alignment operation
-
     # Workflow-specific: initialization
     init: str = ""  # Initialize alignment (fetch VAD data)
 
     # Audio serving
     audio_src: str = ""  # Audio file serving URL base
-

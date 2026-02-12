@@ -54,7 +54,6 @@ class AlignmentStepState(TypedDict, total=False):
     visible_count: int  # Number of visible cards in viewport
     is_auto_mode: bool  # Whether card count is in auto-adjust mode
     card_width: int  # Card stack width in rem units
-    history: List[Dict[str, Any]]  # Undo history (generic snapshots)
 
 # %% ../../nbs/core/models.ipynb #2a1u6xderpe
 class ReviewStepState(TypedDict, total=False):
