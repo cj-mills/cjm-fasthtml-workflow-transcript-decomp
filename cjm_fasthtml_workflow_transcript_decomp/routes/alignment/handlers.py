@@ -61,7 +61,6 @@ def _build_mutation_response(
     history_depth:int,  # Current history depth (for undo button state)
     urls:AlignmentUrls,  # URL bundle
     is_auto_mode:bool=False,  # Whether card count is in auto-adjust mode
-    focused_segment_index:int=0,  # Currently focused text segment
     segments:List[WorkingSegment]=None,  # Decomp segments (for cross-state mini-stats)
 ) -> Tuple:  # OOB response tuple
     """Build the standard OOB response for alignment mutation handlers."""
@@ -72,9 +71,7 @@ def _build_mutation_response(
     chunks = _to_vad_chunks(chunk_dicts)
 
     # Navigation OOB (slots + progress + focus)
-    nav_response = _build_nav_response(
-        chunk_dicts, cs_state, urls, focused_segment_index
-    )
+    nav_response = _build_nav_response(chunk_dicts, cs_state, urls)
 
     # Alignment stats OOB
     stats_oob = render_align_stats(chunks, oob=True)
@@ -178,9 +175,6 @@ async def _handle_align_init(
         audio_duration=audio_duration,
     )
 
-    # Get decomp focused segment for card rendering
-    focused_seg = _get_decomp_focused_index(workflow, session_id)
-
     # Render column body (Web Audio API handles accurate seeking)
     column_body = render_align_column_body(
         chunks=chunks,
@@ -190,7 +184,6 @@ async def _handle_align_init(
         urls=urls,
         kb_system=None,
         media_path=media_path,
-        focused_segment_index=focused_seg,
     )
 
     # Mini-stats badge OOB update for the column header
@@ -204,6 +197,7 @@ async def _handle_align_init(
         print(f"[ALIGN_INIT] Returning column_body + mini_stats_oob")
 
     return (column_body, mini_stats_oob)
+
 
 # %% ../../../nbs/routes/alignment/handlers.ipynb #align-hd-undo
 def _handle_align_undo(
@@ -254,8 +248,6 @@ def _handle_align_undo(
     )
     _update_decomp_segments(workflow, session_id, segments)
 
-    focused_seg_idx = _get_decomp_focused_index(workflow, session_id)
-
     return _build_mutation_response(
         chunk_dicts=restored_chunks,
         focused_index=restored_focused,
@@ -263,6 +255,6 @@ def _handle_align_undo(
         history_depth=len(new_history),
         urls=urls,
         is_auto_mode=ctx.is_auto_mode,
-        focused_segment_index=focused_seg_idx,
         segments=segments,
     )
+

@@ -42,12 +42,9 @@ from ...services.formatting import format_time_precise
 def render_vad_card(
     chunk:VADChunk,  # VAD chunk to render
     card_role:CardRole,  # Role of this card in viewport ("focused" or "context")
-    focused_segment_index:int,  # Currently focused text segment index
 ) -> Any:  # VAD chunk card component
-    """Render a single VAD chunk card with time range, assignment, and playing indicator."""
+    """Render a single VAD chunk card with time range, duration, and playing indicator."""
     is_focused = card_role == "focused"
-    is_assigned = chunk.assigned_segment is not None
-    is_assigned_to_focused = chunk.assigned_segment == focused_segment_index
 
     # Time range display
     time_range = Span(
@@ -63,19 +60,6 @@ def render_vad_card(
         f"{chunk.duration:.1f}s",
         cls=combine_classes(badge, badge_styles.ghost, font_size.xs, font_family.mono)
     )
-
-    # Assignment indicator
-    if is_assigned:
-        assign_cls = text_dui.success if is_assigned_to_focused else text_dui.base_content.opacity(50)
-        assignment = Span(
-            f"\u2192 #{chunk.assigned_segment + 1}",
-            cls=combine_classes(font_size.xs, font_weight.bold, assign_cls)
-        )
-    else:
-        assignment = Span(
-            "\u2014",
-            cls=combine_classes(font_size.xs, text_dui.base_content.opacity(30))
-        )
 
     # Playing indicator — hidden by default, toggled visible by JS during audio playback
     playing_indicator = Div(
@@ -107,12 +91,6 @@ def render_vad_card(
             # Duration badge
             duration_badge,
 
-            # Assignment indicator
-            Div(
-                assignment,
-                cls=combine_classes(w(16), shrink(0), flex_display, items.center, justify.end)
-            ),
-
             cls=combine_classes(
                 card_body, p(3),
                 flex_display, items.center, gap(3)
@@ -136,10 +114,9 @@ def render_vad_card(
         data_card_role=card_role
     )
 
+
 # %% ../../../nbs/components/step_alignment/vad_card.ipynb #vad-card-factory
-def create_vad_card_renderer(
-    focused_segment_index:int=0,  # Currently focused text segment index
-) -> Callable:  # Card renderer callback: (item, CardRenderContext) -> FT
+def create_vad_card_renderer() -> Callable:  # Card renderer callback: (item, CardRenderContext) -> FT
     """Create a card renderer callback for VAD chunk cards."""
     def _render(
         item:Any,  # VADChunk instance
@@ -149,6 +126,6 @@ def create_vad_card_renderer(
         return render_vad_card(
             chunk=item,
             card_role=context.card_role,
-            focused_segment_index=focused_segment_index,
         )
     return _render
+

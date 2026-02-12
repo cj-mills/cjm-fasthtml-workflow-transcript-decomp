@@ -25,23 +25,15 @@ from cjm_fasthtml_workflow_transcript_decomp.components.step_alignment.vad_card 
 from ..models import AlignmentUrls
 from cjm_fasthtml_workflow_transcript_decomp.routes.alignment.core import (
     _load_alignment_context, _update_alignment_state, _build_card_stack_state,
-    _to_vad_chunks, _get_decomp_focused_index,
+    _to_vad_chunks,
 )
 
-# %% ../../../nbs/routes/alignment/card_stack.ipynb #align-cs-nav-response
-def _make_renderer(
-    focused_segment_index:int=0,  # Currently focused text segment
-) -> Any:  # Card renderer callback
-    """Create a VAD card renderer with captured segment focus state."""
-    return create_vad_card_renderer(
-        focused_segment_index=focused_segment_index,
-    )
 
+# %% ../../../nbs/routes/alignment/card_stack.ipynb #align-cs-nav-response
 def _build_nav_response(
     chunk_dicts:List[Dict[str, Any]],  # Serialized VAD chunks
     state:CardStackState,  # Current card stack state
     urls:AlignmentUrls,  # URL bundle
-    focused_segment_index:int=0,  # Currently focused text segment
 ) -> Tuple:  # OOB response elements (slots + progress + focus)
     """Build OOB response for navigation changes."""
     chunks = _to_vad_chunks(chunk_dicts)
@@ -51,9 +43,10 @@ def _build_nav_response(
         config=ALIGN_CS_CONFIG,
         ids=ALIGN_CS_IDS,
         urls=urls.card_stack,
-        render_card=_make_renderer(focused_segment_index),
+        render_card=create_vad_card_renderer(),
         progress_label="VAD Chunk",
     )
+
 
 # %% ../../../nbs/routes/alignment/card_stack.ipynb #align-cs-navigate
 def _handle_align_navigate(
@@ -68,8 +61,7 @@ def _handle_align_navigate(
     chunks = _to_vad_chunks(ctx.chunk_dicts)
 
     state = _build_card_stack_state(ctx)
-    focused_seg = _get_decomp_focused_index(workflow, session_id)
-    renderer = _make_renderer(focused_seg)
+    renderer = create_vad_card_renderer()
 
     result = card_stack_navigate(
         direction=direction,
@@ -85,6 +77,7 @@ def _handle_align_navigate(
     _update_alignment_state(workflow, session_id, focused_chunk_index=state.focused_index)
     return result
 
+
 # %% ../../../nbs/routes/alignment/card_stack.ipynb #align-cs-viewport
 async def _handle_align_update_viewport(
     workflow:Any,  # StructureDecompWorkflow instance
@@ -99,8 +92,7 @@ async def _handle_align_update_viewport(
     chunks = _to_vad_chunks(ctx.chunk_dicts)
 
     state = _build_card_stack_state(ctx)
-    focused_seg = _get_decomp_focused_index(workflow, session_id)
-    renderer = _make_renderer(focused_seg)
+    renderer = create_vad_card_renderer()
 
     result = card_stack_update_viewport(
         visible_count=visible_count,
@@ -123,6 +115,7 @@ async def _handle_align_update_viewport(
         is_auto_mode=is_auto_mode,
     )
     return result
+
 
 # %% ../../../nbs/routes/alignment/card_stack.ipynb #align-cs-save-width
 def _handle_align_save_width(

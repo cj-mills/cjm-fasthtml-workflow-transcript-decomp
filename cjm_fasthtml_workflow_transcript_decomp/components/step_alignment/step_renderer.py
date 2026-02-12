@@ -105,17 +105,17 @@ def render_align_stats(
 ) -> Any:  # Statistics component
     """Render alignment statistics."""
     total = len(chunks)
-    assigned = sum(1 for c in chunks if c.assigned_segment is not None)
     total_dur = sum(c.duration for c in chunks) if chunks else 0.0
 
     return Div(
         Span(
-            f"{total} chunks \u00b7 {total_dur:.1f}s total \u00b7 {assigned} assigned",
+            f"{total} chunks \u00b7 {total_dur:.1f}s total",
             cls=combine_classes(font_size.sm, text_dui.base_content.opacity(70))
         ),
         id=StructureDecompHtmlIds.ALIGNMENT_STATS,
         hx_swap_oob="true" if oob else None
     )
+
 
 # %% ../../../nbs/components/step_alignment/step_renderer.ipynb #align-sr-body
 def render_align_column_body(
@@ -126,7 +126,6 @@ def render_align_column_body(
     urls:AlignmentUrls,  # URL bundle for alignment routes
     kb_system:Any=None,  # Rendered keyboard system (None when KB managed externally)
     media_path:Optional[str]=None,  # Path to audio file for playback
-    focused_segment_index:int=0,  # Currently focused text segment (from decomp state)
 ) -> Any:  # Div with id=ALIGNMENT_COLUMN_CONTENT
     """Render the alignment column content area with card stack viewport."""
     if DEBUG_ALIGN_RENDER:
@@ -136,9 +135,7 @@ def render_align_column_body(
         print(f"[ALIGN_RENDER] urls.audio_src: {urls.audio_src if urls else None}")
 
     # Create card renderer callback
-    card_renderer = create_vad_card_renderer(
-        focused_segment_index=focused_segment_index,
-    )
+    card_renderer = create_vad_card_renderer()
 
     # Build CardStackState for library viewport
     cs_state = CardStackState(
@@ -210,6 +207,7 @@ def render_align_column_body(
         id=StructureDecompHtmlIds.ALIGNMENT_COLUMN_CONTENT,
         cls=combine_classes(grow(), min_h(0), overflow.hidden, flex_display, flex_direction.col)
     )
+
 
 # %% ../../../nbs/components/step_alignment/step_renderer.ipynb #align-sr-footer
 def render_align_footer_content(

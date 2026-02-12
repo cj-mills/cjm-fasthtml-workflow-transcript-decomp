@@ -433,7 +433,6 @@ def render_combined_step(
         align_width = _get_alignment_card_width(ctx, default=40)
         # Web Audio API handles accurate seeking
         media_path = _get_media_path(ctx)
-        decomp_focused = _get_focused_index(ctx) if is_decomp_init else 0
 
         if DEBUG_COMBINED_RENDER:
             print(f"[COMBINED_RENDER] media_path: {media_path}")
@@ -446,7 +445,6 @@ def render_combined_step(
             urls=align_urls,
             kb_system=None,  # KB system is in stable container
             media_path=media_path,
-            focused_segment_index=decomp_focused,
         )
         align_mini_text = render_align_mini_stats_text(chunks)
 
@@ -547,3 +545,4 @@ def render_combined_step(
             p(4), p.x(2), p.b(0)
         )
     )
+
