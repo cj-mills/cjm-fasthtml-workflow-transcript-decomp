@@ -70,8 +70,7 @@ class AlignmentUrls:
     # Card stack navigation and viewport (from cjm-fasthtml-card-stack library)
     card_stack: CardStackUrls = field(default_factory=CardStackUrls)
 
-    # Workflow-specific: chunk operations
-    toggle_assign: str = ""  # Toggle chunk-to-segment assignment
+    # Workflow-specific: operations
     undo: str = ""  # Undo last alignment operation
 
     # Workflow-specific: initialization

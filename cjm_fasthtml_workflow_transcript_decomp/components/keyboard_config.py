@@ -45,7 +45,7 @@ from cjm_fasthtml_workflow_transcript_decomp.components.step_decomposition.card_
 
 # Alignment-specific keyboard config (building blocks)
 from cjm_fasthtml_workflow_transcript_decomp.components.step_alignment.keyboard_config import (
-    SD_ALIGN_TOGGLE_ASSIGN_BTN, SD_ALIGN_UNDO_BTN,
+    SD_ALIGN_UNDO_BTN,
     create_align_kb_parts,
 )
 from cjm_fasthtml_workflow_transcript_decomp.components.step_alignment.card_stack_config import (
@@ -57,6 +57,7 @@ from ..routes.models import DecompUrls, AlignmentUrls
 
 # Debug flag for keyboard system tracing (set False in production)
 DEBUG_KB_SYSTEM = True
+
 
 # %% ../../nbs/components/keyboard_config.ipynb #kb-hints
 def render_keyboard_hints_collapsible(
@@ -157,7 +158,6 @@ def build_combined_kb_system(
     # Alignment URL mappings
     align_url_map = {
         **build_card_stack_url_map(ALIGN_CS_BTN_IDS, align_urls.card_stack),
-        SD_ALIGN_TOGGLE_ASSIGN_BTN: align_urls.toggle_assign,
         SD_ALIGN_UNDO_BTN: align_urls.undo,
     }
 
@@ -195,6 +195,7 @@ def build_combined_kb_system(
         print(f"[KB_SYSTEM] combined kb_system built successfully")
 
     return kb_manager, kb_system
+
 
 # %% ../../nbs/components/keyboard_config.ipynb #0rck8zsx5u8m
 # Hidden button ID for chrome swap HTMX trigger

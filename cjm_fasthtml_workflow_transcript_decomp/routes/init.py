@@ -76,7 +76,6 @@ from cjm_fasthtml_workflow_transcript_decomp.routes.alignment.card_stack import 
 # Import Phase 2 (alignment) handlers — workflow-specific operations
 from cjm_fasthtml_workflow_transcript_decomp.routes.alignment.handlers import (
     _handle_align_init,
-    _handle_align_toggle_assign,
     _handle_align_undo,
 )
 
@@ -393,13 +392,6 @@ def init_router(
         return await _handle_align_init(workflow, request, sess, urls=_align_urls)
 
     @router
-    def align_toggle_assign(request, sess, chunk_index: int):
-        """Toggle assignment of a VAD chunk to the focused text segment."""
-        return _handle_align_toggle_assign(
-            workflow, request, sess, chunk_index, urls=_align_urls,
-        )
-
-    @router
     def align_undo(request, sess):
         """Undo the last alignment operation."""
         return _handle_align_undo(workflow, request, sess, urls=_align_urls)
@@ -465,7 +457,6 @@ def init_router(
             update_viewport=align_update_viewport.to(),
             save_width=align_save_width.to(),
         ),
-        toggle_assign=align_toggle_assign.to(),
         undo=align_undo.to(),
         init=align_init.to(),
         audio_src=audio_src.to(),
@@ -518,7 +509,6 @@ def init_router(
 
     workflow._alignment_routes = {
         "init": align_init,
-        "toggle_assign": align_toggle_assign,
         "undo": align_undo,
         "nav_up": align_nav_up,
         "nav_down": align_nav_down,
