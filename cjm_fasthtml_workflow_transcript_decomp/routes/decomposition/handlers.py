@@ -46,7 +46,7 @@ from cjm_fasthtml_workflow_transcript_decomp.services.segmentation import (
 from cjm_fasthtml_workflow_transcript_decomp.routes.decomposition.core import (
     _to_segments, _load_decomp_context, _get_decomp_state,
     _get_selection_state, _update_decomp_state, _push_history,
-    _build_card_stack_state,
+    _build_card_stack_state, _try_auto_populate_times,
 )
 from cjm_fasthtml_workflow_transcript_decomp.routes.decomposition.card_stack import (
     _build_slots_oob, _build_nav_response
@@ -133,6 +133,9 @@ async def _handle_decomp_init(
             source_blocks
         )
         segment_dicts = [s.to_dict() for s in working_segments]
+
+        # Try to auto-populate times if VAD chunks already available and counts match
+        segment_dicts = _try_auto_populate_times(workflow, session_id, segment_dicts)
 
         # Store in state
         _update_decomp_state(
@@ -271,6 +274,9 @@ async def _handle_decomp_split(
     reindexed = reindex_segments(_to_segments(new_segments))
     new_segment_dicts = [s.to_dict() for s in reindexed]
 
+    # Try to auto-populate times if counts now match VAD chunks
+    new_segment_dicts = _try_auto_populate_times(workflow, session_id, new_segment_dicts)
+
     # Update state — focus moves to the new segment (second half)
     new_focused_index = segment_index + 1
     _update_decomp_state(workflow, session_id,
@@ -283,11 +289,11 @@ async def _handle_decomp_split(
 
 # %% ../../../nbs/routes/decomposition/handlers.ipynb #dh-merge
 def _handle_decomp_merge(
-    workflow: StructureDecompWorkflow,  # The workflow instance
+    workflow:StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    segment_index: int,  # Index of segment to merge (merges with previous)
-    urls: DecompUrls,  # URL bundle for decomposition routes
+    segment_index:int,  # Index of segment to merge (merges with previous)
+    urls:DecompUrls,  # URL bundle for decomposition routes
 ):  # OOB slot updates with stats, progress, focus, and toolbar
     """Merge a segment with the previous segment."""
     session_id = get_session_id(sess)
@@ -314,6 +320,9 @@ def _handle_decomp_merge(
     reindexed = reindex_segments(_to_segments(new_segments))
     new_segment_dicts = [s.to_dict() for s in reindexed]
     
+    # Try to auto-populate times if counts now match VAD chunks
+    new_segment_dicts = _try_auto_populate_times(workflow, session_id, new_segment_dicts)
+    
     # Update state — focus moves to merged segment (previous position)
     new_focused_index = segment_index - 1
     _update_decomp_state(workflow, session_id,
@@ -326,10 +335,10 @@ def _handle_decomp_merge(
 
 # %% ../../../nbs/routes/decomposition/handlers.ipynb #dh-undo
 def _handle_decomp_undo(
-    workflow: StructureDecompWorkflow,  # The workflow instance
+    workflow:StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    urls: DecompUrls,  # URL bundle for decomposition routes
+    urls:DecompUrls,  # URL bundle for decomposition routes
 ):  # OOB slot updates with stats, progress, focus, and toolbar
     """Undo the last operation by restoring previous state from history."""
     session_id = get_session_id(sess)
@@ -344,6 +353,9 @@ def _handle_decomp_undo(
     previous_segments = snapshot["segments"]
     new_focused_index = min(snapshot["focused_index"], max(0, len(previous_segments) - 1))
     
+    # Try to auto-populate times if counts now match VAD chunks
+    previous_segments = _try_auto_populate_times(workflow, session_id, previous_segments)
+    
     _update_decomp_state(workflow, session_id,
         segments=previous_segments, history=remaining_history,
         focused_index=new_focused_index,
@@ -355,10 +367,10 @@ def _handle_decomp_undo(
 
 # %% ../../../nbs/routes/decomposition/handlers.ipynb #dh-reset
 def _handle_decomp_reset(
-    workflow: StructureDecompWorkflow,  # The workflow instance
+    workflow:StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    urls: DecompUrls,  # URL bundle for decomposition routes
+    urls:DecompUrls,  # URL bundle for decomposition routes
 ):  # OOB slot updates with stats, progress, focus, and toolbar
     """Reset segments to the initial NLTK split result."""
     session_id = get_session_id(sess)
@@ -371,21 +383,25 @@ def _handle_decomp_reset(
     if ctx.segment_dicts:
         history_depth = _push_history(workflow, session_id, ctx.segment_dicts, ctx.focused_index)
     
+    # Try to auto-populate times if counts match VAD chunks
+    initial_segments_copy = initial_segments.copy()
+    initial_segments_copy = _try_auto_populate_times(workflow, session_id, initial_segments_copy)
+    
     # Restore initial segments — reset focus to first segment
     _update_decomp_state(workflow, session_id,
-        segments=initial_segments.copy(), focused_index=0,
+        segments=initial_segments_copy, focused_index=0,
     )
     
     return _build_mutation_response(
-        initial_segments, 0, ctx.visible_count, history_depth, urls, is_auto_mode=ctx.is_auto_mode,
+        initial_segments_copy, 0, ctx.visible_count, history_depth, urls, is_auto_mode=ctx.is_auto_mode,
     )
 
 # %% ../../../nbs/routes/decomposition/handlers.ipynb #dh-ai-split
 async def _handle_decomp_ai_split(
-    workflow: StructureDecompWorkflow,  # The workflow instance
+    workflow:StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    urls: DecompUrls,  # URL bundle for decomposition routes
+    urls:DecompUrls,  # URL bundle for decomposition routes
 ):  # OOB slot updates with stats, progress, focus, and toolbar
     """Re-run AI (NLTK) sentence splitting on all current text."""
     session_id = get_session_id(sess)
@@ -406,6 +422,9 @@ async def _handle_decomp_ai_split(
         source_blocks
     )
     new_segment_dicts = [s.to_dict() for s in working_segments]
+    
+    # Try to auto-populate times if counts now match VAD chunks
+    new_segment_dicts = _try_auto_populate_times(workflow, session_id, new_segment_dicts)
     
     # Update state — reset focus to first segment
     _update_decomp_state(workflow, session_id,

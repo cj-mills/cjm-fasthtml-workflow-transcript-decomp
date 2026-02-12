@@ -123,157 +123,158 @@ graph LR
     services_text_utils[services.text_utils<br/>text_utils]
     workflow_workflow[workflow.workflow<br/>workflow]
 
-    components_keyboard_config --> components_step_decomposition_keyboard_config
-    components_keyboard_config --> components_step_decomposition_card_stack_config
-    components_keyboard_config --> components_step_alignment_card_stack_config
-    components_keyboard_config --> routes_models
-    components_keyboard_config --> core_html_ids
     components_keyboard_config --> components_step_alignment_keyboard_config
+    components_keyboard_config --> components_step_alignment_card_stack_config
+    components_keyboard_config --> components_step_decomposition_card_stack_config
+    components_keyboard_config --> components_step_decomposition_keyboard_config
+    components_keyboard_config --> core_html_ids
+    components_keyboard_config --> routes_models
     components_step_alignment_helpers --> core_models
     components_step_alignment_step_renderer --> components_step_alignment_card_stack_config
-    components_step_alignment_step_renderer --> routes_models
-    components_step_alignment_step_renderer --> core_models
     components_step_alignment_step_renderer --> core_html_ids
-    components_step_alignment_step_renderer --> components_step_alignment_vad_card
+    components_step_alignment_step_renderer --> routes_models
     components_step_alignment_step_renderer --> components_step_alignment_callbacks
-    components_step_alignment_vad_card --> core_models
+    components_step_alignment_step_renderer --> core_models
+    components_step_alignment_step_renderer --> components_step_alignment_vad_card
     components_step_alignment_vad_card --> core_html_ids
     components_step_alignment_vad_card --> services_formatting
+    components_step_alignment_vad_card --> core_models
+    components_step_combined --> components_step_alignment_card_stack_config
     components_step_combined --> components_step_alignment_helpers
-    components_step_combined --> components_step_decomposition_step_renderer
     components_step_combined --> components_step_decomposition_helpers
+    components_step_combined --> components_step_decomposition_card_stack_config
+    components_step_combined --> components_step_decomposition_step_renderer
     components_step_combined --> core_models
     components_step_combined --> components_keyboard_config
-    components_step_combined --> components_step_decomposition_card_stack_config
-    components_step_combined --> components_step_alignment_card_stack_config
-    components_step_combined --> routes_models
     components_step_combined --> components_step_alignment_step_renderer
+    components_step_combined --> routes_models
     components_step_combined --> core_html_ids
     components_step_decomposition_helpers --> core_models
     components_step_decomposition_keyboard_config --> components_step_decomposition_card_stack_config
+    components_step_decomposition_segment_card --> core_html_ids
     components_step_decomposition_segment_card --> components_step_decomposition_card_stack_config
     components_step_decomposition_segment_card --> core_models
-    components_step_decomposition_segment_card --> core_html_ids
-    components_step_decomposition_step_renderer --> components_step_decomposition_card_stack_config
-    components_step_decomposition_step_renderer --> core_models
-    components_step_decomposition_step_renderer --> components_step_decomposition_segment_card
-    components_step_decomposition_step_renderer --> routes_models
-    components_step_decomposition_step_renderer --> components_step_decomposition_callbacks
-    components_step_decomposition_step_renderer --> core_html_ids
     components_step_decomposition_step_renderer --> services_text_utils
+    components_step_decomposition_step_renderer --> components_step_decomposition_card_stack_config
+    components_step_decomposition_step_renderer --> core_html_ids
+    components_step_decomposition_step_renderer --> components_step_decomposition_callbacks
+    components_step_decomposition_step_renderer --> components_step_decomposition_segment_card
+    components_step_decomposition_step_renderer --> core_models
+    components_step_decomposition_step_renderer --> routes_models
     components_step_selection_helpers --> core_models
-    components_step_selection_local_files --> components_step_selection_helpers
     components_step_selection_local_files --> core_html_ids
+    components_step_selection_local_files --> components_step_selection_helpers
     components_step_selection_preview_panel --> core_html_ids
     components_step_selection_selection_queue --> core_html_ids
-    components_step_selection_source_browser --> services_source_utils
+    components_step_selection_source_browser --> services_text_utils
     components_step_selection_source_browser --> services_formatting
     components_step_selection_source_browser --> core_html_ids
-    components_step_selection_source_browser --> services_text_utils
-    components_step_selection_step_renderer --> routes_models
-    components_step_selection_step_renderer --> components_step_selection_helpers
+    components_step_selection_source_browser --> services_source_utils
     components_step_selection_step_renderer --> components_step_selection_local_files
-    components_step_selection_step_renderer --> components_step_selection_preview_panel
-    components_step_selection_step_renderer --> components_step_selection_source_browser
-    components_step_selection_step_renderer --> core_html_ids
     components_step_selection_step_renderer --> services_text_utils
+    components_step_selection_step_renderer --> core_html_ids
+    components_step_selection_step_renderer --> components_step_selection_helpers
+    components_step_selection_step_renderer --> routes_models
+    components_step_selection_step_renderer --> components_step_selection_source_browser
     components_step_selection_step_renderer --> components_step_selection_selection_queue
+    components_step_selection_step_renderer --> components_step_selection_preview_panel
     components_steps --> core_html_ids
-    routes_alignment_card_stack --> routes_alignment_core
     routes_alignment_card_stack --> components_step_alignment_card_stack_config
+    routes_alignment_card_stack --> routes_alignment_core
     routes_alignment_card_stack --> routes_models
     routes_alignment_card_stack --> components_step_alignment_vad_card
     routes_alignment_core --> core_models
-    routes_alignment_handlers --> routes_alignment_core
-    routes_alignment_handlers --> components_step_alignment_step_renderer
-    routes_alignment_handlers --> routes_alignment_card_stack
     routes_alignment_handlers --> components_step_alignment_card_stack_config
+    routes_alignment_handlers --> routes_alignment_core
+    routes_alignment_handlers --> core_html_ids
+    routes_alignment_handlers --> components_step_alignment_step_renderer
     routes_alignment_handlers --> routes_models
     routes_alignment_handlers --> core_models
-    routes_alignment_handlers --> core_html_ids
-    routes_core --> core_models
-    routes_core --> components_keyboard_config
-    routes_core --> components_step_decomposition_card_stack_config
-    routes_core --> components_step_alignment_step_renderer
+    routes_alignment_handlers --> routes_alignment_card_stack
     routes_core --> components_step_alignment_card_stack_config
+    routes_core --> workflow_workflow
+    routes_core --> components_step_decomposition_card_stack_config
+    routes_core --> components_keyboard_config
+    routes_core --> core_html_ids
+    routes_core --> components_step_alignment_step_renderer
     routes_core --> routes_models
     routes_core --> components_step_decomposition_step_renderer
-    routes_core --> workflow_workflow
-    routes_core --> core_html_ids
-    routes_decomposition_card_stack --> routes_decomposition_core
+    routes_core --> core_models
+    routes_decomposition_card_stack --> workflow_workflow
     routes_decomposition_card_stack --> components_step_decomposition_card_stack_config
+    routes_decomposition_card_stack --> routes_decomposition_core
     routes_decomposition_card_stack --> components_step_decomposition_segment_card
     routes_decomposition_card_stack --> routes_models
-    routes_decomposition_card_stack --> workflow_workflow
-    routes_decomposition_core --> workflow_workflow
     routes_decomposition_core --> core_models
-    routes_decomposition_handlers --> components_step_decomposition_step_renderer
-    routes_decomposition_handlers --> routes_decomposition_core
-    routes_decomposition_handlers --> components_keyboard_config
+    routes_decomposition_core --> workflow_workflow
+    routes_decomposition_core --> services_alignment
     routes_decomposition_handlers --> components_step_combined
-    routes_decomposition_handlers --> services_text_utils
-    routes_decomposition_handlers --> routes_decomposition_card_stack
-    routes_decomposition_handlers --> services_segmentation
-    routes_decomposition_handlers --> core_models
-    routes_decomposition_handlers --> components_step_decomposition_card_stack_config
-    routes_decomposition_handlers --> routes_models
+    routes_decomposition_handlers --> routes_decomposition_core
     routes_decomposition_handlers --> workflow_workflow
+    routes_decomposition_handlers --> components_step_decomposition_card_stack_config
+    routes_decomposition_handlers --> components_keyboard_config
     routes_decomposition_handlers --> core_html_ids
-    routes_init --> routes_models
-    routes_init --> routes_decomposition_card_stack
-    routes_init --> routes_selection_local_files
+    routes_decomposition_handlers --> routes_decomposition_card_stack
+    routes_decomposition_handlers --> components_step_decomposition_step_renderer
+    routes_decomposition_handlers --> services_text_utils
+    routes_decomposition_handlers --> services_segmentation
+    routes_decomposition_handlers --> routes_models
+    routes_decomposition_handlers --> core_models
+    routes_init --> routes_alignment_card_stack
+    routes_init --> workflow_workflow
+    routes_init --> routes_alignment_handlers
     routes_init --> routes_decomposition_handlers
+    routes_init --> routes_selection_local_files
     routes_init --> routes_selection_filtering
+    routes_init --> routes_decomposition_card_stack
     routes_init --> routes_selection_queue
     routes_init --> routes_core
-    routes_init --> routes_alignment_card_stack
+    routes_init --> routes_models
     routes_init --> routes_selection_tabs
-    routes_init --> routes_alignment_handlers
-    routes_init --> workflow_workflow
-    routes_selection_core --> routes_models
     routes_selection_core --> components_step_selection_source_browser
+    routes_selection_core --> components_step_selection_selection_queue
+    routes_selection_core --> routes_models
     routes_selection_core --> workflow_workflow
     routes_selection_core --> components_step_selection_step_renderer
-    routes_selection_core --> components_step_selection_selection_queue
-    routes_selection_filtering --> routes_selection_core
-    routes_selection_filtering --> routes_models
-    routes_selection_filtering --> services_source_utils
     routes_selection_filtering --> components_step_selection_source_browser
+    routes_selection_filtering --> routes_selection_core
+    routes_selection_filtering --> services_source_utils
+    routes_selection_filtering --> routes_models
     routes_selection_filtering --> workflow_workflow
-    routes_selection_local_files --> routes_models
-    routes_selection_local_files --> routes_selection_core
-    routes_selection_local_files --> services_source
     routes_selection_local_files --> components_step_selection_local_files
+    routes_selection_local_files --> services_source
+    routes_selection_local_files --> routes_selection_core
+    routes_selection_local_files --> routes_models
     routes_selection_local_files --> workflow_workflow
     routes_selection_queue --> routes_selection_core
     routes_selection_queue --> routes_models
-    routes_selection_queue --> components_step_selection_preview_panel
     routes_selection_queue --> services_source_utils
     routes_selection_queue --> workflow_workflow
-    routes_selection_tabs --> routes_models
+    routes_selection_queue --> components_step_selection_preview_panel
     routes_selection_tabs --> components_step_selection_local_files
-    routes_selection_tabs --> routes_selection_core
-    routes_selection_tabs --> components_step_selection_source_browser
     routes_selection_tabs --> services_source_utils
+    routes_selection_tabs --> routes_selection_core
+    routes_selection_tabs --> routes_models
     routes_selection_tabs --> workflow_workflow
     routes_selection_tabs --> components_step_selection_step_renderer
     routes_selection_tabs --> routes_selection_local_files
+    routes_selection_tabs --> components_step_selection_source_browser
     services_alignment --> core_models
     services_graph --> core_models
     services_segmentation --> core_models
     services_text_utils --> core_models
     workflow_workflow --> routes_models
+    workflow_workflow --> core_config
+    workflow_workflow --> services_alignment
     workflow_workflow --> services_segmentation
     workflow_workflow --> services_source
-    workflow_workflow --> components_step_selection_step_renderer
-    workflow_workflow --> services_alignment
-    workflow_workflow --> core_config
-    workflow_workflow --> components_steps
     workflow_workflow --> services_graph
+    workflow_workflow --> components_steps
+    workflow_workflow --> components_step_selection_step_renderer
     workflow_workflow --> components_step_combined
 ```
 
-*148 cross-module dependencies detected*
+*149 cross-module dependencies detected*
 
 ## CLI Reference
 
@@ -292,7 +293,9 @@ Detailed documentation for each module in the project:
 ``` python
 from cjm_fasthtml_workflow_transcript_decomp.services.alignment import (
     AlignmentService,
-    get_segments_without_time
+    get_segments_without_time,
+    check_alignment_ready,
+    populate_segment_times
 )
 ```
 
@@ -303,6 +306,27 @@ def get_segments_without_time(
     segments:List[WorkingSegment],  # All segments
 ) -> List[WorkingSegment]:  # Segments missing time alignment
     "Get all segments that don't have time alignment."
+```
+
+``` python
+def check_alignment_ready(
+    segments:List[WorkingSegment],  # Text segments
+    chunks:List[VADChunk],  # VAD chunks
+) -> bool:  # True if counts match and alignment can proceed
+    "Check if segment and VAD chunk counts match for 1:1 alignment."
+```
+
+``` python
+def populate_segment_times(
+    segments:List[WorkingSegment],  # Text segments to populate (modified in place)
+    chunks:List[VADChunk],  # VAD chunks providing timestamps
+) -> bool:  # True if times were populated (counts matched)
+    """
+    Copy timestamps from VAD chunks to segments using 1:1 index mapping.
+    
+    Segments are modified in place. Returns False without modification
+    if counts don't match.
+    """
 ```
 
 #### Classes
@@ -909,6 +933,28 @@ def _push_history(
     "Push current state to history stack before making changes."
 ```
 
+``` python
+def _get_vad_chunks(
+    workflow:StructureDecompWorkflow,  # The workflow instance
+    session_id:str,  # Session identifier string
+) -> List[VADChunk]:  # VAD chunks from alignment state (empty if not initialized)
+    "Get VAD chunks from alignment state."
+```
+
+``` python
+def _try_auto_populate_times(
+    workflow:StructureDecompWorkflow,  # The workflow instance
+    session_id:str,  # Session identifier string
+    segment_dicts:List[Dict[str, Any]],  # Current segment dictionaries
+) -> List[Dict[str, Any]]:  # Updated segment dicts (with times if counts matched)
+    """
+    Check if segment/VAD counts match and populate times if ready.
+    
+    Returns the segment dicts with times populated if counts matched,
+    or the original dicts unchanged if counts don't match.
+    """
+```
+
 #### Classes
 
 ``` python
@@ -1230,41 +1276,41 @@ async def _handle_decomp_split(
 
 ``` python
 def _handle_decomp_merge(
-    workflow: StructureDecompWorkflow,  # The workflow instance
+    workflow:StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    segment_index: int,  # Index of segment to merge (merges with previous)
-    urls: DecompUrls,  # URL bundle for decomposition routes
+    segment_index:int,  # Index of segment to merge (merges with previous)
+    urls:DecompUrls,  # URL bundle for decomposition routes
 ):  # OOB slot updates with stats, progress, focus, and toolbar
     "Merge a segment with the previous segment."
 ```
 
 ``` python
 def _handle_decomp_undo(
-    workflow: StructureDecompWorkflow,  # The workflow instance
+    workflow:StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    urls: DecompUrls,  # URL bundle for decomposition routes
+    urls:DecompUrls,  # URL bundle for decomposition routes
 ):  # OOB slot updates with stats, progress, focus, and toolbar
     "Undo the last operation by restoring previous state from history."
 ```
 
 ``` python
 def _handle_decomp_reset(
-    workflow: StructureDecompWorkflow,  # The workflow instance
+    workflow:StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    urls: DecompUrls,  # URL bundle for decomposition routes
+    urls:DecompUrls,  # URL bundle for decomposition routes
 ):  # OOB slot updates with stats, progress, focus, and toolbar
     "Reset segments to the initial NLTK split result."
 ```
 
 ``` python
 async def _handle_decomp_ai_split(
-    workflow: StructureDecompWorkflow,  # The workflow instance
+    workflow:StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    urls: DecompUrls,  # URL bundle for decomposition routes
+    urls:DecompUrls,  # URL bundle for decomposition routes
 ):  # OOB slot updates with stats, progress, focus, and toolbar
     "Re-run AI (NLTK) sentence splitting on all current text."
 ```
