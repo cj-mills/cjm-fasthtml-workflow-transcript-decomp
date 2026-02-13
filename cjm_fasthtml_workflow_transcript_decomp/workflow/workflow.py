@@ -141,8 +141,8 @@ class StructureDecompWorkflow:
         # Create StepFlow
         self._step_flow = self._create_step_flow()
         
-        # Create routers
-        self._router = self._create_router()
+        # Create routers (focused routers for each domain)
+        self._routers = self._create_routers()
         self._stepflow_router = self._step_flow.create_router(
             prefix=self.config.get_full_stepflow_prefix()
         )
@@ -190,9 +190,9 @@ class StructureDecompWorkflow:
         return self._state_store
     
     @property
-    def router(self) -> APIRouter:  # Main workflow router
-        """Main workflow router."""
-        return self._router
+    def routers(self) -> List[APIRouter]:  # List of workflow routers
+        """Access to workflow routers (excludes stepflow router)."""
+        return self._routers
     
     @property
     def stepflow_router(self) -> APIRouter:  # StepFlow-generated router
@@ -222,7 +222,7 @@ def get_routers(
     self: StructureDecompWorkflow
 ) -> List[APIRouter]:  # List of routers to register
     """Return all routers for registration with the app."""
-    return [self._router, self._stepflow_router]
+    return self._routers + [self._stepflow_router]
 
 # %% ../../nbs/workflow/workflow.ipynb #5fbd6ae3
 @patch
@@ -254,7 +254,7 @@ def render_entry_point(
         return Div(*content, id=self.config.container_id)
     
     # Sources available - load current status asynchronously
-    current_status_url = f"{self.config.route_prefix}/current_status"
+    current_status_url = self._core_routes["current_status"].to()
     return AsyncLoadingContainer(
         container_id=self.config.container_id,
         load_url=current_status_url
@@ -384,9 +384,9 @@ def _create_step_flow(
 
 # %% ../../nbs/workflow/workflow.ipynb #a27c7fd5
 @patch
-def _create_router(
+def _create_routers(
     self: StructureDecompWorkflow
-) -> APIRouter:  # Configured APIRouter
-    """Create the workflow's API router."""
-    from cjm_fasthtml_workflow_transcript_decomp.routes.init import init_router
-    return init_router(self)
+) -> List[APIRouter]:  # List of configured APIRouters
+    """Create the workflow's API routers."""
+    from cjm_fasthtml_workflow_transcript_decomp.routes.init import init_routers
+    return init_routers(self)
