@@ -26,13 +26,13 @@ from ..core.config import StructureDecompWorkflowConfig
 from cjm_fasthtml_workflow_transcript_decomp.routes.models import (
     CardStackUrls, DecompUrls, AlignmentUrls,
 )
-from ..services.source import SourceService
+from ..selection.services.source import SourceService
 from ..services.segmentation import SegmentationService
 from ..services.alignment import AlignmentService
 from ..services.graph import GraphService
 
 # Step renderers
-from ..components.step_selection.step_renderer import render_selection_step
+from ..selection.components.step_renderer import render_selection_step
 from ..components.step_combined import render_combined_step
 from ..components.steps import render_review_step
 
