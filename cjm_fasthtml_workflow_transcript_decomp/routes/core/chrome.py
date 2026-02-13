@@ -16,16 +16,17 @@ from cjm_fasthtml_card_stack.core.constants import DEFAULT_VISIBLE_COUNT, DEFAUL
 from cjm_fasthtml_interactions.core.state_store import get_session_id
 
 from ...core.html_ids import StructureDecompHtmlIds
-from ...core.models import WorkingSegment, VADChunk
-from ..models import DecompUrls, AlignmentUrls
+from ...decomposition.models import WorkingSegment, DecompUrls
+from ...core.models import VADChunk
+from ..models import AlignmentUrls
 from ...workflow.workflow import StructureDecompWorkflow
 
 # Decomposition renderers
-from cjm_fasthtml_workflow_transcript_decomp.components.step_decomposition.step_renderer import (
+from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.step_renderer import (
     render_toolbar as render_decomp_toolbar,
     render_decomp_footer_content,
 )
-from cjm_fasthtml_workflow_transcript_decomp.components.step_decomposition.card_stack_config import (
+from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.card_stack_config import (
     DECOMP_CS_CONFIG, DECOMP_CS_IDS,
 )
 

@@ -41,17 +41,18 @@ from cjm_fasthtml_card_stack.core.constants import DEFAULT_VISIBLE_COUNT, DEFAUL
 
 # Local imports
 from ..core.html_ids import StructureDecompHtmlIds
-from ..core.models import WorkingSegment, VADChunk
-from ..routes.models import DecompUrls, AlignmentUrls
+from ..decomposition.models import WorkingSegment, DecompUrls
+from ..core.models import VADChunk
+from ..routes.models import AlignmentUrls
 
 # Decomposition state getters
-from cjm_fasthtml_workflow_transcript_decomp.components.step_decomposition.helpers import (
+from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.helpers import (
     _is_initialized, _get_segments, _get_focused_index, _get_history,
     _get_visible_count, _get_card_width,
 )
 
 # Decomposition composable renderers
-from cjm_fasthtml_workflow_transcript_decomp.components.step_decomposition.step_renderer import (
+from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.step_renderer import (
     render_decomp_column_body, render_toolbar, render_decomp_stats,
     render_decomp_footer_content, render_decomp_mini_stats_text,
 )
@@ -76,7 +77,7 @@ from cjm_fasthtml_workflow_transcript_decomp.components.keyboard_config import (
     render_keyboard_hints_collapsible, generate_zone_change_js,
     SWITCH_CHROME_BTN_ID,
 )
-from cjm_fasthtml_workflow_transcript_decomp.components.step_decomposition.card_stack_config import (
+from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.card_stack_config import (
     DECOMP_CS_CONFIG, DECOMP_CS_IDS,
 )
 

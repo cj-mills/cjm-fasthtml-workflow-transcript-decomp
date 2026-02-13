@@ -13,7 +13,7 @@ from fasthtml.common import APIRouter
 # Import subpackage router assemblies
 from .core.init import init_core_routers
 from ..selection.routes.init import init_selection_routers
-from .decomposition.init import init_decomposition_routers
+from ..decomposition.routes.init import init_decomposition_routers
 from .alignment.init import init_alignment_routers
 
 from ..workflow.workflow import StructureDecompWorkflow

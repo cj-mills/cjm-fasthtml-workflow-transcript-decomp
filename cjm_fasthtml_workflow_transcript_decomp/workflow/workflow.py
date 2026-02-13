@@ -23,11 +23,11 @@ from cjm_plugin_system.core.manager import PluginManager
 from cjm_workflow_state.state_store import SQLiteWorkflowStateStore
 
 from ..core.config import StructureDecompWorkflowConfig
-from cjm_fasthtml_workflow_transcript_decomp.routes.models import (
-    CardStackUrls, DecompUrls, AlignmentUrls,
-)
+from ..decomposition.models import DecompUrls
+from ..routes.models import AlignmentUrls
+from cjm_fasthtml_card_stack.core.models import CardStackUrls
 from ..selection.services.source import SourceService
-from ..services.segmentation import SegmentationService
+from ..decomposition.services.segmentation import SegmentationService
 from ..services.alignment import AlignmentService
 from ..services.graph import GraphService
 

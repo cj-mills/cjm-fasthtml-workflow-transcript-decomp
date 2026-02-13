@@ -33,12 +33,12 @@ from cjm_fasthtml_card_stack.keyboard.actions import build_card_stack_url_map
 from ..core.html_ids import StructureDecompHtmlIds
 
 # Decomposition-specific keyboard config (building blocks)
-from cjm_fasthtml_workflow_transcript_decomp.components.step_decomposition.keyboard_config import (
+from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.keyboard_config import (
     SD_DECOMP_ENTER_SPLIT_BTN, SD_DECOMP_EXIT_SPLIT_BTN,
     SD_DECOMP_SPLIT_BTN, SD_DECOMP_MERGE_BTN, SD_DECOMP_UNDO_BTN,
     create_decomp_kb_parts,
 )
-from cjm_fasthtml_workflow_transcript_decomp.components.step_decomposition.card_stack_config import (
+from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.card_stack_config import (
     DECOMP_CS_CONFIG, DECOMP_CS_IDS, DECOMP_CS_BTN_IDS,
     DECOMP_TS_IDS,
 )
@@ -52,7 +52,8 @@ from cjm_fasthtml_workflow_transcript_decomp.components.step_alignment.card_stac
 )
 
 # URL bundles
-from ..routes.models import DecompUrls, AlignmentUrls
+from ..decomposition.models import DecompUrls
+from ..routes.models import AlignmentUrls
 
 # Debug flag for keyboard system tracing (set False in production)
 DEBUG_KB_SYSTEM = True
