@@ -6,24 +6,14 @@
 __all__ = ['init_routers']
 
 # %% ../../nbs/routes/init.ipynb #a996b93f
-from typing import List, Dict, Any, Tuple, Callable
+from typing import List
 
 from fasthtml.common import APIRouter
 
-from cjm_fasthtml_workflow_transcript_decomp.routes.models import (
-    DecompUrls, SelectionUrls, AlignmentUrls,
-)
-
-# Import core router assembly
+# Import subpackage router assemblies
 from .core.init import init_core_routers
-
-# Import selection router assembly
 from .selection.init import init_selection_routers
-
-# Import decomposition router assembly
 from .decomposition.init import init_decomposition_routers
-
-# Import alignment router assembly
 from .alignment.init import init_alignment_routers
 
 from ..workflow.workflow import StructureDecompWorkflow
