@@ -12,7 +12,7 @@ pip install cjm_fasthtml_workflow_transcript_decomp
 ## Project Structure
 
     nbs/
-    ├── alignment/ (12)
+    ├── alignment/ (13)
     │   ├── components/ (6)
     │   │   ├── callbacks.ipynb          # Focus change callback and audio playback JavaScript for the alignment card stack
     │   │   ├── card_stack_config.ipynb  # Card stack configuration, HTML IDs, and button IDs for the VAD alignment card stack
@@ -27,8 +27,10 @@ pip install cjm_fasthtml_workflow_transcript_decomp
     │   │   └── init.ipynb        # Router assembly for Phase 2 alignment routes
     │   ├── services/ (1)
     │   │   └── alignment.ipynb  # Alignment service for temporal coordination via Silero VAD plugin
-    │   └── models.ipynb  # Data models and URL bundles for the alignment package
-    ├── combined/ (2)
+    │   ├── html_ids.ipynb  # HTML ID constants for Phase 2 Right Column: VAD Alignment
+    │   └── models.ipynb    # Data models and URL bundles for the alignment package
+    ├── combined/ (3)
+    │   ├── html_ids.ipynb         # HTML ID constants for Phase 2 Shell: Dual-Column Layout shared chrome
     │   ├── keyboard_config.ipynb  # Shared keyboard navigation configuration for the combined Phase 2 step
     │   └── step_combined.ipynb    # Phase 2 combined step renderer: dual-column layout for Segment & Align
     ├── core/ (4)
@@ -36,8 +38,8 @@ pip install cjm_fasthtml_workflow_transcript_decomp
     │   │   ├── formatting.ipynb  # Display formatting utilities for dates, times, and filenames
     │   │   └── text_utils.ipynb  # Text processing utilities for word counting, splitting, and position mapping
     │   ├── config.ipynb    # Configuration dataclass for structure decomposition workflow
-    │   └── html_ids.ipynb  # Centralized HTML ID constants for structure decomposition workflow components
-    ├── decomposition/ (12)
+    │   └── html_ids.ipynb  # Core HTML ID constants for workflow-level components
+    ├── decomposition/ (13)
     │   ├── components/ (6)
     │   │   ├── callbacks.ipynb          # JavaScript callback generators for Phase 2 decomposition keyboard interaction
     │   │   ├── card_stack_config.ipynb  # Card stack configuration constants for the Phase 2 decomposition UI
@@ -52,13 +54,15 @@ pip install cjm_fasthtml_workflow_transcript_decomp
     │   │   └── init.ipynb        # Router assembly for Phase 2 decomposition routes
     │   ├── services/ (1)
     │   │   └── segmentation.ipynb  # Segmentation service for text decomposition via NLTK plugin
-    │   └── models.ipynb  # Data models and URL bundles for Phase 2 Left Column: Text Segmentation
-    ├── review/ (3)
+    │   ├── html_ids.ipynb  # HTML ID constants for Phase 2 Left Column: Text Decomposition
+    │   └── models.ipynb    # Data models and URL bundles for Phase 2 Left Column: Text Segmentation
+    ├── review/ (4)
     │   ├── components/ (1)
     │   │   └── step_renderer.ipynb  # Placeholder step renderer for Phase 3: Review & Commit
     │   ├── services/ (1)
     │   │   └── graph.ipynb  # Graph service for committing documents and segments to the context graph
-    │   └── models.ipynb  # Review step state and working document model for Phase 3: Review & Commit
+    │   ├── html_ids.ipynb  # HTML ID constants for Phase 3: Review & Commit
+    │   └── models.ipynb    # Review step state and working document model for Phase 3: Review & Commit
     ├── routes/ (6)
     │   ├── core/ (5)
     │   │   ├── audio.ipynb    # Audio file serving route handlers for alignment playback
@@ -67,7 +71,7 @@ pip install cjm_fasthtml_workflow_transcript_decomp
     │   │   ├── sources.ipynb  # Source data retrieval route handlers
     │   │   └── status.ipynb   # Workflow status and lifecycle route handlers
     │   └── init.ipynb  # Router initialization for the structure decomposition workflow
-    ├── selection/ (15)
+    ├── selection/ (16)
     │   ├── components/ (6)
     │   │   ├── helpers.ipynb          # Shared helper functions for the selection module
     │   │   ├── local_files.ipynb      # Local files browser for importing external .db files
@@ -85,11 +89,12 @@ pip install cjm_fasthtml_workflow_transcript_decomp
     │   ├── services/ (2)
     │   │   ├── source.ipynb        # Source service for federated transcription queries via DuckDB
     │   │   └── source_utils.ipynb  # Source record operations for metadata extraction, grouping, and validation
-    │   └── models.ipynb  # Data models and URL bundles for Phase 1: Source Selection & Ordering
+    │   ├── html_ids.ipynb  # HTML ID constants for Phase 1: Source Selection & Ordering
+    │   └── models.ipynb    # Data models and URL bundles for Phase 1: Source Selection & Ordering
     └── workflow/ (1)
         └── workflow.ipynb  # Main workflow class for structure decomposition
 
-Total: 55 notebooks across 8 directories
+Total: 60 notebooks across 8 directories
 
 ## Module Dependencies
 
@@ -101,12 +106,14 @@ graph LR
     alignment_components_keyboard_config[alignment.components.keyboard_config<br/>keyboard_config]
     alignment_components_step_renderer[alignment.components.step_renderer<br/>step_renderer]
     alignment_components_vad_card[alignment.components.vad_card<br/>vad_card]
+    alignment_html_ids[alignment.html_ids<br/>html_ids]
     alignment_models[alignment.models<br/>models]
     alignment_routes_card_stack[alignment.routes.card_stack<br/>card_stack]
     alignment_routes_core[alignment.routes.core<br/>core]
     alignment_routes_handlers[alignment.routes.handlers<br/>handlers]
     alignment_routes_init[alignment.routes.init<br/>init]
     alignment_services_alignment[alignment.services.alignment<br/>alignment]
+    combined_html_ids[combined.html_ids<br/>html_ids]
     combined_keyboard_config[combined.keyboard_config<br/>keyboard_config]
     combined_step_combined[combined.step_combined<br/>step_combined]
     core_config[core.config<br/>config]
@@ -119,6 +126,7 @@ graph LR
     decomposition_components_keyboard_config[decomposition.components.keyboard_config<br/>keyboard_config]
     decomposition_components_segment_card[decomposition.components.segment_card<br/>segment_card]
     decomposition_components_step_renderer[decomposition.components.step_renderer<br/>step_renderer]
+    decomposition_html_ids[decomposition.html_ids<br/>html_ids]
     decomposition_models[decomposition.models<br/>models]
     decomposition_routes_card_stack[decomposition.routes.card_stack<br/>card_stack]
     decomposition_routes_core[decomposition.routes.core<br/>core]
@@ -126,6 +134,7 @@ graph LR
     decomposition_routes_init[decomposition.routes.init<br/>init]
     decomposition_services_segmentation[decomposition.services.segmentation<br/>segmentation]
     review_components_step_renderer[review.components.step_renderer<br/>step_renderer]
+    review_html_ids[review.html_ids<br/>html_ids]
     review_models[review.models<br/>models]
     review_services_graph[review.services.graph<br/>graph]
     routes_core_audio[routes.core.audio<br/>audio]
@@ -140,6 +149,7 @@ graph LR
     selection_components_selection_queue[selection.components.selection_queue<br/>selection_queue]
     selection_components_source_browser[selection.components.source_browser<br/>source_browser]
     selection_components_step_renderer[selection.components.step_renderer<br/>step_renderer]
+    selection_html_ids[selection.html_ids<br/>html_ids]
     selection_models[selection.models<br/>models]
     selection_routes_core[selection.routes.core<br/>core]
     selection_routes_filtering[selection.routes.filtering<br/>filtering]
@@ -152,181 +162,184 @@ graph LR
     workflow_workflow[workflow.workflow<br/>workflow]
 
     alignment_components_helpers --> alignment_models
-    alignment_components_step_renderer --> alignment_components_callbacks
+    alignment_components_step_renderer --> alignment_components_card_stack_config
     alignment_components_step_renderer --> alignment_models
     alignment_components_step_renderer --> alignment_components_vad_card
-    alignment_components_step_renderer --> alignment_components_card_stack_config
-    alignment_components_step_renderer --> core_html_ids
-    alignment_components_vad_card --> core_services_formatting
+    alignment_components_step_renderer --> alignment_components_callbacks
+    alignment_components_step_renderer --> alignment_html_ids
+    alignment_components_step_renderer --> combined_html_ids
     alignment_components_vad_card --> alignment_models
-    alignment_components_vad_card --> core_html_ids
-    alignment_routes_card_stack --> alignment_routes_core
-    alignment_routes_card_stack --> alignment_components_vad_card
-    alignment_routes_card_stack --> workflow_workflow
-    alignment_routes_card_stack --> alignment_models
+    alignment_components_vad_card --> alignment_html_ids
+    alignment_components_vad_card --> core_services_formatting
     alignment_routes_card_stack --> alignment_components_card_stack_config
+    alignment_routes_card_stack --> alignment_components_vad_card
+    alignment_routes_card_stack --> alignment_routes_core
+    alignment_routes_card_stack --> alignment_models
+    alignment_routes_card_stack --> workflow_workflow
     alignment_routes_core --> alignment_models
     alignment_routes_handlers --> alignment_components_step_renderer
-    alignment_routes_handlers --> alignment_routes_core
     alignment_routes_handlers --> alignment_models
-    alignment_routes_handlers --> workflow_workflow
-    alignment_routes_handlers --> core_html_ids
     alignment_routes_handlers --> alignment_components_card_stack_config
     alignment_routes_handlers --> combined_step_combined
     alignment_routes_handlers --> alignment_routes_card_stack
-    alignment_routes_init --> alignment_routes_card_stack
+    alignment_routes_handlers --> alignment_routes_core
+    alignment_routes_handlers --> workflow_workflow
+    alignment_routes_handlers --> combined_html_ids
+    alignment_routes_init --> alignment_routes_handlers
     alignment_routes_init --> workflow_workflow
     alignment_routes_init --> alignment_models
-    alignment_routes_init --> alignment_routes_handlers
-    alignment_services_alignment --> decomposition_models
+    alignment_routes_init --> alignment_routes_card_stack
     alignment_services_alignment --> alignment_models
+    alignment_services_alignment --> decomposition_models
     combined_keyboard_config --> decomposition_components_card_stack_config
     combined_keyboard_config --> decomposition_components_keyboard_config
-    combined_keyboard_config --> decomposition_models
     combined_keyboard_config --> alignment_components_keyboard_config
-    combined_keyboard_config --> alignment_models
     combined_keyboard_config --> alignment_components_card_stack_config
-    combined_keyboard_config --> core_html_ids
-    combined_step_combined --> decomposition_components_card_stack_config
-    combined_step_combined --> alignment_models
+    combined_keyboard_config --> combined_html_ids
+    combined_keyboard_config --> decomposition_models
+    combined_keyboard_config --> alignment_models
+    combined_step_combined --> combined_keyboard_config
     combined_step_combined --> alignment_components_helpers
     combined_step_combined --> decomposition_components_helpers
-    combined_step_combined --> combined_keyboard_config
     combined_step_combined --> alignment_components_step_renderer
+    combined_step_combined --> combined_html_ids
     combined_step_combined --> alignment_components_card_stack_config
-    combined_step_combined --> decomposition_models
     combined_step_combined --> decomposition_components_step_renderer
-    combined_step_combined --> core_html_ids
+    combined_step_combined --> decomposition_models
+    combined_step_combined --> decomposition_components_card_stack_config
+    combined_step_combined --> alignment_models
+    combined_step_combined --> decomposition_html_ids
     core_services_text_utils --> decomposition_models
     decomposition_components_helpers --> decomposition_models
     decomposition_components_keyboard_config --> decomposition_components_card_stack_config
+    decomposition_components_segment_card --> decomposition_html_ids
     decomposition_components_segment_card --> decomposition_components_card_stack_config
     decomposition_components_segment_card --> decomposition_models
-    decomposition_components_segment_card --> core_html_ids
-    decomposition_components_step_renderer --> decomposition_components_card_stack_config
-    decomposition_components_step_renderer --> decomposition_components_segment_card
-    decomposition_components_step_renderer --> decomposition_models
     decomposition_components_step_renderer --> core_services_text_utils
-    decomposition_components_step_renderer --> core_html_ids
+    decomposition_components_step_renderer --> decomposition_components_card_stack_config
+    decomposition_components_step_renderer --> combined_html_ids
+    decomposition_components_step_renderer --> decomposition_html_ids
+    decomposition_components_step_renderer --> decomposition_models
     decomposition_components_step_renderer --> decomposition_components_callbacks
-    decomposition_routes_card_stack --> decomposition_routes_core
-    decomposition_routes_card_stack --> decomposition_components_segment_card
-    decomposition_routes_card_stack --> decomposition_models
+    decomposition_components_step_renderer --> decomposition_components_segment_card
     decomposition_routes_card_stack --> decomposition_components_card_stack_config
+    decomposition_routes_card_stack --> decomposition_routes_core
+    decomposition_routes_card_stack --> decomposition_models
     decomposition_routes_card_stack --> workflow_workflow
-    decomposition_routes_core --> decomposition_models
-    decomposition_routes_core --> alignment_services_alignment
+    decomposition_routes_card_stack --> decomposition_components_segment_card
     decomposition_routes_core --> workflow_workflow
+    decomposition_routes_core --> decomposition_models
     decomposition_routes_core --> alignment_models
+    decomposition_routes_core --> alignment_services_alignment
     decomposition_routes_handlers --> combined_step_combined
     decomposition_routes_handlers --> decomposition_components_card_stack_config
-    decomposition_routes_handlers --> decomposition_routes_core
     decomposition_routes_handlers --> decomposition_services_segmentation
-    decomposition_routes_handlers --> decomposition_components_step_renderer
-    decomposition_routes_handlers --> decomposition_models
     decomposition_routes_handlers --> combined_keyboard_config
+    decomposition_routes_handlers --> decomposition_routes_core
+    decomposition_routes_handlers --> decomposition_components_step_renderer
     decomposition_routes_handlers --> decomposition_routes_card_stack
-    decomposition_routes_handlers --> workflow_workflow
+    decomposition_routes_handlers --> decomposition_models
     decomposition_routes_handlers --> core_services_text_utils
-    decomposition_routes_handlers --> core_html_ids
+    decomposition_routes_handlers --> workflow_workflow
+    decomposition_routes_handlers --> combined_html_ids
+    decomposition_routes_init --> decomposition_routes_handlers
     decomposition_routes_init --> decomposition_routes_card_stack
     decomposition_routes_init --> workflow_workflow
-    decomposition_routes_init --> decomposition_routes_handlers
     decomposition_routes_init --> decomposition_models
     decomposition_services_segmentation --> decomposition_models
-    review_components_step_renderer --> core_html_ids
+    review_components_step_renderer --> review_html_ids
     review_models --> decomposition_models
     review_models --> alignment_models
     review_services_graph --> core_models
-    review_services_graph --> decomposition_models
     review_services_graph --> review_models
+    review_services_graph --> decomposition_models
     routes_core_audio --> workflow_workflow
-    routes_core_chrome --> combined_step_combined
-    routes_core_chrome --> decomposition_components_step_renderer
-    routes_core_chrome --> decomposition_models
     routes_core_chrome --> decomposition_components_card_stack_config
+    routes_core_chrome --> combined_step_combined
     routes_core_chrome --> alignment_models
     routes_core_chrome --> combined_keyboard_config
     routes_core_chrome --> alignment_components_step_renderer
-    routes_core_chrome --> workflow_workflow
-    routes_core_chrome --> core_html_ids
     routes_core_chrome --> alignment_components_card_stack_config
+    routes_core_chrome --> decomposition_components_step_renderer
+    routes_core_chrome --> decomposition_models
+    routes_core_chrome --> workflow_workflow
+    routes_core_chrome --> combined_html_ids
+    routes_core_init --> routes_core_audio
+    routes_core_init --> routes_core_sources
     routes_core_init --> workflow_workflow
     routes_core_init --> routes_core_chrome
     routes_core_init --> routes_core_status
-    routes_core_init --> routes_core_audio
-    routes_core_init --> routes_core_sources
     routes_core_sources --> workflow_workflow
     routes_core_status --> workflow_workflow
-    routes_init --> routes_core_init
-    routes_init --> workflow_workflow
-    routes_init --> selection_routes_init
-    routes_init --> alignment_routes_init
     routes_init --> decomposition_routes_init
+    routes_init --> workflow_workflow
+    routes_init --> alignment_routes_init
+    routes_init --> selection_routes_init
+    routes_init --> routes_core_init
     selection_components_helpers --> selection_models
+    selection_components_local_files --> selection_html_ids
     selection_components_local_files --> selection_components_helpers
-    selection_components_local_files --> core_html_ids
-    selection_components_preview_panel --> core_html_ids
-    selection_components_selection_queue --> core_html_ids
+    selection_components_preview_panel --> selection_html_ids
+    selection_components_selection_queue --> selection_html_ids
+    selection_components_source_browser --> core_services_formatting
     selection_components_source_browser --> selection_services_source_utils
     selection_components_source_browser --> core_services_text_utils
-    selection_components_source_browser --> core_services_formatting
-    selection_components_source_browser --> core_html_ids
-    selection_components_step_renderer --> selection_components_selection_queue
-    selection_components_step_renderer --> selection_components_source_browser
+    selection_components_source_browser --> selection_html_ids
+    selection_components_step_renderer --> selection_models
     selection_components_step_renderer --> selection_components_local_files
     selection_components_step_renderer --> core_services_text_utils
     selection_components_step_renderer --> selection_components_helpers
-    selection_components_step_renderer --> selection_models
+    selection_components_step_renderer --> selection_html_ids
+    selection_components_step_renderer --> selection_components_selection_queue
+    selection_components_step_renderer --> selection_components_source_browser
     selection_components_step_renderer --> selection_components_preview_panel
-    selection_components_step_renderer --> core_html_ids
-    selection_routes_core --> selection_components_selection_queue
-    selection_routes_core --> selection_components_source_browser
-    selection_routes_core --> selection_components_step_renderer
-    selection_routes_core --> workflow_workflow
     selection_routes_core --> selection_models
+    selection_routes_core --> workflow_workflow
+    selection_routes_core --> selection_components_selection_queue
+    selection_routes_core --> selection_components_step_renderer
+    selection_routes_core --> selection_components_source_browser
+    selection_routes_filtering --> selection_models
     selection_routes_filtering --> selection_services_source_utils
     selection_routes_filtering --> selection_routes_core
-    selection_routes_filtering --> selection_components_source_browser
     selection_routes_filtering --> workflow_workflow
-    selection_routes_filtering --> selection_models
-    selection_routes_init --> workflow_workflow
-    selection_routes_init --> selection_routes_local_files
+    selection_routes_filtering --> selection_components_source_browser
     selection_routes_init --> selection_routes_tabs
-    selection_routes_init --> selection_routes_filtering
-    selection_routes_init --> selection_routes_queue
     selection_routes_init --> selection_models
-    selection_routes_local_files --> selection_routes_core
-    selection_routes_local_files --> selection_services_source
-    selection_routes_local_files --> selection_components_local_files
-    selection_routes_local_files --> workflow_workflow
+    selection_routes_init --> workflow_workflow
+    selection_routes_init --> selection_routes_filtering
+    selection_routes_init --> selection_routes_local_files
+    selection_routes_init --> selection_routes_queue
     selection_routes_local_files --> selection_models
+    selection_routes_local_files --> selection_routes_core
+    selection_routes_local_files --> selection_components_local_files
+    selection_routes_local_files --> selection_services_source
+    selection_routes_local_files --> workflow_workflow
+    selection_routes_queue --> selection_models
     selection_routes_queue --> selection_routes_core
     selection_routes_queue --> selection_services_source_utils
     selection_routes_queue --> workflow_workflow
-    selection_routes_queue --> selection_models
     selection_routes_queue --> selection_components_preview_panel
+    selection_routes_tabs --> selection_routes_local_files
+    selection_routes_tabs --> selection_models
+    selection_routes_tabs --> selection_components_step_renderer
+    selection_routes_tabs --> selection_components_source_browser
+    selection_routes_tabs --> selection_components_local_files
+    selection_routes_tabs --> workflow_workflow
     selection_routes_tabs --> selection_routes_core
     selection_routes_tabs --> selection_services_source_utils
-    selection_routes_tabs --> selection_components_source_browser
-    selection_routes_tabs --> selection_routes_local_files
-    selection_routes_tabs --> workflow_workflow
-    selection_routes_tabs --> selection_components_local_files
-    selection_routes_tabs --> selection_components_step_renderer
-    selection_routes_tabs --> selection_models
-    workflow_workflow --> core_config
-    workflow_workflow --> decomposition_models
     workflow_workflow --> review_services_graph
-    workflow_workflow --> selection_components_step_renderer
-    workflow_workflow --> alignment_services_alignment
     workflow_workflow --> decomposition_services_segmentation
     workflow_workflow --> selection_services_source
+    workflow_workflow --> core_config
+    workflow_workflow --> selection_components_step_renderer
+    workflow_workflow --> alignment_services_alignment
+    workflow_workflow --> decomposition_models
+    workflow_workflow --> combined_step_combined
     workflow_workflow --> alignment_models
     workflow_workflow --> review_components_step_renderer
-    workflow_workflow --> combined_step_combined
 ```
 
-*173 cross-module dependencies detected*
+*176 cross-module dependencies detected*
 
 ## CLI Reference
 
@@ -1634,22 +1647,160 @@ def _generate_sortable_init_script(
 
 ### html_ids (`html_ids.ipynb`)
 
-> Centralized HTML ID constants for structure decomposition workflow
-> components
+> HTML ID constants for Phase 2 Right Column: VAD Alignment
 
 #### Import
 
 ``` python
-from cjm_fasthtml_workflow_transcript_decomp.core.html_ids import (
-    StructureDecompHtmlIds
+from cjm_fasthtml_workflow_transcript_decomp.alignment.html_ids import (
+    AlignmentHtmlIds
 )
 ```
 
 #### Classes
 
 ``` python
-class StructureDecompHtmlIds:
-    "HTML ID constants for structure decomposition workflow."
+class AlignmentHtmlIds:
+    "HTML ID constants for Phase 2 Right Column: VAD Alignment."
+    
+    def as_selector(
+            id_str:str  # The HTML ID to convert
+        ) -> str:  # CSS selector with # prefix
+        "Convert an ID to a CSS selector format."
+    
+    def vad_chunk(
+            index:int  # VAD chunk index
+        ) -> str:  # HTML ID for the VAD chunk element
+        "Generate HTML ID for a VAD chunk element."
+```
+
+### html_ids (`html_ids.ipynb`)
+
+> HTML ID constants for Phase 2 Shell: Dual-Column Layout shared chrome
+
+#### Import
+
+``` python
+from cjm_fasthtml_workflow_transcript_decomp.combined.html_ids import (
+    CombinedHtmlIds
+)
+```
+
+#### Classes
+
+``` python
+class CombinedHtmlIds:
+    "HTML ID constants for Phase 2 Shell: Dual-Column Layout shared chrome."
+    
+    def as_selector(
+            id_str:str  # The HTML ID to convert
+        ) -> str:  # CSS selector with # prefix
+        "Convert an ID to a CSS selector format."
+```
+
+### html_ids (`html_ids.ipynb`)
+
+> Core HTML ID constants for workflow-level components
+
+#### Import
+
+``` python
+from cjm_fasthtml_workflow_transcript_decomp.core.html_ids import (
+    CoreHtmlIds
+)
+```
+
+#### Classes
+
+``` python
+class CoreHtmlIds:
+    """
+    HTML ID constants for workflow-level components.
+    
+    Page-specific IDs are in their respective packages:
+    - selection.html_ids.SelectionHtmlIds
+    - decomposition.html_ids.DecompositionHtmlIds
+    - alignment.html_ids.AlignmentHtmlIds
+    - combined.html_ids.CombinedHtmlIds
+    - review.html_ids.ReviewHtmlIds
+    """
+    
+    def as_selector(
+            id_str:str  # The HTML ID to convert
+        ) -> str:  # CSS selector with # prefix
+        "Convert an ID to a CSS selector format."
+```
+
+### html_ids (`html_ids.ipynb`)
+
+> HTML ID constants for Phase 2 Left Column: Text Decomposition
+
+#### Import
+
+``` python
+from cjm_fasthtml_workflow_transcript_decomp.decomposition.html_ids import (
+    DecompositionHtmlIds
+)
+```
+
+#### Classes
+
+``` python
+class DecompositionHtmlIds:
+    "HTML ID constants for Phase 2 Left Column: Text Decomposition."
+    
+    def as_selector(
+            id_str:str  # The HTML ID to convert
+        ) -> str:  # CSS selector with # prefix
+        "Convert an ID to a CSS selector format."
+    
+    def segment_card(
+            index:int  # Segment index in the decomposition
+        ) -> str:  # HTML ID for the segment card
+        "Generate HTML ID for a segment card."
+```
+
+### html_ids (`html_ids.ipynb`)
+
+> HTML ID constants for Phase 3: Review & Commit
+
+#### Import
+
+``` python
+from cjm_fasthtml_workflow_transcript_decomp.review.html_ids import (
+    ReviewHtmlIds
+)
+```
+
+#### Classes
+
+``` python
+class ReviewHtmlIds:
+    "HTML ID constants for Phase 3: Review & Commit."
+    
+    def as_selector(
+            id_str:str  # The HTML ID to convert
+        ) -> str:  # CSS selector with # prefix
+        "Convert an ID to a CSS selector format."
+```
+
+### html_ids (`html_ids.ipynb`)
+
+> HTML ID constants for Phase 1: Source Selection & Ordering
+
+#### Import
+
+``` python
+from cjm_fasthtml_workflow_transcript_decomp.selection.html_ids import (
+    SelectionHtmlIds
+)
+```
+
+#### Classes
+
+``` python
+class SelectionHtmlIds:
+    "HTML ID constants for Phase 1: Source Selection & Ordering."
     
     def as_selector(
             id_str:str  # The HTML ID to convert
@@ -1673,16 +1824,6 @@ class StructureDecompHtmlIds:
             provider_id:str  # Provider identifier
         ) -> str:  # HTML ID for the queue item
         "Generate HTML ID for a queue item."
-    
-    def segment_card(
-            index:int  # Segment index in the decomposition
-        ) -> str:  # HTML ID for the segment card
-        "Generate HTML ID for a segment card."
-    
-    def vad_chunk(
-            index:int  # VAD chunk index
-        ) -> str:  # HTML ID for the VAD chunk element
-        "Generate HTML ID for a VAD chunk element."
 ```
 
 ### init (`init.ipynb`)
@@ -3482,11 +3623,7 @@ def _render_tab_headers(
     tab_switch_url: str = "",  # URL for switching tabs via HTMX
     oob: bool = False,  # Whether to render as OOB swap
 ) -> Any:  # Tab headers container
-    """
-    Render the tab header radio inputs.
-    
-    Separated from content to enable OOB swaps when switching tabs.
-    """
+    "Render the tab header radio inputs."
 ```
 
 ``` python
@@ -3495,13 +3632,7 @@ def _render_source_tabs(
     active_content: Any,  # Content for the currently active tab
     tab_switch_url: str = "",  # URL for switching tabs via HTMX
 ) -> Any:  # Tabs header + separate content container
-    """
-    Render source type tabs with a single shared content container.
-    
-    The tab headers and content are separate elements to enable fine-grained
-    HTMX swaps. This avoids flicker by keeping the content container in place
-    while only swapping its inner content.
-    """
+    "Render source type tabs with a single shared content container."
 ```
 
 ``` python

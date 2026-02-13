@@ -30,7 +30,7 @@ from cjm_fasthtml_keyboard_navigation.components.system import render_keyboard_s
 from cjm_fasthtml_card_stack.keyboard.actions import build_card_stack_url_map
 
 # Local HTML IDs
-from ..core.html_ids import StructureDecompHtmlIds
+from .html_ids import CombinedHtmlIds
 
 # Decomposition-specific keyboard config (building blocks)
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.keyboard_config import (
@@ -212,9 +212,9 @@ def generate_zone_change_js(
     align_prefix = ALIGN_CS_CONFIG.prefix
 
     # Column container IDs
-    decomp_col_id = StructureDecompHtmlIds.DECOMP_COLUMN
-    align_col_id = StructureDecompHtmlIds.ALIGNMENT_COLUMN
-    active_input_id = StructureDecompHtmlIds.ACTIVE_COLUMN_INPUT
+    decomp_col_id = CombinedHtmlIds.DECOMP_COLUMN
+    align_col_id = CombinedHtmlIds.ALIGNMENT_COLUMN
+    active_input_id = CombinedHtmlIds.ACTIVE_COLUMN_INPUT
 
     # Chrome swap trigger with dropdown sync (optional)
     chrome_swap_js = ""

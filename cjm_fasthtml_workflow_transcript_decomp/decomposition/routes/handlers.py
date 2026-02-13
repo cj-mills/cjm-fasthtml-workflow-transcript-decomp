@@ -19,7 +19,7 @@ from cjm_workflow_state.history import pop_history
 
 from cjm_fasthtml_tailwind.utilities.layout import display_tw
 
-from ...core.html_ids import StructureDecompHtmlIds
+from ...combined.html_ids import CombinedHtmlIds
 from ..models import WorkingSegment, DecompUrls
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.step_renderer import (
     render_decomp_column_body, render_decomp_stats, render_toolbar,
@@ -180,7 +180,7 @@ async def _handle_decomp_init(
         kb_system.script,
         kb_system.hidden_inputs,
         kb_system.action_buttons,
-        id=StructureDecompHtmlIds.KEYBOARD_SYSTEM,
+        id=CombinedHtmlIds.KEYBOARD_SYSTEM,
         hx_swap_oob="innerHTML"
     )
 
@@ -192,7 +192,7 @@ async def _handle_decomp_init(
         id=SWITCH_CHROME_BTN_ID,
         cls=str(display_tw.hidden),
         hx_post=switch_chrome_url,
-        hx_include=f"#{StructureDecompHtmlIds.ACTIVE_COLUMN_INPUT}",
+        hx_include=f"#{CombinedHtmlIds.ACTIVE_COLUMN_INPUT}",
         hx_swap="none",
         hx_swap_oob="true",
     )
@@ -200,7 +200,7 @@ async def _handle_decomp_init(
     # Update hints to include zone switch info
     hints_oob = Div(
         render_keyboard_hints_collapsible(kb_manager, include_zone_switch=True),
-        id=StructureDecompHtmlIds.SHARED_HINTS,
+        id=CombinedHtmlIds.SHARED_HINTS,
         hx_swap_oob="innerHTML"
     )
 
@@ -219,12 +219,12 @@ async def _handle_decomp_init(
             reset_url=urls.reset, ai_split_url=urls.ai_split, undo_url=urls.undo,
             can_undo=(history_depth > 0), visible_count=stored_visible_count, is_auto_mode=stored_is_auto_mode,
         ),
-        id=StructureDecompHtmlIds.SHARED_TOOLBAR,
+        id=CombinedHtmlIds.SHARED_TOOLBAR,
         hx_swap_oob="innerHTML"
     )
     controls_oob = Div(
         render_width_slider(DECOMP_CS_CONFIG, DECOMP_CS_IDS, card_width=stored_card_width),
-        id=StructureDecompHtmlIds.SHARED_CONTROLS,
+        id=CombinedHtmlIds.SHARED_CONTROLS,
         hx_swap_oob="innerHTML"
     )
     footer_oob = Div(
@@ -232,7 +232,7 @@ async def _handle_decomp_init(
             render_decomp_footer_content(segments, focused_index),
             segment_count, chunk_count
         ),
-        id=StructureDecompHtmlIds.SHARED_FOOTER,
+        id=CombinedHtmlIds.SHARED_FOOTER,
         hx_swap_oob="innerHTML"
     )
     mini_stats_oob = render_decomp_mini_stats_badge(segments, oob=True)

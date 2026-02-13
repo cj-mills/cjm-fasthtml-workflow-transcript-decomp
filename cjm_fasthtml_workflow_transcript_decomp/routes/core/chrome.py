@@ -15,7 +15,7 @@ from cjm_fasthtml_card_stack.core.constants import DEFAULT_VISIBLE_COUNT, DEFAUL
 
 from cjm_fasthtml_interactions.core.state_store import get_session_id
 
-from ...core.html_ids import StructureDecompHtmlIds
+from ...combined.html_ids import CombinedHtmlIds
 from ...decomposition.models import WorkingSegment, DecompUrls
 from ...alignment.models import VADChunk, AlignmentUrls
 from ...workflow.workflow import StructureDecompWorkflow
@@ -119,22 +119,22 @@ async def _handle_switch_chrome(
     # Return OOB swaps
     hints_oob = Div(
         hints_content,
-        id=StructureDecompHtmlIds.SHARED_HINTS,
+        id=CombinedHtmlIds.SHARED_HINTS,
         hx_swap_oob="innerHTML"
     )
     toolbar_oob = Div(
         toolbar_content,
-        id=StructureDecompHtmlIds.SHARED_TOOLBAR,
+        id=CombinedHtmlIds.SHARED_TOOLBAR,
         hx_swap_oob="innerHTML"
     )
     controls_oob = Div(
         controls_content,
-        id=StructureDecompHtmlIds.SHARED_CONTROLS,
+        id=CombinedHtmlIds.SHARED_CONTROLS,
         hx_swap_oob="innerHTML"
     )
     footer_oob = Div(
         render_footer_inner_content(column_footer, segment_count, chunk_count),
-        id=StructureDecompHtmlIds.SHARED_FOOTER,
+        id=CombinedHtmlIds.SHARED_FOOTER,
         hx_swap_oob="innerHTML"
     )
 

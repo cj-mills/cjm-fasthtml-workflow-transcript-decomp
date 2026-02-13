@@ -40,7 +40,9 @@ from cjm_fasthtml_card_stack.components.states import render_loading_state
 from cjm_fasthtml_card_stack.core.constants import DEFAULT_VISIBLE_COUNT, DEFAULT_CARD_WIDTH
 
 # Local imports
-from ..core.html_ids import StructureDecompHtmlIds
+# HTML IDs (page-specific)
+from .html_ids import CombinedHtmlIds
+from ..decomposition.html_ids import DecompositionHtmlIds
 from ..decomposition.models import WorkingSegment, DecompUrls
 from ..alignment.models import VADChunk, AlignmentUrls
 
@@ -121,7 +123,7 @@ def render_decomp_mini_stats_badge(
     """Render the decomposition mini-stats badge for the column header."""
     return Span(
         render_decomp_mini_stats_text(segments),
-        id=StructureDecompHtmlIds.DECOMP_MINI_STATS,
+        id=CombinedHtmlIds.DECOMP_MINI_STATS,
         cls=combine_classes(badge, badge_styles.ghost, badge_sizes.sm),
         hx_swap_oob="true" if oob else None,
     )
@@ -134,7 +136,7 @@ def render_align_mini_stats_badge(
     """Render the alignment mini-stats badge for the column header."""
     return Span(
         render_align_mini_stats_text(chunks),
-        id=StructureDecompHtmlIds.ALIGNMENT_MINI_STATS,
+        id=CombinedHtmlIds.ALIGNMENT_MINI_STATS,
         cls=combine_classes(badge, badge_styles.ghost, badge_sizes.sm),
         hx_swap_oob="true" if oob else None,
     )
@@ -177,7 +179,7 @@ def render_alignment_status(
     
     return Span(
         render_alignment_status_text(segment_count, chunk_count),
-        id=StructureDecompHtmlIds.ALIGNMENT_STATUS,
+        id=CombinedHtmlIds.ALIGNMENT_STATUS,
         cls=badge_cls,
         hx_swap_oob="true" if oob else None,
     )
@@ -230,7 +232,7 @@ def _render_shared_chrome(
 
     hints = Div(
         hints_content,
-        id=StructureDecompHtmlIds.SHARED_HINTS,
+        id=CombinedHtmlIds.SHARED_HINTS,
         cls=str(p(2))
     )
 
@@ -251,7 +253,7 @@ def _render_shared_chrome(
 
     toolbar = Div(
         toolbar_content,
-        id=StructureDecompHtmlIds.SHARED_TOOLBAR,
+        id=CombinedHtmlIds.SHARED_TOOLBAR,
         cls=str(p(2))
     )
 
@@ -264,7 +266,7 @@ def _render_shared_chrome(
 
     controls = Div(
         controls_content,
-        id=StructureDecompHtmlIds.SHARED_CONTROLS,
+        id=CombinedHtmlIds.SHARED_CONTROLS,
         cls=str(p(2))
     )
 
@@ -283,7 +285,7 @@ def _render_shared_chrome(
 
     footer = Div(
         footer_inner,
-        id=StructureDecompHtmlIds.SHARED_FOOTER,
+        id=CombinedHtmlIds.SHARED_FOOTER,
         cls=combine_classes(
             p(1), bg_dui.base_100,
             border_dui.base_300, border.t(),
@@ -325,24 +327,24 @@ def _render_decomp_column(
             Div(
                 hx_post=init_url,
                 hx_trigger="load",
-                hx_target=StructureDecompHtmlIds.as_selector(
-                    StructureDecompHtmlIds.DECOMP_COLUMN_CONTENT
+                hx_target=CombinedHtmlIds.as_selector(
+                    CombinedHtmlIds.DECOMP_COLUMN_CONTENT
                 ),
                 hx_swap="outerHTML"
             ) if init_url else None,
-            id=StructureDecompHtmlIds.DECOMP_COLUMN_CONTENT,
+            id=CombinedHtmlIds.DECOMP_COLUMN_CONTENT,
             cls=combine_classes(grow(), overflow.hidden, flex_display, flex_direction.col, p(4))
         )
 
     return Div(
         _render_column_header(
             title="Text Decomposition",
-            stats_id=StructureDecompHtmlIds.DECOMP_MINI_STATS,
-            header_id=StructureDecompHtmlIds.DECOMP_COLUMN_HEADER,
+            stats_id=CombinedHtmlIds.DECOMP_MINI_STATS,
+            header_id=CombinedHtmlIds.DECOMP_COLUMN_HEADER,
             initial_text=mini_stats_text,
         ),
         content,
-        id=StructureDecompHtmlIds.DECOMP_COLUMN,
+        id=CombinedHtmlIds.DECOMP_COLUMN,
         cls=combine_classes(_DECOMP_COLUMN_CLS, active_cls)
     )
 
@@ -378,24 +380,24 @@ def _render_alignment_column(
             Div(
                 hx_post=init_url,
                 hx_trigger="load",
-                hx_target=StructureDecompHtmlIds.as_selector(
-                    StructureDecompHtmlIds.ALIGNMENT_COLUMN_CONTENT
+                hx_target=CombinedHtmlIds.as_selector(
+                    CombinedHtmlIds.ALIGNMENT_COLUMN_CONTENT
                 ),
                 hx_swap="outerHTML"
             ) if init_url else None,
-            id=StructureDecompHtmlIds.ALIGNMENT_COLUMN_CONTENT,
+            id=CombinedHtmlIds.ALIGNMENT_COLUMN_CONTENT,
             cls=combine_classes(grow(), min_h(0), overflow.hidden, flex_display, flex_direction.col, p(4))
         )
 
     return Div(
         _render_column_header(
             title="VAD Alignment",
-            stats_id=StructureDecompHtmlIds.ALIGNMENT_MINI_STATS,
-            header_id=StructureDecompHtmlIds.ALIGNMENT_COLUMN_HEADER,
+            stats_id=CombinedHtmlIds.ALIGNMENT_MINI_STATS,
+            header_id=CombinedHtmlIds.ALIGNMENT_COLUMN_HEADER,
             initial_text=mini_stats_text,
         ),
         content,
-        id=StructureDecompHtmlIds.ALIGNMENT_COLUMN,
+        id=CombinedHtmlIds.ALIGNMENT_COLUMN,
         cls=combine_classes(_ALIGNMENT_COLUMN_CLS, active_cls)
     )
 
@@ -415,7 +417,7 @@ def _render_keyboard_system_container(
 
     return Div(
         *content,
-        id=StructureDecompHtmlIds.KEYBOARD_SYSTEM,
+        id=CombinedHtmlIds.KEYBOARD_SYSTEM,
         hx_swap_oob="true" if oob else None,
     )
 
@@ -544,7 +546,7 @@ def render_combined_step(
     # Hidden input tracking active column (decomp or align)
     active_column_input = Input(
         type="hidden",
-        id=StructureDecompHtmlIds.ACTIVE_COLUMN_INPUT,
+        id=CombinedHtmlIds.ACTIVE_COLUMN_INPUT,
         name="active_column",
         value="decomp",
     )
@@ -559,7 +561,7 @@ def render_combined_step(
             id=SWITCH_CHROME_BTN_ID,
             cls=str(display_tw.hidden),
             hx_post=switch_chrome_url,
-            hx_include=f"#{StructureDecompHtmlIds.ACTIVE_COLUMN_INPUT}",
+            hx_include=f"#{CombinedHtmlIds.ACTIVE_COLUMN_INPUT}",
             hx_swap="none",
         )
 
@@ -616,7 +618,7 @@ def render_combined_step(
         # Hidden active column state
         active_column_input,
 
-        id=StructureDecompHtmlIds.DECOMP_CONTAINER,
+        id=DecompositionHtmlIds.DECOMP_CONTAINER,
         cls=combine_classes(
             w.full, h.full,
             flex_display, flex_direction.col,

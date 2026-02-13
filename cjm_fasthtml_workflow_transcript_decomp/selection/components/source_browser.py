@@ -42,7 +42,7 @@ from cjm_fasthtml_tailwind.utilities.flexbox_and_grid import (
 from cjm_fasthtml_tailwind.core.base import combine_classes
 
 # Local imports
-from ...core.html_ids import StructureDecompHtmlIds
+from ..html_ids import SelectionHtmlIds
 from cjm_fasthtml_workflow_transcript_decomp.selection.services.source_utils import (
     extract_batch_id, group_transcriptions, is_source_selected,
     check_audio_exists, extract_model_name
@@ -67,10 +67,10 @@ def _render_grouping_selector(
             Option("Audio File", value="media_path", selected=grouping_mode == "media_path"),
             Option("Batch ID", value="batch_id", selected=grouping_mode == "batch_id"),
             name="grouping_mode",
-            id=StructureDecompHtmlIds.GROUPING_SELECTOR,
+            id=SelectionHtmlIds.GROUPING_SELECTOR,
             cls=combine_classes(select, select_sizes.sm),
             hx_post=grouping_change_url,
-            hx_target=StructureDecompHtmlIds.as_selector(StructureDecompHtmlIds.SOURCE_LIST),
+            hx_target=SelectionHtmlIds.as_selector(SelectionHtmlIds.SOURCE_LIST),
             hx_swap="outerHTML"
         ),
         cls=combine_classes(flex_display, items.center)
@@ -153,7 +153,7 @@ def _render_source_row(
                 cls=combine_classes(checkbox, checkbox_sizes.sm),
                 hx_post=action_url,
                 hx_vals=json.dumps({"record_id": record_id, "provider_id": provider_id}),
-                hx_target=StructureDecompHtmlIds.as_selector(StructureDecompHtmlIds.QUEUE_CONTAINER),
+                hx_target=SelectionHtmlIds.as_selector(SelectionHtmlIds.QUEUE_CONTAINER),
                 hx_swap="outerHTML",
                 name=f"source_{record_id}"
             ),
@@ -174,7 +174,7 @@ def _render_source_row(
             f"{word_count:,} words",
             cls=str(font_size.xs)
         ),
-        id=StructureDecompHtmlIds.source_row(record_id, provider_id),
+        id=SelectionHtmlIds.source_row(record_id, provider_id),
         cls=combine_classes(
             bg_dui.primary.opacity(10) if is_selected else "",
             bg_dui.base_200.hover,
@@ -187,7 +187,7 @@ def _render_source_row(
         data_provider_id=provider_id,
         hx_get=preview_url,
         hx_vals=json.dumps({"record_id": record_id, "provider_id": provider_id}),
-        hx_target=StructureDecompHtmlIds.as_selector(StructureDecompHtmlIds.PREVIEW_PANEL),
+        hx_target=SelectionHtmlIds.as_selector(SelectionHtmlIds.PREVIEW_PANEL),
         hx_swap="outerHTML",
         hx_trigger="click"
     )
@@ -216,7 +216,7 @@ def _render_group_header(
                     cls=combine_classes(btn, btn_styles.ghost, btn_sizes.xs),
                     hx_post=select_all_url,
                     hx_vals=json.dumps({"group_key": group_key, "grouping_mode": grouping_mode}),
-                    hx_target=StructureDecompHtmlIds.as_selector(StructureDecompHtmlIds.QUEUE_CONTAINER),
+                    hx_target=SelectionHtmlIds.as_selector(SelectionHtmlIds.QUEUE_CONTAINER),
                     hx_swap="outerHTML"
                 ) if record_count > 1 else None,
                 cls=combine_classes(flex_display, justify.between, items.center, p.r(4))
@@ -284,7 +284,7 @@ def _render_source_list(
             Tbody(*table_rows),
             cls=combine_classes(table, table_modifiers.pin_rows)
         ),
-        id=StructureDecompHtmlIds.SOURCE_LIST,
+        id=SelectionHtmlIds.SOURCE_LIST,
         cls=combine_classes(grow(), overflow.y.auto, border_radius.box),
         hx_swap_oob="outerHTML" if oob else None
     )
@@ -322,10 +322,10 @@ def _render_source_browser(
                 type="search",
                 placeholder="Search by filename, job ID, or text...",
                 cls=combine_classes(text_input, text_input_sizes.sm, grow()),
-                id=StructureDecompHtmlIds.SOURCE_FILTER_SEARCH,
+                id=SelectionHtmlIds.SOURCE_FILTER_SEARCH,
                 name="search",
                 hx_get=filter_url,
-                hx_target=StructureDecompHtmlIds.as_selector(StructureDecompHtmlIds.SOURCE_LIST),
+                hx_target=SelectionHtmlIds.as_selector(SelectionHtmlIds.SOURCE_LIST),
                 hx_trigger="input changed delay:500ms, keyup[key=='Enter']",
                 hx_swap="outerHTML",
                 onkeydown="if(event.key==='Enter') event.preventDefault()"
@@ -341,7 +341,7 @@ def _render_source_browser(
         # Table
         source_list,
         
-        id=StructureDecompHtmlIds.SOURCE_BROWSER,
+        id=SelectionHtmlIds.SOURCE_BROWSER,
         cls=combine_classes(
             # Sizing
             w.full,

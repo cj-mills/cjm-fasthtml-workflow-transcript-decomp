@@ -49,8 +49,10 @@ from cjm_fasthtml_token_selector.components.tokens import render_token_grid
 from cjm_fasthtml_token_selector.helpers.tokenizer import tokenize
 from cjm_fasthtml_token_selector.core.models import TokenSelectorState
 
+# HTML IDs (page-specific)
+from ..html_ids import DecompositionHtmlIds
+
 # Local imports
-from ...core.html_ids import StructureDecompHtmlIds
 from ..models import WorkingSegment
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.card_stack_config import (
     DECOMP_TS_CONFIG, DECOMP_TS_IDS,
@@ -163,13 +165,13 @@ def _render_split_mode_content(
                 Span("Enter", cls=combine_classes(kbd, kbd_sizes.xs)),
                 cls=combine_classes(font_size.xs, text_dui.base_content.opacity(50), m.l.auto)
             ),
-            id=StructureDecompHtmlIds.SPLIT_MODE_ACTIONS,
+            id=DecompositionHtmlIds.SPLIT_MODE_ACTIONS,
             cls=combine_classes(
                 flex_display, items.center, gap(2),
                 border_dui.base_200, border.t(), p.t(3)
             )
         ),
-        id=StructureDecompHtmlIds.SPLIT_MODE_CONTAINER
+        id=DecompositionHtmlIds.SPLIT_MODE_CONTAINER
     )
 
 # %% ../../../nbs/decomposition/components/segment_card.ipynb #e1f2a3b4
@@ -270,7 +272,7 @@ def render_segment_card(
                 position.relative, p.r(12) if show_actions else ""
             )
         ),
-        id=StructureDecompHtmlIds.segment_card(segment.index),
+        id=DecompositionHtmlIds.segment_card(segment.index),
         cls=combine_classes(
             card, "segment-card", "group",
             bg_dui.base_100, 

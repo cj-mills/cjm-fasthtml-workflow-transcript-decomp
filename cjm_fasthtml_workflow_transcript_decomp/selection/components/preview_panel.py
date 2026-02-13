@@ -29,7 +29,7 @@ from cjm_fasthtml_tailwind.utilities.effects import shadow
 from cjm_fasthtml_tailwind.core.base import combine_classes
 
 # Local imports
-from ...core.html_ids import StructureDecompHtmlIds
+from ..html_ids import SelectionHtmlIds
 
 # %% ../../../nbs/selection/components/preview_panel.ipynb #adf55484
 def _render_preview_panel(
@@ -73,7 +73,7 @@ def _render_preview_panel(
         Input(
             type="checkbox",
             checked="checked" if should_be_open else None,
-            id=StructureDecompHtmlIds.PREVIEW_COLLAPSE_TOGGLE
+            id=SelectionHtmlIds.PREVIEW_COLLAPSE_TOGGLE
         ),
         # Collapse title (clickable header)
         Div(
@@ -87,10 +87,10 @@ def _render_preview_panel(
         # Collapse content
         Div(
             preview_content,
-            id=StructureDecompHtmlIds.PREVIEW_CONTENT,
+            id=SelectionHtmlIds.PREVIEW_CONTENT,
             cls=combine_classes(collapse_content, p(4), bg_dui.base_200.opacity(30))
         ),
-        id=StructureDecompHtmlIds.PREVIEW_PANEL,
+        id=SelectionHtmlIds.PREVIEW_PANEL,
         cls=combine_classes(
             collapse,
             collapse_modifiers.arrow,

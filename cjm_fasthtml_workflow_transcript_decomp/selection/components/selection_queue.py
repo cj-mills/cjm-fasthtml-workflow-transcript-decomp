@@ -36,7 +36,7 @@ from cjm_fasthtml_tailwind.core.base import combine_classes
 from cjm_fasthtml_lucide_icons.factory import lucide_icon
 
 # Local imports
-from ...core.html_ids import StructureDecompHtmlIds
+from ..html_ids import SelectionHtmlIds
 
 # %% ../../../nbs/selection/components/selection_queue.ipynb #ed14ee22
 def _render_queue_item(
@@ -74,13 +74,13 @@ def _render_queue_item(
             cls=combine_classes(btn, btn_styles.ghost, btn_sizes.xs, m.l(1)),
             hx_post=remove_url,
             hx_vals=json.dumps({"record_id": record_id}),
-            hx_target=StructureDecompHtmlIds.as_selector(StructureDecompHtmlIds.QUEUE_CONTAINER),
+            hx_target=SelectionHtmlIds.as_selector(SelectionHtmlIds.QUEUE_CONTAINER),
             hx_swap="outerHTML",
             data_action="remove",
             title="Remove from queue"
         ),
         
-        id=StructureDecompHtmlIds.queue_item(record_id, provider_id),
+        id=SelectionHtmlIds.queue_item(record_id, provider_id),
         cls=combine_classes(
             "queue-item",
             flex_display,
@@ -121,7 +121,7 @@ def _render_selection_queue(
             "Select transcriptions from the browser",
             cls=combine_classes(text_dui.base_content.opacity(30), text_align.center, font_size.xs)
         ),
-        id=StructureDecompHtmlIds.QUEUE_EMPTY,
+        id=SelectionHtmlIds.QUEUE_EMPTY,
         cls=combine_classes(p(8), flex_display, flex_direction.col, justify.center, items.center, grow())
     ) if not selected_sources else None
     
@@ -140,7 +140,7 @@ def _render_selection_queue(
                 "Clear",
                 cls=combine_classes(btn, btn_styles.ghost, btn_sizes.xs),
                 hx_post=clear_url,
-                hx_target=StructureDecompHtmlIds.as_selector(StructureDecompHtmlIds.QUEUE_CONTAINER),
+                hx_target=SelectionHtmlIds.as_selector(SelectionHtmlIds.QUEUE_CONTAINER),
                 hx_swap="outerHTML"
             ) if selected_sources else None,
             cls=combine_classes(
@@ -152,15 +152,15 @@ def _render_selection_queue(
         # Queue list with native Sortable.js (initialized via script)
         Ul(
             *queue_items,
-            id=StructureDecompHtmlIds.QUEUE_LIST,
+            id=SelectionHtmlIds.QUEUE_LIST,
             hx_post=reorder_url,
             hx_trigger="end",
-            hx_target=StructureDecompHtmlIds.as_selector(StructureDecompHtmlIds.QUEUE_CONTAINER),
+            hx_target=SelectionHtmlIds.as_selector(SelectionHtmlIds.QUEUE_CONTAINER),
             hx_swap="outerHTML",
             cls=combine_classes("sortable", grow(), overflow.y.auto, list_style.none, m(0), p(0))
         ) if selected_sources else empty_state,
         
-        id=StructureDecompHtmlIds.QUEUE_CONTAINER,
+        id=SelectionHtmlIds.QUEUE_CONTAINER,
         cls=combine_classes(
             # Responsive width: full on mobile, fixed on large screens
             w.full,

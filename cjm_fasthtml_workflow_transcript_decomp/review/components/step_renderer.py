@@ -15,7 +15,7 @@ from cjm_fasthtml_tailwind.utilities.spacing import m
 from cjm_fasthtml_tailwind.utilities.typography import font_size, font_weight
 from cjm_fasthtml_tailwind.core.base import combine_classes
 
-from ...core.html_ids import StructureDecompHtmlIds
+from ..html_ids import ReviewHtmlIds
 
 # %% ../../../nbs/review/components/step_renderer.ipynb #review-sr-render
 def render_review_step(
@@ -44,5 +44,5 @@ def render_review_step(
             P("Success/error feedback after commit", cls=str(m.b(1))),
             cls=combine_classes(m.l(4), m.b(4))
         ),
-        id=StructureDecompHtmlIds.REVIEW_CONTAINER
+        id=ReviewHtmlIds.REVIEW_CONTAINER
     )

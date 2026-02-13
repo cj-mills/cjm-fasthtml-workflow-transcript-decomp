@@ -34,7 +34,7 @@ from cjm_fasthtml_card_stack.core.constants import CardRole
 from cjm_fasthtml_card_stack.core.models import CardRenderContext
 
 # Local imports
-from ...core.html_ids import StructureDecompHtmlIds
+from ..html_ids import AlignmentHtmlIds
 from ..models import VADChunk
 from ...core.services.formatting import format_time_precise
 
@@ -100,7 +100,7 @@ def render_vad_card(
         # Absolutely positioned playing indicator
         playing_indicator,
 
-        id=StructureDecompHtmlIds.vad_chunk(chunk.index),
+        id=AlignmentHtmlIds.vad_chunk(chunk.index),
         cls=combine_classes(
             card, "vad-card",
             position.relative,

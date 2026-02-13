@@ -15,7 +15,7 @@ from cjm_fasthtml_interactions.core.state_store import get_session_id
 from cjm_fasthtml_card_stack.core.models import CardStackState
 from cjm_fasthtml_card_stack.core.constants import DEFAULT_VISIBLE_COUNT, DEFAULT_CARD_WIDTH
 
-from ...core.html_ids import StructureDecompHtmlIds
+from ...combined.html_ids import CombinedHtmlIds
 from ..models import VADChunk, AlignmentUrls
 
 # Alignment components (same package)
@@ -133,7 +133,7 @@ async def _handle_align_init(
     # Mini-stats badge OOB update for the column header
     mini_stats_oob = Span(
         render_align_mini_stats_text(chunks),
-        id=StructureDecompHtmlIds.ALIGNMENT_MINI_STATS,
+        id=CombinedHtmlIds.ALIGNMENT_MINI_STATS,
         hx_swap_oob="true"
     )
     

@@ -38,7 +38,9 @@ from cjm_fasthtml_workflow_transcript_decomp.alignment.components.card_stack_con
 )
 
 # Local imports
-from ...core.html_ids import StructureDecompHtmlIds
+# HTML IDs (page-specific)
+from ..html_ids import AlignmentHtmlIds
+from ...combined.html_ids import CombinedHtmlIds
 from ..models import VADChunk, AlignmentUrls
 from cjm_fasthtml_workflow_transcript_decomp.alignment.components.vad_card import (
     create_vad_card_renderer
@@ -75,7 +77,7 @@ def render_align_toolbar(
             cls=combine_classes(flex_display, items.center)
         ),
 
-        id=StructureDecompHtmlIds.ALIGNMENT_TOOLBAR,
+        id=AlignmentHtmlIds.ALIGNMENT_TOOLBAR,
         cls=combine_classes(flex_display, gap(2), items.center),
         hx_swap_oob="true" if oob else None
     )
@@ -94,7 +96,7 @@ def render_align_stats(
             f"{total} chunks \u00b7 {total_dur:.1f}s total",
             cls=combine_classes(font_size.sm, text_dui.base_content.opacity(70))
         ),
-        id=StructureDecompHtmlIds.ALIGNMENT_STATS,
+        id=AlignmentHtmlIds.ALIGNMENT_STATS,
         hx_swap_oob="true" if oob else None
     )
 
@@ -155,9 +157,9 @@ def render_align_column_body(
         button_ids=ALIGN_CS_BTN_IDS,
         config=ALIGN_CS_CONFIG,
         urls=urls.card_stack,
-        container_id=StructureDecompHtmlIds.ALIGNMENT_COLUMN_CONTENT,
+        container_id=CombinedHtmlIds.ALIGNMENT_COLUMN_CONTENT,
         focus_input_id=ALIGN_CS_IDS.focused_index_input,
-        audio_player_id=StructureDecompHtmlIds.AUDIO_PLAYER,
+        audio_player_id=AlignmentHtmlIds.AUDIO_PLAYER,
     )
 
     # Keyboard system elements (optional — may be managed at combined-step level)
@@ -171,7 +173,7 @@ def render_align_column_body(
 
         # Hidden audio element for audition playback
         Audio(
-            id=StructureDecompHtmlIds.AUDIO_PLAYER,
+            id=AlignmentHtmlIds.AUDIO_PLAYER,
             src=audio_src,
             preload="metadata",
             cls=str(display_tw.hidden),
@@ -186,7 +188,7 @@ def render_align_column_body(
         # JavaScript callbacks (library card stack JS + audio playback)
         callbacks_script,
 
-        id=StructureDecompHtmlIds.ALIGNMENT_COLUMN_CONTENT,
+        id=CombinedHtmlIds.ALIGNMENT_COLUMN_CONTENT,
         cls=combine_classes(grow(), min_h(0), overflow.hidden, flex_display, flex_direction.col)
     )
 
@@ -202,7 +204,7 @@ def render_align_footer_content(
     return Div(
         render_progress_indicator(focused_index, total_chunks, ALIGN_CS_IDS, label="VAD Chunk"),
         render_align_stats(chunks),
-        id=StructureDecompHtmlIds.ALIGNMENT_FOOTER,
+        id=AlignmentHtmlIds.ALIGNMENT_FOOTER,
         cls=combine_classes(flex_display, justify.between, items.center, gap(4))
     )
 

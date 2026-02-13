@@ -46,8 +46,11 @@ from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.card_stack
     DECOMP_TS_CONFIG, DECOMP_TS_IDS,
 )
 
+# HTML IDs (page-specific)
+from ..html_ids import DecompositionHtmlIds
+from ...combined.html_ids import CombinedHtmlIds
+
 # Local imports
-from ...core.html_ids import StructureDecompHtmlIds
 from ..models import WorkingSegment, DecompUrls
 from ...core.services.text_utils import calculate_segment_stats
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.segment_card import (
@@ -106,7 +109,7 @@ def render_toolbar(
             Button(
                 lucide_icon("rotate-ccw", size=4, cls=str(m.r(2))),
                 "Reset",
-                id=StructureDecompHtmlIds.DECOMP_RESET_BTN,
+                id=DecompositionHtmlIds.DECOMP_RESET_BTN,
                 cls=combine_classes(btn, btn_styles.ghost, btn_sizes.sm),
                 hx_post=reset_url,
                 hx_swap="none"
@@ -114,7 +117,7 @@ def render_toolbar(
             Button(
                 lucide_icon("sparkles", size=4, cls=str(m.r(2))),
                 "AI Split",
-                id=StructureDecompHtmlIds.DECOMP_AI_SPLIT_BTN,
+                id=DecompositionHtmlIds.DECOMP_AI_SPLIT_BTN,
                 cls=combine_classes(btn, btn_colors.secondary, btn_sizes.sm),
                 hx_post=ai_split_url,
                 hx_swap="none"
@@ -122,7 +125,7 @@ def render_toolbar(
             cls=combine_classes(flex_display, gap(2))
         ),
 
-        id=StructureDecompHtmlIds.DECOMP_TOOLBAR,
+        id=DecompositionHtmlIds.DECOMP_TOOLBAR,
         cls=combine_classes(
             flex_display, gap(2), items.center
         ),
@@ -142,7 +145,7 @@ def render_decomp_stats(
             f"{stats['total_segments']} segments · {stats['total_words']:,} words",
             cls=combine_classes(font_size.sm, text_dui.base_content.opacity(70))
         ),
-        id=StructureDecompHtmlIds.DECOMP_STATS,
+        id=DecompositionHtmlIds.DECOMP_STATS,
         hx_swap_oob="true" if oob else None
     )
 
@@ -192,7 +195,7 @@ def render_decomp_column_body(
         button_ids=DECOMP_CS_BTN_IDS,
         config=DECOMP_CS_CONFIG,
         urls=urls.card_stack,
-        container_id=StructureDecompHtmlIds.DECOMP_COLUMN_CONTENT,
+        container_id=CombinedHtmlIds.DECOMP_COLUMN_CONTENT,
         focus_input_id=DECOMP_CS_IDS.focused_index_input,
     )
 
@@ -223,7 +226,7 @@ def render_decomp_column_body(
         # Token selector JS (caret navigation, display, key repeat)
         ts_script,
 
-        id=StructureDecompHtmlIds.DECOMP_COLUMN_CONTENT,
+        id=CombinedHtmlIds.DECOMP_COLUMN_CONTENT,
         cls=combine_classes(grow(), min_h(0), overflow.hidden, flex_display, flex_direction.col)
     )
 
@@ -238,7 +241,7 @@ def render_decomp_footer_content(
     return Div(
         render_progress_indicator(focused_index, total_segments, DECOMP_CS_IDS, label="Segment"),
         render_decomp_stats(segments),
-        id=StructureDecompHtmlIds.DECOMP_FOOTER,
+        id=DecompositionHtmlIds.DECOMP_FOOTER,
         cls=combine_classes(flex_display, justify.between, items.center, gap(4))
     )
 

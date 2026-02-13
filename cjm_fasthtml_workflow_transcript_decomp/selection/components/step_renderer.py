@@ -36,7 +36,7 @@ from cjm_fasthtml_tailwind.utilities.flexbox_and_grid import (
 from cjm_fasthtml_tailwind.core.base import combine_classes
 
 # Local imports
-from ...core.html_ids import StructureDecompHtmlIds
+from ..html_ids import SelectionHtmlIds
 from ..models import SelectionUrls
 
 # Keyboard navigation library
@@ -89,7 +89,7 @@ def _create_selection_keyboard_manager() -> ZoneManager:  # Configured keyboard 
     """Create the keyboard zone manager for Phase 1 selection step."""
     # Source browser zone (left panel)
     browser_zone = FocusZone(
-        id=StructureDecompHtmlIds.SOURCE_LIST,
+        id=SelectionHtmlIds.SOURCE_LIST,
         item_selector='tr[data-selectable="true"]',
         navigation=LinearVertical(),
         data_attributes=("record-id", "provider-id"),
@@ -101,7 +101,7 @@ def _create_selection_keyboard_manager() -> ZoneManager:  # Configured keyboard 
     
     # Selection queue zone (right panel)
     queue_zone = FocusZone(
-        id=StructureDecompHtmlIds.QUEUE_CONTAINER,
+        id=SelectionHtmlIds.QUEUE_CONTAINER,
         item_selector="li.queue-item",
         navigation=LinearVertical(),
         data_attributes=("record-id", "provider-id"),
@@ -117,14 +117,14 @@ def _create_selection_keyboard_manager() -> ZoneManager:  # Configured keyboard 
         KeyAction(
             key=" ",
             htmx_trigger=SD_TOGGLE_BTN,
-            zone_ids=(StructureDecompHtmlIds.SOURCE_LIST,),
+            zone_ids=(SelectionHtmlIds.SOURCE_LIST,),
             description="Toggle selection",
             hint_group="Selection",
         ),
         KeyAction(
             key="Enter",
             htmx_trigger=SD_TOGGLE_BTN,
-            zone_ids=(StructureDecompHtmlIds.SOURCE_LIST,),
+            zone_ids=(SelectionHtmlIds.SOURCE_LIST,),
             description="Toggle selection",
             hint_group="Selection",
             show_in_hints=False,
@@ -134,14 +134,14 @@ def _create_selection_keyboard_manager() -> ZoneManager:  # Configured keyboard 
         KeyAction(
             key="Delete",
             htmx_trigger=SD_REMOVE_BTN,
-            zone_ids=(StructureDecompHtmlIds.QUEUE_CONTAINER,),
+            zone_ids=(SelectionHtmlIds.QUEUE_CONTAINER,),
             description="Remove from queue",
             hint_group="Queue",
         ),
         KeyAction(
             key="Backspace",
             htmx_trigger=SD_REMOVE_BTN,
-            zone_ids=(StructureDecompHtmlIds.QUEUE_CONTAINER,),
+            zone_ids=(SelectionHtmlIds.QUEUE_CONTAINER,),
             description="Remove from queue",
             hint_group="Queue",
             show_in_hints=False,
@@ -152,7 +152,7 @@ def _create_selection_keyboard_manager() -> ZoneManager:  # Configured keyboard 
             key="ArrowUp",
             modifiers=frozenset({"shift"}),
             htmx_trigger=SD_REORDER_UP_BTN,
-            zone_ids=(StructureDecompHtmlIds.QUEUE_CONTAINER,),
+            zone_ids=(SelectionHtmlIds.QUEUE_CONTAINER,),
             description="Move up in queue",
             hint_group="Queue",
         ),
@@ -160,7 +160,7 @@ def _create_selection_keyboard_manager() -> ZoneManager:  # Configured keyboard 
             key="ArrowDown",
             modifiers=frozenset({"shift"}),
             htmx_trigger=SD_REORDER_DOWN_BTN,
-            zone_ids=(StructureDecompHtmlIds.QUEUE_CONTAINER,),
+            zone_ids=(SelectionHtmlIds.QUEUE_CONTAINER,),
             description="Move down in queue",
             hint_group="Queue",
         ),
@@ -171,7 +171,7 @@ def _create_selection_keyboard_manager() -> ZoneManager:  # Configured keyboard 
             key="{",
             modifiers=frozenset({"ctrl", "shift"}),
             htmx_trigger=SD_TAB_PREV_BTN,
-            zone_ids=(StructureDecompHtmlIds.SOURCE_LIST,),
+            zone_ids=(SelectionHtmlIds.SOURCE_LIST,),
             description="Previous tab",
             hint_group="Tabs",
         ),
@@ -179,7 +179,7 @@ def _create_selection_keyboard_manager() -> ZoneManager:  # Configured keyboard 
             key="}",
             modifiers=frozenset({"ctrl", "shift"}),
             htmx_trigger=SD_TAB_NEXT_BTN,
-            zone_ids=(StructureDecompHtmlIds.SOURCE_LIST,),
+            zone_ids=(SelectionHtmlIds.SOURCE_LIST,),
             description="Next tab",
             hint_group="Tabs",
         ),
@@ -244,7 +244,7 @@ def _render_selection_stats(
             "Select sources to continue",
             cls=combine_classes(font_size.sm, text_dui.base_content.opacity(50))
         ),
-        id=StructureDecompHtmlIds.SELECTION_STATS,
+        id=SelectionHtmlIds.SELECTION_STATS,
         hx_swap_oob="true" if oob else None,
     )
 
@@ -258,7 +258,7 @@ def _render_selection_footer(
         # Statistics
         _render_selection_stats(selected_sources, transcriptions, oob=False),
         
-        id=StructureDecompHtmlIds.SELECTION_FOOTER,
+        id=SelectionHtmlIds.SELECTION_FOOTER,
         cls=combine_classes(
             p(4),
             bg_dui.base_100,
@@ -276,10 +276,7 @@ def _render_tab_headers(
     tab_switch_url: str = "",  # URL for switching tabs via HTMX
     oob: bool = False,  # Whether to render as OOB swap
 ) -> Any:  # Tab headers container
-    """Render the tab header radio inputs.
-    
-    Separated from content to enable OOB swaps when switching tabs.
-    """
+    """Render the tab header radio inputs."""
     return Div(
         Input(
             type="radio",
@@ -287,13 +284,13 @@ def _render_tab_headers(
             aria_label="Plugin DB",
             checked="checked" if active_tab == "db" else None,
             cls=str(tab),
-            id=StructureDecompHtmlIds.SOURCE_TAB_DB,
+            id=SelectionHtmlIds.SOURCE_TAB_DB,
             tabindex="-1",
             onfocus="this.blur()",
             # Always include HTMX (server handles if already on this tab)
             hx_post=tab_switch_url if tab_switch_url else None,
             hx_vals='{"direction": "db"}' if tab_switch_url else None,
-            hx_target=StructureDecompHtmlIds.as_selector(StructureDecompHtmlIds.SOURCE_TAB_CONTENT) if tab_switch_url else None,
+            hx_target=SelectionHtmlIds.as_selector(SelectionHtmlIds.SOURCE_TAB_CONTENT) if tab_switch_url else None,
             hx_swap="innerHTML" if tab_switch_url else None,
         ),
         Input(
@@ -302,18 +299,18 @@ def _render_tab_headers(
             aria_label="Local Files",
             checked="checked" if active_tab == "files" else None,
             cls=str(tab),
-            id=StructureDecompHtmlIds.SOURCE_TAB_FILES,
+            id=SelectionHtmlIds.SOURCE_TAB_FILES,
             tabindex="-1",
             onfocus="this.blur()",
             # Always include HTMX (server handles if already on this tab)
             hx_post=tab_switch_url if tab_switch_url else None,
             hx_vals='{"direction": "files"}' if tab_switch_url else None,
-            hx_target=StructureDecompHtmlIds.as_selector(StructureDecompHtmlIds.SOURCE_TAB_CONTENT) if tab_switch_url else None,
+            hx_target=SelectionHtmlIds.as_selector(SelectionHtmlIds.SOURCE_TAB_CONTENT) if tab_switch_url else None,
             hx_swap="innerHTML" if tab_switch_url else None,
         ),
         cls=combine_classes(tabs, tabs_styles.box),
         role="tablist",
-        id=StructureDecompHtmlIds.SOURCE_TABS,
+        id=SelectionHtmlIds.SOURCE_TABS,
         hx_swap_oob="true" if oob else None,
     )
 
@@ -323,19 +320,14 @@ def _render_source_tabs(
     active_content: Any,  # Content for the currently active tab
     tab_switch_url: str = "",  # URL for switching tabs via HTMX
 ) -> Any:  # Tabs header + separate content container
-    """Render source type tabs with a single shared content container.
-    
-    The tab headers and content are separate elements to enable fine-grained
-    HTMX swaps. This avoids flicker by keeping the content container in place
-    while only swapping its inner content.
-    """
+    """Render source type tabs with a single shared content container."""
     # Tab headers
     tab_headers = _render_tab_headers(active_tab, tab_switch_url, oob=False)
     
     # Content container (separate from tabs)
     content_container = Div(
         active_content,
-        id=StructureDecompHtmlIds.SOURCE_TAB_CONTENT,
+        id=SelectionHtmlIds.SOURCE_TAB_CONTENT,
         cls=combine_classes(
             grow(),
             min_h(0),
@@ -420,12 +412,12 @@ def render_selection_step(
             SD_TAB_NEXT_BTN: urls.tab_switch,
         },
         target_map={
-            SD_TOGGLE_BTN: StructureDecompHtmlIds.as_selector(StructureDecompHtmlIds.QUEUE_CONTAINER),
-            SD_REMOVE_BTN: StructureDecompHtmlIds.as_selector(StructureDecompHtmlIds.QUEUE_CONTAINER),
-            SD_REORDER_UP_BTN: StructureDecompHtmlIds.as_selector(StructureDecompHtmlIds.QUEUE_CONTAINER),
-            SD_REORDER_DOWN_BTN: StructureDecompHtmlIds.as_selector(StructureDecompHtmlIds.QUEUE_CONTAINER),
-            SD_TAB_PREV_BTN: StructureDecompHtmlIds.as_selector(StructureDecompHtmlIds.SOURCE_TAB_CONTENT),
-            SD_TAB_NEXT_BTN: StructureDecompHtmlIds.as_selector(StructureDecompHtmlIds.SOURCE_TAB_CONTENT),
+            SD_TOGGLE_BTN: SelectionHtmlIds.as_selector(SelectionHtmlIds.QUEUE_CONTAINER),
+            SD_REMOVE_BTN: SelectionHtmlIds.as_selector(SelectionHtmlIds.QUEUE_CONTAINER),
+            SD_REORDER_UP_BTN: SelectionHtmlIds.as_selector(SelectionHtmlIds.QUEUE_CONTAINER),
+            SD_REORDER_DOWN_BTN: SelectionHtmlIds.as_selector(SelectionHtmlIds.QUEUE_CONTAINER),
+            SD_TAB_PREV_BTN: SelectionHtmlIds.as_selector(SelectionHtmlIds.SOURCE_TAB_CONTENT),
+            SD_TAB_NEXT_BTN: SelectionHtmlIds.as_selector(SelectionHtmlIds.SOURCE_TAB_CONTENT),
         },
         swap_map={
             SD_TAB_PREV_BTN: "innerHTML",
@@ -451,7 +443,7 @@ def render_selection_step(
         cls=str(display_tw.hidden),
         hx_get=urls.preview,
         hx_include=include_selector,
-        hx_target=StructureDecompHtmlIds.as_selector(StructureDecompHtmlIds.PREVIEW_PANEL),
+        hx_target=SelectionHtmlIds.as_selector(SelectionHtmlIds.PREVIEW_PANEL),
         hx_swap="outerHTML",
     )
     
@@ -587,7 +579,7 @@ def render_selection_step(
         # Sortable initialization script (htmx integration)
         sortable_script,
         
-        id=StructureDecompHtmlIds.SOURCE_SELECTOR,
+        id=SelectionHtmlIds.SOURCE_SELECTOR,
         cls=combine_classes(
             w.full,
             h.full,

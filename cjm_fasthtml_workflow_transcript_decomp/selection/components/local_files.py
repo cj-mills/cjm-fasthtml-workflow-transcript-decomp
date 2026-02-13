@@ -45,7 +45,7 @@ from cjm_fasthtml_file_browser.providers.local import LocalFileSystemProvider
 from cjm_fasthtml_file_browser.components.browser import render_file_browser
 
 # Local imports
-from ...core.html_ids import StructureDecompHtmlIds
+from ..html_ids import SelectionHtmlIds
 from cjm_fasthtml_workflow_transcript_decomp.selection.components.helpers import (
     _get_selection_state
 )
@@ -124,7 +124,7 @@ def _render_external_sources_list(
                     hx_post=remove_url,
                     hx_vals=json.dumps({"db_path": db_path}),
                     # Use SOURCE_LIST ID for consistent zone focus ring
-                    hx_target=StructureDecompHtmlIds.as_selector(StructureDecompHtmlIds.SOURCE_LIST),
+                    hx_target=SelectionHtmlIds.as_selector(SelectionHtmlIds.SOURCE_LIST),
                     hx_swap="outerHTML",
                     title=f"Remove {path.name}"
                 ),
@@ -148,7 +148,7 @@ def _render_external_sources_list(
         ),
         Ul(
             *list_items,
-            id=StructureDecompHtmlIds.EXTERNAL_SOURCES_LIST,
+            id=SelectionHtmlIds.EXTERNAL_SOURCES_LIST,
             cls=combine_classes(list_style.none, m(0), p(0), overflow.y.auto, max_h(32))
         ),
         cls=combine_classes(m.t(2), shrink._0)
@@ -187,7 +187,7 @@ def _render_local_files_browser(
                 border_radius.box
             ),
             # Use SOURCE_LIST ID for consistent zone focus ring with Plugin DB tab
-            id=StructureDecompHtmlIds.SOURCE_LIST
+            id=SelectionHtmlIds.SOURCE_LIST
         )
     
     # Create defaults if not provided
@@ -213,7 +213,7 @@ def _render_local_files_browser(
         )
     
     # HTMX target for file browser - use SOURCE_LIST ID for consistent zone focus ring
-    hx_target = StructureDecompHtmlIds.as_selector(StructureDecompHtmlIds.SOURCE_LIST)
+    hx_target = SelectionHtmlIds.as_selector(SelectionHtmlIds.SOURCE_LIST)
     
     return Div(
         # Error message (if any)
@@ -238,7 +238,7 @@ def _render_local_files_browser(
         # Added external sources list (now below file browser)
         _render_external_sources_list(external_paths, remove_url),
         # Use SOURCE_LIST ID for consistent zone focus ring with Plugin DB tab
-        id=StructureDecompHtmlIds.SOURCE_LIST,
+        id=SelectionHtmlIds.SOURCE_LIST,
         cls=combine_classes(
             w.full,
             h.full,
