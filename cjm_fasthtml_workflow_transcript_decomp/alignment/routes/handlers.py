@@ -26,7 +26,7 @@ from cjm_fasthtml_workflow_transcript_decomp.alignment.components.step_renderer 
     render_align_toolbar, render_align_stats, render_align_column_body,
     render_align_footer_content, render_align_mini_stats_text,
 )
-from cjm_fasthtml_workflow_transcript_decomp.components.step_combined import (
+from cjm_fasthtml_workflow_transcript_decomp.combined.step_combined import (
     render_alignment_status,
 )
 

@@ -36,7 +36,7 @@ from cjm_fasthtml_card_stack.core.models import CardRenderContext
 # Local imports
 from ...core.html_ids import StructureDecompHtmlIds
 from ..models import VADChunk
-from ...services.formatting import format_time_precise
+from ...core.services.formatting import format_time_precise
 
 # %% ../../../nbs/alignment/components/vad_card.ipynb #vad-card-render
 def render_vad_card(

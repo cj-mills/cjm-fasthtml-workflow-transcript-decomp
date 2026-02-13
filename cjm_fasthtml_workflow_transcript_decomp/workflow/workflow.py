@@ -29,12 +29,12 @@ from cjm_fasthtml_card_stack.core.models import CardStackUrls
 from ..selection.services.source import SourceService
 from ..decomposition.services.segmentation import SegmentationService
 from ..alignment.services.alignment import AlignmentService
-from ..services.graph import GraphService
+from ..review.services.graph import GraphService
 
 # Step renderers
 from ..selection.components.step_renderer import render_selection_step
-from ..components.step_combined import render_combined_step
-from ..components.steps import render_review_step
+from ..combined.step_combined import render_combined_step
+from ..review.components.step_renderer import render_review_step
 
 # %% ../../nbs/workflow/workflow.ipynb #ngyugzueiw
 class _SessionStateStoreAdapter:

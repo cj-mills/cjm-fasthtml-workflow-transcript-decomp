@@ -47,8 +47,8 @@ from cjm_fasthtml_workflow_transcript_decomp.selection.services.source_utils imp
     extract_batch_id, group_transcriptions, is_source_selected,
     check_audio_exists, extract_model_name
 )
-from ...services.text_utils import count_words
-from cjm_fasthtml_workflow_transcript_decomp.services.formatting import (
+from ...core.services.text_utils import count_words
+from cjm_fasthtml_workflow_transcript_decomp.core.services.formatting import (
     format_date, format_audio_filename
 )
 

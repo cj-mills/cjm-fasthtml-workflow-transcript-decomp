@@ -38,12 +38,12 @@ from cjm_fasthtml_workflow_transcript_decomp.alignment.components.card_stack_con
 )
 
 # Footer helper
-from cjm_fasthtml_workflow_transcript_decomp.components.step_combined import (
+from cjm_fasthtml_workflow_transcript_decomp.combined.step_combined import (
     render_footer_inner_content,
 )
 
 # Keyboard config
-from cjm_fasthtml_workflow_transcript_decomp.components.keyboard_config import (
+from cjm_fasthtml_workflow_transcript_decomp.combined.keyboard_config import (
     build_combined_kb_system, render_keyboard_hints_collapsible,
 )
 

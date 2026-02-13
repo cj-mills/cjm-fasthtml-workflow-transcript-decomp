@@ -52,7 +52,7 @@ from cjm_fasthtml_workflow_transcript_decomp.selection.components.helpers import
     _get_selected_sources, _get_grouping_mode, _get_selection_state,
     _generate_sortable_init_script
 )
-from ...services.text_utils import count_words
+from ...core.services.text_utils import count_words
 from cjm_fasthtml_workflow_transcript_decomp.selection.components.source_browser import (
     _render_source_browser
 )

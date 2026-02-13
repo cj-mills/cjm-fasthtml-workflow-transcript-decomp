@@ -49,7 +49,7 @@ from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.card_stack
 # Local imports
 from ...core.html_ids import StructureDecompHtmlIds
 from ..models import WorkingSegment, DecompUrls
-from ...services.text_utils import calculate_segment_stats
+from ...core.services.text_utils import calculate_segment_stats
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.segment_card import (
     create_segment_card_renderer
 )

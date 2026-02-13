@@ -25,18 +25,18 @@ from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.step_rende
     render_decomp_column_body, render_decomp_stats, render_toolbar,
     render_decomp_footer_content, render_decomp_mini_stats_text,
 )
-from cjm_fasthtml_workflow_transcript_decomp.components.step_combined import (
+from cjm_fasthtml_workflow_transcript_decomp.combined.step_combined import (
     render_decomp_mini_stats_badge, _render_keyboard_system_container,
     render_alignment_status, render_footer_inner_content,
 )
-from cjm_fasthtml_workflow_transcript_decomp.components.keyboard_config import (
+from cjm_fasthtml_workflow_transcript_decomp.combined.keyboard_config import (
     build_combined_kb_system, render_keyboard_hints_collapsible,
     generate_zone_change_js, SWITCH_CHROME_BTN_ID,
 )
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.card_stack_config import (
     DECOMP_CS_CONFIG, DECOMP_CS_IDS, DECOMP_TS_IDS,
 )
-from cjm_fasthtml_workflow_transcript_decomp.services.text_utils import (
+from cjm_fasthtml_workflow_transcript_decomp.core.services.text_utils import (
     word_index_to_char_position,
 )
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.services.segmentation import (
