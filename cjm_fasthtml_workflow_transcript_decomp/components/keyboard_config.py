@@ -44,16 +44,16 @@ from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.card_stack
 )
 
 # Alignment-specific keyboard config (building blocks)
-from cjm_fasthtml_workflow_transcript_decomp.components.step_alignment.keyboard_config import (
+from cjm_fasthtml_workflow_transcript_decomp.alignment.components.keyboard_config import (
     create_align_kb_parts,
 )
-from cjm_fasthtml_workflow_transcript_decomp.components.step_alignment.card_stack_config import (
+from cjm_fasthtml_workflow_transcript_decomp.alignment.components.card_stack_config import (
     ALIGN_CS_CONFIG, ALIGN_CS_IDS, ALIGN_CS_BTN_IDS,
 )
 
 # URL bundles
 from ..decomposition.models import DecompUrls
-from ..routes.models import AlignmentUrls
+from ..alignment.models import AlignmentUrls
 
 # Debug flag for keyboard system tracing (set False in production)
 DEBUG_KB_SYSTEM = True

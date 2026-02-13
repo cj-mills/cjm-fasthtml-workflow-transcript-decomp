@@ -21,7 +21,6 @@ from cjm_fasthtml_tailwind.utilities.layout import display_tw
 
 from ...core.html_ids import StructureDecompHtmlIds
 from ..models import WorkingSegment, DecompUrls
-from ...routes.models import AlignmentUrls
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.step_renderer import (
     render_decomp_column_body, render_decomp_stats, render_toolbar,
     render_decomp_footer_content, render_decomp_mini_stats_text,

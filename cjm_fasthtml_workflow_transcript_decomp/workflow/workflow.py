@@ -24,11 +24,11 @@ from cjm_workflow_state.state_store import SQLiteWorkflowStateStore
 
 from ..core.config import StructureDecompWorkflowConfig
 from ..decomposition.models import DecompUrls
-from ..routes.models import AlignmentUrls
+from ..alignment.models import AlignmentUrls
 from cjm_fasthtml_card_stack.core.models import CardStackUrls
 from ..selection.services.source import SourceService
 from ..decomposition.services.segmentation import SegmentationService
-from ..services.alignment import AlignmentService
+from ..alignment.services.alignment import AlignmentService
 from ..services.graph import GraphService
 
 # Step renderers

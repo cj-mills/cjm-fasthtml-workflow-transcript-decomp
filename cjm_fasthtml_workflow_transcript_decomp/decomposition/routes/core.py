@@ -17,8 +17,8 @@ from cjm_workflow_state.history import push_history
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.models import (
     WorkingSegment, DecompositionStepState
 )
-from ...core.models import VADChunk
-from cjm_fasthtml_workflow_transcript_decomp.services.alignment import (
+from ...alignment.models import VADChunk
+from cjm_fasthtml_workflow_transcript_decomp.alignment.services.alignment import (
     check_alignment_ready, populate_segment_times
 )
 from ...workflow.workflow import StructureDecompWorkflow

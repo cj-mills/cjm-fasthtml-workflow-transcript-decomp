@@ -17,8 +17,7 @@ from cjm_fasthtml_interactions.core.state_store import get_session_id
 
 from ...core.html_ids import StructureDecompHtmlIds
 from ...decomposition.models import WorkingSegment, DecompUrls
-from ...core.models import VADChunk
-from ..models import AlignmentUrls
+from ...alignment.models import VADChunk, AlignmentUrls
 from ...workflow.workflow import StructureDecompWorkflow
 
 # Decomposition renderers
@@ -31,10 +30,10 @@ from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.card_stack
 )
 
 # Alignment renderers
-from cjm_fasthtml_workflow_transcript_decomp.components.step_alignment.step_renderer import (
+from cjm_fasthtml_workflow_transcript_decomp.alignment.components.step_renderer import (
     render_align_toolbar, render_align_footer_content,
 )
-from cjm_fasthtml_workflow_transcript_decomp.components.step_alignment.card_stack_config import (
+from cjm_fasthtml_workflow_transcript_decomp.alignment.components.card_stack_config import (
     ALIGN_CS_CONFIG, ALIGN_CS_IDS,
 )
 

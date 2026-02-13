@@ -42,8 +42,7 @@ from cjm_fasthtml_card_stack.core.constants import DEFAULT_VISIBLE_COUNT, DEFAUL
 # Local imports
 from ..core.html_ids import StructureDecompHtmlIds
 from ..decomposition.models import WorkingSegment, DecompUrls
-from ..core.models import VADChunk
-from ..routes.models import AlignmentUrls
+from ..alignment.models import VADChunk, AlignmentUrls
 
 # Decomposition state getters
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.helpers import (
@@ -58,16 +57,16 @@ from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.step_rende
 )
 
 # Alignment state getters
-from cjm_fasthtml_workflow_transcript_decomp.components.step_alignment.helpers import (
+from cjm_fasthtml_workflow_transcript_decomp.alignment.components.helpers import (
     _is_alignment_initialized, _get_vad_chunks, _get_focused_chunk_index,
     _get_alignment_visible_count, _get_alignment_card_width, _get_media_path,
 )
 
 # Alignment composable renderers
-from cjm_fasthtml_workflow_transcript_decomp.components.step_alignment.step_renderer import (
+from cjm_fasthtml_workflow_transcript_decomp.alignment.components.step_renderer import (
     render_align_column_body, render_align_mini_stats_text,
 )
-from cjm_fasthtml_workflow_transcript_decomp.components.step_alignment.card_stack_config import (
+from cjm_fasthtml_workflow_transcript_decomp.alignment.components.card_stack_config import (
     ALIGN_CS_IDS,
 )
 
