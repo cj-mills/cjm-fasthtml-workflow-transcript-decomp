@@ -26,9 +26,6 @@ from cjm_fasthtml_workflow_transcript_decomp.alignment.components.step_renderer 
     render_align_toolbar, render_align_stats, render_align_column_body,
     render_align_footer_content, render_align_mini_stats_text,
 )
-from cjm_fasthtml_workflow_transcript_decomp.combined.step_combined import (
-    render_alignment_status,
-)
 
 # Route core helpers (same package)
 from cjm_fasthtml_workflow_transcript_decomp.alignment.routes.core import (
@@ -52,11 +49,12 @@ async def _handle_align_init(
     urls:AlignmentUrls,  # URL bundle
     visible_count:int=5,  # Initial visible card count
     card_width:int=40,  # Initial card width in rem
-) -> tuple:  # (column_body, mini_stats_oob, alignment_status_oob)
+) -> tuple:  # (column_body, mini_stats_oob)
     """Initialize alignment from audio file via VAD plugin.
     
     Note: KB system is always built by decomp init handler. This handler
-    only returns column body, mini-stats OOB, and alignment status OOB.
+    only returns column body and mini-stats OOB. Alignment status OOB is
+    added by the wrapper in combined/handlers.
     """
     session_id = get_session_id(sess)
 
@@ -69,14 +67,9 @@ async def _handle_align_init(
     step_states = state.get("step_states", {})
     selection_state = step_states.get("selection", {})
     selected_sources = selection_state.get("selected_sources", [])
-    
-    # Get segment count from decomposition state for alignment status
-    decomp_state = step_states.get("decomposition", {})
-    segment_count = len(decomp_state.get("segments", []))
 
     if DEBUG_ALIGNMENT:
         print(f"[ALIGN_INIT] selected_sources count: {len(selected_sources)}")
-        print(f"[ALIGN_INIT] segment_count: {segment_count}")
 
     # Extract media_path from first selected source's source block
     media_path = None
@@ -103,8 +96,6 @@ async def _handle_align_init(
         chunks, audio_duration = await workflow.alignment_service.analyze_audio_async(media_path)
         if DEBUG_ALIGNMENT:
             print(f"[ALIGN_INIT] VAD returned {len(chunks)} chunks, duration: {audio_duration:.2f}s")
-
-    chunk_count = len(chunks)
 
     # Serialize and store
     chunk_dicts = [c.to_dict() for c in chunks]
@@ -136,27 +127,28 @@ async def _handle_align_init(
         id=CombinedHtmlIds.ALIGNMENT_MINI_STATS,
         hx_swap_oob="true"
     )
-    
-    # Alignment status OOB update
-    alignment_status_oob = render_alignment_status(
-        segment_count=segment_count,
-        chunk_count=chunk_count,
-        oob=True,
-    )
 
     if DEBUG_ALIGNMENT:
-        print(f"[ALIGN_INIT] Returning column_body + mini_stats_oob + alignment_status_oob")
+        print(f"[ALIGN_INIT] Returning column_body + mini_stats_oob")
 
-    return (column_body, mini_stats_oob, alignment_status_oob)
+    return (column_body, mini_stats_oob)
 
 # %% ../../../nbs/alignment/routes/handlers.ipynb #zr8z2g6w2x
 def init_workflow_router(
     workflow: StructureDecompWorkflow,  # The workflow instance
     prefix: str,  # Route prefix (e.g., "/workflow/align/workflow")
     urls: AlignmentUrls,  # URL bundle (populated after routes defined)
+    handler_init: Callable = None,  # Optional wrapped init handler
 ) -> Tuple[APIRouter, Dict[str, Callable]]:  # (router, route_dict)
-    """Initialize workflow routes for alignment."""
+    """Initialize workflow routes for alignment.
+    
+    Accepts optional handler override for wrapping with cross-domain
+    coordination (e.g., alignment status OOB updates).
+    """
     router = APIRouter(prefix=prefix)
+
+    # Use provided handler or fall back to raw domain handler
+    _init = handler_init or _handle_align_init
 
     # -------------------------------------------------------------------------
     # Workflow Operations
@@ -165,7 +157,7 @@ def init_workflow_router(
     @router
     async def init(request, sess):
         """Initialize alignment from audio file via VAD plugin."""
-        return await _handle_align_init(workflow, request, sess, urls=urls)
+        return await _init(workflow, request, sess, urls=urls)
 
     # -------------------------------------------------------------------------
     # Route Dict

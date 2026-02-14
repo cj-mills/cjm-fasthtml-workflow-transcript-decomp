@@ -27,7 +27,7 @@ from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.step_rende
 )
 from cjm_fasthtml_workflow_transcript_decomp.combined.step_combined import (
     render_seg_mini_stats_badge, _render_keyboard_system_container,
-    render_alignment_status, render_footer_inner_content,
+    render_footer_inner_content,
 )
 from cjm_fasthtml_workflow_transcript_decomp.combined.keyboard_config import (
     build_combined_kb_system, render_keyboard_hints_collapsible,
@@ -46,7 +46,7 @@ from cjm_fasthtml_workflow_transcript_decomp.decomposition.services.segmentation
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.routes.core import (
     _to_segments, _load_seg_context, _get_seg_state,
     _get_selection_state, _update_seg_state, _push_history,
-    _build_card_stack_state, _get_vad_chunk_count,
+    _build_card_stack_state,
 )
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.routes.card_stack import (
     _build_slots_oob, _build_nav_response
@@ -64,10 +64,9 @@ def _build_mutation_response(
     visible_count:int,  # Number of visible cards
     history_depth:int,  # Current undo history depth
     urls:SegmentationUrls,  # URL bundle
-    chunk_count:int=0,  # Number of VAD chunks (for alignment status)
     is_split_mode:bool=False,  # Whether split mode is active
     is_auto_mode:bool=False,  # Whether card count is in auto-adjust mode
-) -> Tuple:  # OOB elements (slots + progress + focus + stats + toolbar + mini-stats + alignment-status)
+) -> Tuple:  # OOB elements (slots + progress + focus + stats + toolbar + mini-stats)
     """Build the standard OOB response for mutation handlers."""
     state = CardStackState(
         focused_index=focused_index,
@@ -87,15 +86,8 @@ def _build_mutation_response(
         is_auto_mode=is_auto_mode, oob=True,
     )
     mini_stats_oob = render_seg_mini_stats_badge(segments, oob=True)
-    
-    # Alignment status OOB
-    alignment_status_oob = render_alignment_status(
-        segment_count=len(segment_dicts),
-        chunk_count=chunk_count,
-        oob=True,
-    )
 
-    return (*nav_response, stats_oob, toolbar_oob, mini_stats_oob, alignment_status_oob)
+    return (*nav_response, stats_oob, toolbar_oob, mini_stats_oob)
 
 # %% ../../../nbs/decomposition/routes/handlers.ipynb #dh-init
 async def _handle_seg_init(
@@ -121,9 +113,6 @@ async def _handle_seg_init(
     stored_visible_count = seg_state.get("visible_count", visible_count)
     stored_is_auto_mode = seg_state.get("is_auto_mode", False)
     stored_card_width = seg_state.get("card_width", card_width)
-    
-    # Get VAD chunk count for alignment status (may be populated if alignment init ran first)
-    chunk_count = _get_vad_chunk_count(workflow, session_id)
 
     if not selected_sources:
         # No sources selected, initialize with empty state
@@ -223,6 +212,12 @@ async def _handle_seg_init(
         id=CombinedHtmlIds.SHARED_CONTROLS,
         hx_swap_oob="innerHTML"
     )
+    
+    # Footer needs chunk_count for alignment status display (cross-domain, from combined/)
+    # Get VAD chunk count (may be populated if alignment init ran first)
+    workflow_state = workflow.state_store.get_state(workflow.config.workflow_id, session_id)
+    chunk_count = len(workflow_state.get("step_states", {}).get("alignment", {}).get("vad_chunks", []))
+    
     footer_oob = Div(
         render_footer_inner_content(
             render_seg_footer_content(segments, focused_index),
@@ -232,16 +227,13 @@ async def _handle_seg_init(
         hx_swap_oob="innerHTML"
     )
     mini_stats_oob = render_seg_mini_stats_badge(segments, oob=True)
-    
-    # Send alignment status as separate OOB swap (handles race with alignment init)
-    alignment_status_oob = render_alignment_status(segment_count, chunk_count, oob=True)
 
     if DEBUG_SEG_HANDLERS:
         print("[SEG_HANDLERS] Returning column_body + combined KB OOB swaps")
 
     return (
         column_body, kb_system_oob, zone_change_js, chrome_switch_btn, hints_oob,
-        toolbar_oob, controls_oob, footer_oob, mini_stats_oob, alignment_status_oob
+        toolbar_oob, controls_oob, footer_oob, mini_stats_oob,
     )
 
 # %% ../../../nbs/decomposition/routes/handlers.ipynb #dh-split
@@ -255,9 +247,6 @@ async def _handle_seg_split(
     """Split a segment at the specified word position."""
     session_id = get_session_id(sess)
     ctx = _load_seg_context(workflow, session_id)
-    
-    # Get VAD chunk count for alignment status
-    chunk_count = _get_vad_chunk_count(workflow, session_id)
 
     # Extract word index from token selector hidden input
     form = await request.form()
@@ -279,7 +268,7 @@ async def _handle_seg_split(
     if char_position <= 0 or char_position >= len(segment.text):
         return _build_mutation_response(
             ctx.segment_dicts, segment_index, ctx.visible_count, history_depth, urls,
-            chunk_count=chunk_count, is_auto_mode=ctx.is_auto_mode,
+            is_auto_mode=ctx.is_auto_mode,
         )
 
     # Split the segment
@@ -302,7 +291,7 @@ async def _handle_seg_split(
 
     return _build_mutation_response(
         new_segment_dicts, new_focused_index, ctx.visible_count, history_depth, urls,
-        chunk_count=chunk_count, is_auto_mode=ctx.is_auto_mode,
+        is_auto_mode=ctx.is_auto_mode,
     )
 
 # %% ../../../nbs/decomposition/routes/handlers.ipynb #dh-merge
@@ -316,9 +305,6 @@ def _handle_seg_merge(
     """Merge a segment with the previous segment."""
     session_id = get_session_id(sess)
     ctx = _load_seg_context(workflow, session_id)
-    
-    # Get VAD chunk count for alignment status
-    chunk_count = _get_vad_chunk_count(workflow, session_id)
     
     # Can't merge first segment (nothing before it)
     if segment_index <= 0 or segment_index >= len(ctx.segment_dicts):
@@ -349,7 +335,7 @@ def _handle_seg_merge(
     
     return _build_mutation_response(
         new_segment_dicts, new_focused_index, ctx.visible_count, history_depth, urls,
-        chunk_count=chunk_count, is_auto_mode=ctx.is_auto_mode,
+        is_auto_mode=ctx.is_auto_mode,
     )
 
 # %% ../../../nbs/decomposition/routes/handlers.ipynb #dh-undo
@@ -362,9 +348,6 @@ def _handle_seg_undo(
     """Undo the last operation by restoring previous state from history."""
     session_id = get_session_id(sess)
     ctx = _load_seg_context(workflow, session_id)
-    
-    # Get VAD chunk count for alignment status
-    chunk_count = _get_vad_chunk_count(workflow, session_id)
     
     result = pop_history(ctx.history)
     if result is None:
@@ -382,7 +365,7 @@ def _handle_seg_undo(
     
     return _build_mutation_response(
         previous_segments, new_focused_index, ctx.visible_count, len(remaining_history), urls,
-        chunk_count=chunk_count, is_auto_mode=ctx.is_auto_mode,
+        is_auto_mode=ctx.is_auto_mode,
     )
 
 # %% ../../../nbs/decomposition/routes/handlers.ipynb #dh-reset
@@ -398,9 +381,6 @@ def _handle_seg_reset(
     seg_state = _get_seg_state(workflow, session_id)
     initial_segments = seg_state.get("initial_segments", [])
     
-    # Get VAD chunk count for alignment status
-    chunk_count = _get_vad_chunk_count(workflow, session_id)
-    
     # Push current state to history before reset
     history_depth = 0
     if ctx.segment_dicts:
@@ -413,7 +393,7 @@ def _handle_seg_reset(
     
     return _build_mutation_response(
         initial_segments, 0, ctx.visible_count, history_depth, urls,
-        chunk_count=chunk_count, is_auto_mode=ctx.is_auto_mode,
+        is_auto_mode=ctx.is_auto_mode,
     )
 
 # %% ../../../nbs/decomposition/routes/handlers.ipynb #dh-ai-split
@@ -426,9 +406,6 @@ async def _handle_seg_ai_split(
     """Re-run AI (NLTK) sentence splitting on all current text."""
     session_id = get_session_id(sess)
     ctx = _load_seg_context(workflow, session_id)
-    
-    # Get VAD chunk count for alignment status
-    chunk_count = _get_vad_chunk_count(workflow, session_id)
     
     if not ctx.segment_dicts:
         state = _build_card_stack_state(ctx)
@@ -453,7 +430,7 @@ async def _handle_seg_ai_split(
     
     return _build_mutation_response(
         new_segment_dicts, 0, ctx.visible_count, history_depth, urls,
-        chunk_count=chunk_count, is_auto_mode=ctx.is_auto_mode,
+        is_auto_mode=ctx.is_auto_mode,
     )
 
 # %% ../../../nbs/decomposition/routes/handlers.ipynb #ul6toz93cyp
@@ -461,9 +438,27 @@ def init_workflow_router(
     workflow: StructureDecompWorkflow,  # The workflow instance
     prefix: str,  # Route prefix (e.g., "/workflow/seg/workflow")
     urls: SegmentationUrls,  # URL bundle (populated after routes defined)
+    handler_init: Callable = None,  # Optional wrapped init handler
+    handler_split: Callable = None,  # Optional wrapped split handler
+    handler_merge: Callable = None,  # Optional wrapped merge handler
+    handler_undo: Callable = None,  # Optional wrapped undo handler
+    handler_reset: Callable = None,  # Optional wrapped reset handler
+    handler_ai_split: Callable = None,  # Optional wrapped ai_split handler
 ) -> Tuple[APIRouter, Dict[str, Callable]]:  # (router, route_dict)
-    """Initialize workflow routes for segmentation."""
+    """Initialize workflow routes for segmentation.
+    
+    Accepts optional handler overrides for wrapping with cross-domain
+    coordination (e.g., alignment status OOB updates).
+    """
     router = APIRouter(prefix=prefix)
+
+    # Use provided handlers or fall back to raw domain handlers
+    _init = handler_init or _handle_seg_init
+    _split = handler_split or _handle_seg_split
+    _merge = handler_merge or _handle_seg_merge
+    _undo = handler_undo or _handle_seg_undo
+    _reset = handler_reset or _handle_seg_reset
+    _ai_split = handler_ai_split or _handle_seg_ai_split
 
     # -------------------------------------------------------------------------
     # Workflow Operations
@@ -472,36 +467,42 @@ def init_workflow_router(
     @router
     async def init(request, sess):
         """Initialize segments from Phase 1 selected sources."""
-        return await _handle_seg_init(workflow, request, sess, urls=urls)
+        return await _init(workflow, request, sess, urls=urls)
 
     @router
     async def split(request, sess, segment_index: int):
         """Split a segment at the specified word position."""
-        return await _handle_seg_split(
-            workflow, request, sess, segment_index, urls=urls,
-        )
+        return await _split(workflow, request, sess, segment_index, urls=urls)
 
     @router
-    def merge(request, sess, segment_index: int):
+    async def merge(request, sess, segment_index: int):
         """Merge a segment with the previous segment."""
-        return _handle_seg_merge(
-            workflow, request, sess, segment_index, urls=urls,
-        )
+        # Wrapped handler is always async
+        result = _merge(workflow, request, sess, segment_index, urls=urls)
+        if hasattr(result, '__await__'):
+            return await result
+        return result
 
     @router
-    def undo(request, sess):
+    async def undo(request, sess):
         """Undo the last segmentation operation."""
-        return _handle_seg_undo(workflow, request, sess, urls=urls)
+        result = _undo(workflow, request, sess, urls=urls)
+        if hasattr(result, '__await__'):
+            return await result
+        return result
 
     @router
-    def reset(request, sess):
+    async def reset(request, sess):
         """Reset segments to the initial NLTK split result."""
-        return _handle_seg_reset(workflow, request, sess, urls=urls)
+        result = _reset(workflow, request, sess, urls=urls)
+        if hasattr(result, '__await__'):
+            return await result
+        return result
 
     @router
     async def ai_split(request, sess):
         """Re-run AI (NLTK) sentence splitting on all current text."""
-        return await _handle_seg_ai_split(workflow, request, sess, urls=urls)
+        return await _ai_split(workflow, request, sess, urls=urls)
 
     # -------------------------------------------------------------------------
     # Route Dict

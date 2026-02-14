@@ -23,6 +23,7 @@ def init_alignment_routers(
     workflow: StructureDecompWorkflow,  # The workflow instance
     prefix: str,  # Base prefix for alignment routes (e.g., "/workflow/align")
     audio_src_url: str,  # URL for audio_src route (from core router)
+    wrapped_init: Callable = None,  # Optional wrapped init handler
 ) -> Tuple[List[APIRouter], AlignmentUrls, Dict[str, Callable]]:  # (routers, urls, merged_routes)
     """Initialize and return all alignment routers with URL bundle."""
     # Create empty URL bundle (populated after routes are defined)
@@ -33,7 +34,8 @@ def init_alignment_routers(
         workflow, f"{prefix}/card_stack", urls
     )
     workflow_router, workflow_routes = init_workflow_router(
-        workflow, f"{prefix}/workflow", urls
+        workflow, f"{prefix}/workflow", urls,
+        handler_init=wrapped_init,
     )
 
     # Populate the URL bundle using .to() on route functions

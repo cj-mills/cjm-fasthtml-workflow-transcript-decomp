@@ -16,6 +16,13 @@ from ..selection.routes.init import init_selection_routers
 from ..decomposition.routes.init import init_segmentation_routers
 from ..alignment.routes.init import init_alignment_routers
 
+# Import wrapped handlers for cross-domain coordination
+from cjm_fasthtml_workflow_transcript_decomp.combined.handlers import (
+    wrapped_seg_init, wrapped_seg_split, wrapped_seg_merge,
+    wrapped_seg_undo, wrapped_seg_reset, wrapped_seg_ai_split,
+    wrapped_align_init,
+)
+
 from ..workflow.workflow import StructureDecompWorkflow
 
 # %% ../../nbs/routes/init.ipynb #o055uobf0bp
@@ -32,12 +39,24 @@ def init_routers(
     selection_routers, selection_urls, selection_routes = init_selection_routers(
         workflow, f"{base_prefix}/selection"
     )
+    
+    # Pass wrapped handlers for cross-domain coordination (alignment status OOB)
+    seg_wrapped = {
+        "init": wrapped_seg_init,
+        "split": wrapped_seg_split,
+        "merge": wrapped_seg_merge,
+        "undo": wrapped_seg_undo,
+        "reset": wrapped_seg_reset,
+        "ai_split": wrapped_seg_ai_split,
+    }
     seg_routers, seg_urls, seg_routes = init_segmentation_routers(
-        workflow, f"{base_prefix}/seg"
+        workflow, f"{base_prefix}/seg",
+        wrapped_handlers=seg_wrapped,
     )
     align_routers, align_urls, align_routes = init_alignment_routers(
         workflow, f"{base_prefix}/align",
         audio_src_url=core_routes["audio_src"].to(),
+        wrapped_init=wrapped_align_init,
     )
 
     # Store URL bundles on workflow for renderer access
