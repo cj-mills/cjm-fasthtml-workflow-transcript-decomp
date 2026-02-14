@@ -46,7 +46,7 @@ from cjm_fasthtml_workflow_transcript_decomp.decomposition.services.segmentation
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.routes.core import (
     _to_segments, _load_decomp_context, _get_decomp_state,
     _get_selection_state, _update_decomp_state, _push_history,
-    _build_card_stack_state, _try_auto_populate_times, _get_vad_chunks,
+    _build_card_stack_state, _get_vad_chunk_count,
 )
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.routes.card_stack import (
     _build_slots_oob, _build_nav_response
@@ -123,8 +123,7 @@ async def _handle_decomp_init(
     stored_card_width = decomp_state.get("card_width", card_width)
     
     # Get VAD chunk count for alignment status (may be populated if alignment init ran first)
-    vad_chunks = _get_vad_chunks(workflow, session_id)
-    chunk_count = len(vad_chunks)
+    chunk_count = _get_vad_chunk_count(workflow, session_id)
 
     if not selected_sources:
         # No sources selected, initialize with empty state
@@ -146,9 +145,6 @@ async def _handle_decomp_init(
             source_blocks
         )
         segment_dicts = [s.to_dict() for s in working_segments]
-
-        # Try to auto-populate times if VAD chunks already available and counts match
-        segment_dicts = _try_auto_populate_times(workflow, session_id, segment_dicts)
 
         # Store in state
         _update_decomp_state(
@@ -261,8 +257,7 @@ async def _handle_decomp_split(
     ctx = _load_decomp_context(workflow, session_id)
     
     # Get VAD chunk count for alignment status
-    vad_chunks = _get_vad_chunks(workflow, session_id)
-    chunk_count = len(vad_chunks)
+    chunk_count = _get_vad_chunk_count(workflow, session_id)
 
     # Extract word index from token selector hidden input
     form = await request.form()
@@ -299,9 +294,6 @@ async def _handle_decomp_split(
     reindexed = reindex_segments(_to_segments(new_segments))
     new_segment_dicts = [s.to_dict() for s in reindexed]
 
-    # Try to auto-populate times if counts now match VAD chunks
-    new_segment_dicts = _try_auto_populate_times(workflow, session_id, new_segment_dicts)
-
     # Update state — focus moves to the new segment (second half)
     new_focused_index = segment_index + 1
     _update_decomp_state(workflow, session_id,
@@ -326,8 +318,7 @@ def _handle_decomp_merge(
     ctx = _load_decomp_context(workflow, session_id)
     
     # Get VAD chunk count for alignment status
-    vad_chunks = _get_vad_chunks(workflow, session_id)
-    chunk_count = len(vad_chunks)
+    chunk_count = _get_vad_chunk_count(workflow, session_id)
     
     # Can't merge first segment (nothing before it)
     if segment_index <= 0 or segment_index >= len(ctx.segment_dicts):
@@ -349,9 +340,6 @@ def _handle_decomp_merge(
     
     reindexed = reindex_segments(_to_segments(new_segments))
     new_segment_dicts = [s.to_dict() for s in reindexed]
-    
-    # Try to auto-populate times if counts now match VAD chunks
-    new_segment_dicts = _try_auto_populate_times(workflow, session_id, new_segment_dicts)
     
     # Update state — focus moves to merged segment (previous position)
     new_focused_index = segment_index - 1
@@ -376,8 +364,7 @@ def _handle_decomp_undo(
     ctx = _load_decomp_context(workflow, session_id)
     
     # Get VAD chunk count for alignment status
-    vad_chunks = _get_vad_chunks(workflow, session_id)
-    chunk_count = len(vad_chunks)
+    chunk_count = _get_vad_chunk_count(workflow, session_id)
     
     result = pop_history(ctx.history)
     if result is None:
@@ -387,9 +374,6 @@ def _handle_decomp_undo(
     snapshot, remaining_history = result
     previous_segments = snapshot["segments"]
     new_focused_index = min(snapshot["focused_index"], max(0, len(previous_segments) - 1))
-    
-    # Try to auto-populate times if counts now match VAD chunks
-    previous_segments = _try_auto_populate_times(workflow, session_id, previous_segments)
     
     _update_decomp_state(workflow, session_id,
         segments=previous_segments, history=remaining_history,
@@ -415,25 +399,20 @@ def _handle_decomp_reset(
     initial_segments = decomp_state.get("initial_segments", [])
     
     # Get VAD chunk count for alignment status
-    vad_chunks = _get_vad_chunks(workflow, session_id)
-    chunk_count = len(vad_chunks)
+    chunk_count = _get_vad_chunk_count(workflow, session_id)
     
     # Push current state to history before reset
     history_depth = 0
     if ctx.segment_dicts:
         history_depth = _push_history(workflow, session_id, ctx.segment_dicts, ctx.focused_index)
     
-    # Try to auto-populate times if counts match VAD chunks
-    initial_segments_copy = initial_segments.copy()
-    initial_segments_copy = _try_auto_populate_times(workflow, session_id, initial_segments_copy)
-    
     # Restore initial segments — reset focus to first segment
     _update_decomp_state(workflow, session_id,
-        segments=initial_segments_copy, focused_index=0,
+        segments=initial_segments.copy(), focused_index=0,
     )
     
     return _build_mutation_response(
-        initial_segments_copy, 0, ctx.visible_count, history_depth, urls,
+        initial_segments, 0, ctx.visible_count, history_depth, urls,
         chunk_count=chunk_count, is_auto_mode=ctx.is_auto_mode,
     )
 
@@ -449,8 +428,7 @@ async def _handle_decomp_ai_split(
     ctx = _load_decomp_context(workflow, session_id)
     
     # Get VAD chunk count for alignment status
-    vad_chunks = _get_vad_chunks(workflow, session_id)
-    chunk_count = len(vad_chunks)
+    chunk_count = _get_vad_chunk_count(workflow, session_id)
     
     if not ctx.segment_dicts:
         state = _build_card_stack_state(ctx)
@@ -467,9 +445,6 @@ async def _handle_decomp_ai_split(
         source_blocks
     )
     new_segment_dicts = [s.to_dict() for s in working_segments]
-    
-    # Try to auto-populate times if counts now match VAD chunks
-    new_segment_dicts = _try_auto_populate_times(workflow, session_id, new_segment_dicts)
     
     # Update state — reset focus to first segment
     _update_decomp_state(workflow, session_id,

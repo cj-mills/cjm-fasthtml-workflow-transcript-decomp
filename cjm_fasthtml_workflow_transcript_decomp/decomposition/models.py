@@ -8,7 +8,7 @@ __all__ = ['TextSegment', 'DecompositionStepState', 'DecompUrls']
 # %% ../../nbs/decomposition/models.ipynb #decomp-models-imports
 from typing import Optional, List, Dict, Any
 from typing_extensions import TypedDict
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field, asdict, fields
 
 from cjm_fasthtml_card_stack.core.models import CardStackUrls
 
@@ -26,10 +26,6 @@ class TextSegment:
     start_char: Optional[int] = None  # Start character index in source
     end_char: Optional[int] = None  # End character index in source
     
-    # Temporal coordinates (populated when segment count matches VAD chunk count)
-    start_time: Optional[float] = None  # Start time in seconds
-    end_time: Optional[float] = None  # End time in seconds
-    
     def to_dict(self) -> Dict[str, Any]:  # Dictionary representation
         """Convert to dictionary for JSON serialization."""
         return asdict(self)
@@ -39,11 +35,10 @@ class TextSegment:
         cls,
         data: Dict[str, Any]  # Dictionary representation
     ) -> "TextSegment":  # Reconstructed TextSegment
-        """Create from dictionary."""
-        data = data.copy()
-        # Remove legacy fields if present
-        data.pop("vad_chunk_indices", None)
-        return cls(**data)
+        """Create from dictionary, filtering out legacy/unknown fields."""
+        valid_field_names = {f.name for f in fields(cls)}
+        filtered = {k: v for k, v in data.items() if k in valid_field_names}
+        return cls(**filtered)
 
 # %% ../../nbs/decomposition/models.ipynb #decomp-step-state
 class DecompositionStepState(TypedDict, total=False):

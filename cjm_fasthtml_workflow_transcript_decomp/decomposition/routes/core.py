@@ -17,10 +17,6 @@ from cjm_workflow_state.history import push_history
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.models import (
     TextSegment, DecompositionStepState
 )
-from ...alignment.models import VADChunk
-from cjm_fasthtml_workflow_transcript_decomp.alignment.services.alignment import (
-    check_alignment_ready, populate_segment_times
-)
 from ...workflow.workflow import StructureDecompWorkflow
 
 # Debug flag for state update tracing (set False in production)
@@ -169,37 +165,14 @@ def _push_history(
     _update_decomp_state(workflow, session_id, history=new_history)
     return len(new_history)
 
-# %% ../../../nbs/decomposition/routes/core.ipynb #8685kjz710s
-def _get_vad_chunks(
-    workflow:StructureDecompWorkflow,  # The workflow instance
-    session_id:str,  # Session identifier string
-) -> List[VADChunk]:  # VAD chunks from alignment state (empty if not initialized)
-    """Get VAD chunks from alignment state."""
+
+#| export
+def _get_vad_chunk_count(
+    workflow: StructureDecompWorkflow,  # The workflow instance
+    session_id: str,  # Session identifier string
+) -> int:  # Number of VAD chunks in alignment state
+    """Get VAD chunk count from alignment state for status display."""
     workflow_state = workflow.state_store.get_state(workflow.config.workflow_id, session_id)
     step_states = workflow_state.get("step_states", {})
     align_state = step_states.get("alignment", {})
-    chunk_dicts = align_state.get("vad_chunks", [])
-    return [VADChunk.from_dict(c) for c in chunk_dicts]
-
-
-#| export
-def _try_auto_populate_times(
-    workflow:StructureDecompWorkflow,  # The workflow instance
-    session_id:str,  # Session identifier string
-    segment_dicts:List[Dict[str, Any]],  # Current segment dictionaries
-) -> List[Dict[str, Any]]:  # Updated segment dicts (with times if counts matched)
-    """Check if segment/VAD counts match and populate times if ready."""
-    chunks = _get_vad_chunks(workflow, session_id)
-    if not chunks:
-        return segment_dicts
-    
-    segments = [TextSegment.from_dict(s) for s in segment_dicts]
-    
-    if populate_segment_times(segments, chunks):
-        if DEBUG_DECOMP_STATE:
-            print(f"[DECOMP_STATE] Auto-populated times: {len(segments)} segments matched {len(chunks)} VAD chunks")
-        return [s.to_dict() for s in segments]
-    
-    if DEBUG_DECOMP_STATE:
-        print(f"[DECOMP_STATE] Counts don't match: {len(segments)} segments vs {len(chunks)} VAD chunks")
-    return segment_dicts
+    return len(align_state.get("vad_chunks", []))

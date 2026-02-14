@@ -166,10 +166,6 @@ def merge_text_segments(
     start_char = first.start_char if source_id else None
     end_char = second.end_char if source_id else None
     
-    # Merge time ranges if both exist
-    start_time = first.start_time
-    end_time = second.end_time if second.end_time is not None else first.end_time
-    
     return TextSegment(
         index=first.index,
         text=merged_text,
@@ -177,8 +173,6 @@ def merge_text_segments(
         source_provider_id=source_provider_id,
         start_char=start_char,
         end_char=end_char,
-        start_time=start_time,
-        end_time=end_time,
     )
 
 # %% ../../../nbs/decomposition/services/segmentation.ipynb #9eb1119f
