@@ -32,15 +32,15 @@ from cjm_fasthtml_card_stack.keyboard.actions import build_card_stack_url_map
 # Local HTML IDs
 from .html_ids import CombinedHtmlIds
 
-# Decomposition-specific keyboard config (building blocks)
+# Segmentation-specific keyboard config (building blocks)
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.keyboard_config import (
-    SD_DECOMP_ENTER_SPLIT_BTN, SD_DECOMP_EXIT_SPLIT_BTN,
-    SD_DECOMP_SPLIT_BTN, SD_DECOMP_MERGE_BTN, SD_DECOMP_UNDO_BTN,
-    create_decomp_kb_parts,
+    SD_SEG_ENTER_SPLIT_BTN, SD_SEG_EXIT_SPLIT_BTN,
+    SD_SEG_SPLIT_BTN, SD_SEG_MERGE_BTN, SD_SEG_UNDO_BTN,
+    create_seg_kb_parts,
 )
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.card_stack_config import (
-    DECOMP_CS_CONFIG, DECOMP_CS_IDS, DECOMP_CS_BTN_IDS,
-    DECOMP_TS_IDS,
+    SEG_CS_CONFIG, SEG_CS_IDS, SEG_CS_BTN_IDS,
+    SEG_TS_IDS,
 )
 
 # Alignment-specific keyboard config (building blocks)
@@ -52,7 +52,7 @@ from cjm_fasthtml_workflow_transcript_decomp.alignment.components.card_stack_con
 )
 
 # URL bundles
-from ..decomposition.models import DecompUrls
+from ..decomposition.models import SegmentationUrls
 from ..alignment.models import AlignmentUrls
 
 # Debug flag for keyboard system tracing (set False in production)
@@ -92,18 +92,18 @@ ZONE_CHANGE_CALLBACK = "onCombinedZoneChange"
 
 
 def build_combined_kb_system(
-    decomp_urls:DecompUrls,  # URL bundle for decomposition routes
+    seg_urls:SegmentationUrls,  # URL bundle for segmentation routes
     align_urls:AlignmentUrls,  # URL bundle for alignment routes
 ) -> Tuple[ZoneManager, Any]:  # (keyboard manager, rendered keyboard system)
-    """Build combined keyboard system with decomp and alignment zones."""
+    """Build combined keyboard system with segmentation and alignment zones."""
     if DEBUG_KB_SYSTEM:
         print("[KB_SYSTEM] build_combined_kb_system called")
 
-    # Get decomp-specific building blocks
-    decomp_zone, decomp_actions, decomp_modes = create_decomp_kb_parts(
-        ids=DECOMP_CS_IDS,
-        button_ids=DECOMP_CS_BTN_IDS,
-        config=DECOMP_CS_CONFIG,
+    # Get segmentation-specific building blocks
+    seg_zone, seg_actions, seg_modes = create_seg_kb_parts(
+        ids=SEG_CS_IDS,
+        button_ids=SEG_CS_BTN_IDS,
+        config=SEG_CS_CONFIG,
     )
 
     # Get alignment-specific building blocks
@@ -114,23 +114,23 @@ def build_combined_kb_system(
     )
 
     if DEBUG_KB_SYSTEM:
-        print(f"[KB_SYSTEM] decomp_zone.id: {decomp_zone.id}")
+        print(f"[KB_SYSTEM] seg_zone.id: {seg_zone.id}")
         print(f"[KB_SYSTEM] align_zone.id: {align_zone.id}")
-        print(f"[KB_SYSTEM] decomp_actions count: {len(decomp_actions)}")
+        print(f"[KB_SYSTEM] seg_actions count: {len(seg_actions)}")
         print(f"[KB_SYSTEM] align_actions count: {len(align_actions)}")
 
-    # Combine modes (only decomp has split mode)
-    all_modes = (*decomp_modes, *align_modes)
+    # Combine modes (only segmentation has split mode)
+    all_modes = (*seg_modes, *align_modes)
 
     # Combine actions from both zones
-    all_actions = (*decomp_actions, *align_actions)
+    all_actions = (*seg_actions, *align_actions)
 
     # Assemble into ZoneManager with zone switching enabled
     kb_manager = ZoneManager(
-        zones=(decomp_zone, align_zone),
+        zones=(seg_zone, align_zone),
         actions=all_actions,
         modes=all_modes,
-        initial_zone_id=decomp_zone.id,
+        initial_zone_id=seg_zone.id,
         prev_zone_key="ArrowLeft",
         next_zone_key="ArrowRight",
         on_zone_change=ZONE_CHANGE_CALLBACK,
@@ -138,20 +138,20 @@ def build_combined_kb_system(
     )
 
     # Build URL maps for both stacks
-    decomp_include_selector = (
-        f"#{DECOMP_CS_IDS.focused_index_input}, "
-        f"#{DECOMP_TS_IDS.anchor_input}"
+    seg_include_selector = (
+        f"#{SEG_CS_IDS.focused_index_input}, "
+        f"#{SEG_TS_IDS.anchor_input}"
     )
     align_include_selector = f"#{ALIGN_CS_IDS.focused_index_input}"
 
-    # Decomp URL mappings
-    decomp_url_map = {
-        **build_card_stack_url_map(DECOMP_CS_BTN_IDS, decomp_urls.card_stack),
-        SD_DECOMP_ENTER_SPLIT_BTN: decomp_urls.enter_split,
-        SD_DECOMP_EXIT_SPLIT_BTN: decomp_urls.exit_split,
-        SD_DECOMP_SPLIT_BTN: decomp_urls.split,
-        SD_DECOMP_MERGE_BTN: decomp_urls.merge,
-        SD_DECOMP_UNDO_BTN: decomp_urls.undo,
+    # Segmentation URL mappings
+    seg_url_map = {
+        **build_card_stack_url_map(SEG_CS_BTN_IDS, seg_urls.card_stack),
+        SD_SEG_ENTER_SPLIT_BTN: seg_urls.enter_split,
+        SD_SEG_EXIT_SPLIT_BTN: seg_urls.exit_split,
+        SD_SEG_SPLIT_BTN: seg_urls.split,
+        SD_SEG_MERGE_BTN: seg_urls.merge,
+        SD_SEG_UNDO_BTN: seg_urls.undo,
     }
 
     # Alignment URL mappings (navigation only — no undo for alignment)
@@ -160,19 +160,19 @@ def build_combined_kb_system(
     }
 
     # Combined URL map
-    url_map = {**decomp_url_map, **align_url_map}
+    url_map = {**seg_url_map, **align_url_map}
 
     # Target maps (each stack targets its own card_stack element)
-    decomp_target = f"#{DECOMP_CS_IDS.card_stack}"
+    seg_target = f"#{SEG_CS_IDS.card_stack}"
     align_target = f"#{ALIGN_CS_IDS.card_stack}"
     target_map = {
-        **{btn_id: decomp_target for btn_id in decomp_url_map},
+        **{btn_id: seg_target for btn_id in seg_url_map},
         **{btn_id: align_target for btn_id in align_url_map},
     }
 
     # Include maps (each stack includes its own focused_index input)
     include_map = {
-        **{btn_id: decomp_include_selector for btn_id in decomp_url_map},
+        **{btn_id: seg_include_selector for btn_id in seg_url_map},
         **{btn_id: align_include_selector for btn_id in align_url_map},
     }
 
@@ -204,15 +204,15 @@ def generate_zone_change_js(
 ) -> Script:  # Script element with zone change callback and click handlers
     """Generate JavaScript for zone change handling and column click handlers."""
     # Zone IDs from card stack configs
-    decomp_zone_id = DECOMP_CS_IDS.card_stack
+    seg_zone_id = SEG_CS_IDS.card_stack
     align_zone_id = ALIGN_CS_IDS.card_stack
 
     # Card stack prefixes for syncCountDropdown calls
-    decomp_prefix = DECOMP_CS_CONFIG.prefix
+    seg_prefix = SEG_CS_CONFIG.prefix
     align_prefix = ALIGN_CS_CONFIG.prefix
 
     # Column container IDs
-    decomp_col_id = CombinedHtmlIds.DECOMP_COLUMN
+    seg_col_id = CombinedHtmlIds.SEG_COLUMN
     align_col_id = CombinedHtmlIds.ALIGNMENT_COLUMN
     active_input_id = CombinedHtmlIds.ACTIVE_COLUMN_INPUT
 
@@ -226,7 +226,7 @@ def generate_zone_change_js(
                 // Add one-time listener to sync dropdown after chrome swap settles
                 function onChromeSettle(evt) {{
                     // Sync the active card stack's dropdown from localStorage
-                    const activePrefix = (newZoneId === decomp_zone_id) ? '{decomp_prefix}' : '{align_prefix}';
+                    const activePrefix = (newZoneId === seg_zone_id) ? '{seg_prefix}' : '{align_prefix}';
                     if (window.cardStacks?.[activePrefix]?.syncCountDropdown) {{
                         window.cardStacks[activePrefix].syncCountDropdown();
                     }}
@@ -239,34 +239,34 @@ def generate_zone_change_js(
 
     js_code = f"""
     (function() {{
-        const decomp_zone_id = '{decomp_zone_id}';
+        const seg_zone_id = '{seg_zone_id}';
         const align_zone_id = '{align_zone_id}';
-        const decomp_col_id = '{decomp_col_id}';
+        const seg_col_id = '{seg_col_id}';
         const align_col_id = '{align_col_id}';
         const active_input_id = '{active_input_id}';
 
         function updateColumnStyles(activeZoneId) {{
-            const decompCol = document.getElementById(decomp_col_id);
+            const segCol = document.getElementById(seg_col_id);
             const alignCol = document.getElementById(align_col_id);
             const activeInput = document.getElementById(active_input_id);
 
-            if (!decompCol || !alignCol) return;
+            if (!segCol || !alignCol) return;
 
-            const isDecompActive = activeZoneId === decomp_zone_id;
+            const isSegActive = activeZoneId === seg_zone_id;
 
             // Ring classes for active indicator
-            decompCol.classList.toggle('ring-1', isDecompActive);
-            decompCol.classList.toggle('ring-primary', isDecompActive);
-            alignCol.classList.toggle('ring-1', !isDecompActive);
-            alignCol.classList.toggle('ring-secondary', !isDecompActive);
+            segCol.classList.toggle('ring-1', isSegActive);
+            segCol.classList.toggle('ring-primary', isSegActive);
+            alignCol.classList.toggle('ring-1', !isSegActive);
+            alignCol.classList.toggle('ring-secondary', !isSegActive);
 
             // Opacity for inactive column
-            decompCol.classList.toggle('opacity-70', !isDecompActive);
-            alignCol.classList.toggle('opacity-70', isDecompActive);
+            segCol.classList.toggle('opacity-70', !isSegActive);
+            alignCol.classList.toggle('opacity-70', isSegActive);
 
             // Update hidden input
             if (activeInput) {{
-                activeInput.value = isDecompActive ? 'decomp' : 'align';
+                activeInput.value = isSegActive ? 'seg' : 'align';
             }}
         }}
 
@@ -296,12 +296,12 @@ def generate_zone_change_js(
 
         // Set up click handlers on columns
         function setupClickHandlers() {{
-            const decompCol = document.getElementById(decomp_col_id);
+            const segCol = document.getElementById(seg_col_id);
             const alignCol = document.getElementById(align_col_id);
 
-            if (decompCol) {{
-                decompCol.addEventListener('mousedown', function(e) {{
-                    handleColumnClick(decomp_zone_id);
+            if (segCol) {{
+                segCol.addEventListener('mousedown', function(e) {{
+                    handleColumnClick(seg_zone_id);
                 }});
             }}
 
@@ -312,8 +312,8 @@ def generate_zone_change_js(
             }}
         }}
 
-        // Initial update (decomp zone is active by default)
-        updateColumnStyles(decomp_zone_id);
+        // Initial update (segmentation zone is active by default)
+        updateColumnStyles(seg_zone_id);
 
         // Set up click handlers
         setupClickHandlers();

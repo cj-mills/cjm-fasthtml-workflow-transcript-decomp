@@ -50,12 +50,12 @@ from cjm_fasthtml_token_selector.helpers.tokenizer import tokenize
 from cjm_fasthtml_token_selector.core.models import TokenSelectorState
 
 # HTML IDs (page-specific)
-from ..html_ids import DecompositionHtmlIds
+from ..html_ids import SegmentationHtmlIds
 
 # Local imports
 from ..models import TextSegment
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.card_stack_config import (
-    DECOMP_TS_CONFIG, DECOMP_TS_IDS,
+    SEG_TS_CONFIG, SEG_TS_IDS,
 )
 
 # %% ../../../nbs/decomposition/components/segment_card.ipynb #e5f6a7b8
@@ -135,7 +135,7 @@ def _render_split_mode_content(
     state = TokenSelectorState(
         anchor=caret_position, focus=caret_position, word_count=len(tokens),
     )
-    grid = render_token_grid(tokens, DECOMP_TS_CONFIG, DECOMP_TS_IDS, state)
+    grid = render_token_grid(tokens, SEG_TS_CONFIG, SEG_TS_IDS, state)
 
     return Div(
         # Token grid from library
@@ -149,7 +149,7 @@ def _render_split_mode_content(
                 cls=combine_classes(btn, btn_colors.primary, btn_sizes.sm, w(40)),
                 hx_post=split_url,
                 hx_vals=json.dumps({"segment_index": segment.index}),
-                hx_include=f"#{DECOMP_TS_IDS.anchor_input}",
+                hx_include=f"#{SEG_TS_IDS.anchor_input}",
                 hx_swap="none",
                 onclick="if(window.kbNav)window.kbNav.exitMode()",
             ),
@@ -165,13 +165,13 @@ def _render_split_mode_content(
                 Span("Enter", cls=combine_classes(kbd, kbd_sizes.xs)),
                 cls=combine_classes(font_size.xs, text_dui.base_content.opacity(50), m.l.auto)
             ),
-            id=DecompositionHtmlIds.SPLIT_MODE_ACTIONS,
+            id=SegmentationHtmlIds.SPLIT_MODE_ACTIONS,
             cls=combine_classes(
                 flex_display, items.center, gap(2),
                 border_dui.base_200, border.t(), p.t(3)
             )
         ),
-        id=DecompositionHtmlIds.SPLIT_MODE_CONTAINER
+        id=SegmentationHtmlIds.SPLIT_MODE_CONTAINER
     )
 
 # %% ../../../nbs/decomposition/components/segment_card.ipynb #e1f2a3b4
@@ -269,7 +269,7 @@ def render_segment_card(
                 position.relative, p.r(12) if show_actions else ""
             )
         ),
-        id=DecompositionHtmlIds.segment_card(segment.index),
+        id=SegmentationHtmlIds.segment_card(segment.index),
         cls=combine_classes(
             card, "segment-card", "group",
             bg_dui.base_100, 

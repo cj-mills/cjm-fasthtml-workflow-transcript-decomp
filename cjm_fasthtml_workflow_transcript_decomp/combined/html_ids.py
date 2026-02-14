@@ -25,11 +25,11 @@ class CombinedHtmlIds:
     SHARED_FOOTER = "sd-shared-footer"
     ALIGNMENT_STATUS = "sd-alignment-status"
 
-    # Decomposition Column
-    DECOMP_COLUMN = "sd-decomp-column"
-    DECOMP_COLUMN_HEADER = "sd-decomp-column-header"
-    DECOMP_COLUMN_CONTENT = "sd-decomp-column-content"
-    DECOMP_MINI_STATS = "sd-decomp-mini-stats"
+    # Segmentation Column
+    SEG_COLUMN = "sd-seg-column"
+    SEG_COLUMN_HEADER = "sd-seg-column-header"
+    SEG_COLUMN_CONTENT = "sd-seg-column-content"
+    SEG_MINI_STATS = "sd-seg-mini-stats"
 
     # Alignment Column
     ALIGNMENT_COLUMN = "sd-align-column"

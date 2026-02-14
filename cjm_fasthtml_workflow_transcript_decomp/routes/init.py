@@ -13,7 +13,7 @@ from fasthtml.common import APIRouter
 # Import subpackage router assemblies
 from .core.init import init_core_routers
 from ..selection.routes.init import init_selection_routers
-from ..decomposition.routes.init import init_decomposition_routers
+from ..decomposition.routes.init import init_segmentation_routers
 from ..alignment.routes.init import init_alignment_routers
 
 from ..workflow.workflow import StructureDecompWorkflow
@@ -32,8 +32,8 @@ def init_routers(
     selection_routers, selection_urls, selection_routes = init_selection_routers(
         workflow, f"{base_prefix}/selection"
     )
-    decomp_routers, decomp_urls, decomp_routes = init_decomposition_routers(
-        workflow, f"{base_prefix}/decomp"
+    seg_routers, seg_urls, seg_routes = init_segmentation_routers(
+        workflow, f"{base_prefix}/seg"
     )
     align_routers, align_urls, align_routes = init_alignment_routers(
         workflow, f"{base_prefix}/align",
@@ -42,14 +42,14 @@ def init_routers(
 
     # Store URL bundles on workflow for renderer access
     workflow._selection_urls = selection_urls
-    workflow._decomp_urls = decomp_urls
+    workflow._seg_urls = seg_urls
     workflow._align_urls = align_urls
     workflow._switch_chrome_url = core_routes["switch_chrome"].to()
 
     # Store route dicts on workflow
     workflow._core_routes = core_routes
     workflow._selection_routes = selection_routes
-    workflow._decomposition_routes = decomp_routes
+    workflow._segmentation_routes = seg_routes
     workflow._alignment_routes = align_routes
 
-    return core_routers + selection_routers + decomp_routers + align_routers
+    return core_routers + selection_routers + seg_routers + align_routers

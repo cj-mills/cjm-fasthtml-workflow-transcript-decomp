@@ -16,17 +16,17 @@ from cjm_fasthtml_card_stack.core.constants import DEFAULT_VISIBLE_COUNT, DEFAUL
 from cjm_fasthtml_interactions.core.state_store import get_session_id
 
 from ...combined.html_ids import CombinedHtmlIds
-from ...decomposition.models import TextSegment, DecompUrls
+from ...decomposition.models import TextSegment, SegmentationUrls
 from ...alignment.models import VADChunk, AlignmentUrls
 from ...workflow.workflow import StructureDecompWorkflow
 
-# Decomposition renderers
+# Segmentation renderers
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.step_renderer import (
-    render_toolbar as render_decomp_toolbar,
-    render_decomp_footer_content,
+    render_toolbar as render_seg_toolbar,
+    render_seg_footer_content,
 )
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.card_stack_config import (
-    DECOMP_CS_CONFIG, DECOMP_CS_IDS,
+    SEG_CS_CONFIG, SEG_CS_IDS,
 )
 
 # Alignment renderers
@@ -54,12 +54,12 @@ async def _handle_switch_chrome(
     workflow:StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    decomp_urls:DecompUrls,  # URL bundle for decomposition routes
+    seg_urls:SegmentationUrls,  # URL bundle for segmentation routes
     align_urls:AlignmentUrls,  # URL bundle for alignment routes
 ) -> tuple:  # OOB swaps for shared chrome containers
     """Switch shared chrome content based on active column."""
     form = await request.form()
-    active_column = form.get("active_column", "decomp")
+    active_column = form.get("active_column", "seg")
 
     if DEBUG_SWITCH_CHROME:
         print(f"[SWITCH_CHROME] active_column: {active_column}")
@@ -67,36 +67,36 @@ async def _handle_switch_chrome(
     session_id = get_session_id(sess)
     state = workflow.state_store.get_state(workflow.config.workflow_id, session_id)
     step_states = state.get("step_states", {})
-    decomp_state = step_states.get("decomposition", {})
+    seg_state = step_states.get("segmentation", {})
     align_state = step_states.get("alignment", {})
 
     # Get counts for alignment status
-    segment_count = len(decomp_state.get("segments", []))
+    segment_count = len(seg_state.get("segments", []))
     chunk_count = len(align_state.get("vad_chunks", []))
 
     # Build combined KB manager for hints
-    kb_manager, _ = build_combined_kb_system(decomp_urls, align_urls)
+    kb_manager, _ = build_combined_kb_system(seg_urls, align_urls)
 
-    if active_column == "decomp":
-        # Decomp chrome
-        segments = [TextSegment.from_dict(s) for s in decomp_state.get("segments", [])]
-        history = decomp_state.get("history", [])
-        focused_index = decomp_state.get("focused_index", 0)
-        visible_count = decomp_state.get("visible_count", DEFAULT_VISIBLE_COUNT)
-        is_auto_mode = decomp_state.get("is_auto_mode", False)
-        card_width = decomp_state.get("card_width", DEFAULT_CARD_WIDTH)
+    if active_column == "seg":
+        # Segmentation chrome
+        segments = [TextSegment.from_dict(s) for s in seg_state.get("segments", [])]
+        history = seg_state.get("history", [])
+        focused_index = seg_state.get("focused_index", 0)
+        visible_count = seg_state.get("visible_count", DEFAULT_VISIBLE_COUNT)
+        is_auto_mode = seg_state.get("is_auto_mode", False)
+        card_width = seg_state.get("card_width", DEFAULT_CARD_WIDTH)
 
         hints_content = render_keyboard_hints_collapsible(kb_manager, include_zone_switch=True)
-        toolbar_content = render_decomp_toolbar(
-            reset_url=decomp_urls.reset,
-            ai_split_url=decomp_urls.ai_split,
-            undo_url=decomp_urls.undo,
+        toolbar_content = render_seg_toolbar(
+            reset_url=seg_urls.reset,
+            ai_split_url=seg_urls.ai_split,
+            undo_url=seg_urls.undo,
             can_undo=(len(history) > 0),
             visible_count=visible_count,
             is_auto_mode=is_auto_mode,
         )
-        controls_content = render_width_slider(DECOMP_CS_CONFIG, DECOMP_CS_IDS, card_width=card_width)
-        column_footer = render_decomp_footer_content(segments, focused_index)
+        controls_content = render_width_slider(SEG_CS_CONFIG, SEG_CS_IDS, card_width=card_width)
+        column_footer = render_seg_footer_content(segments, focused_index)
     else:
         # Alignment chrome
         chunks = [VADChunk.from_dict(c) for c in align_state.get("vad_chunks", [])]
@@ -153,7 +153,7 @@ def init_chrome_router(
         """Switch shared chrome content based on active column."""
         return await _handle_switch_chrome(
             workflow, request, sess,
-            decomp_urls=workflow._decomp_urls,
+            seg_urls=workflow._seg_urls,
             align_urls=workflow._align_urls,
         )
 

@@ -23,7 +23,7 @@ from cjm_plugin_system.core.manager import PluginManager
 from cjm_workflow_state.state_store import SQLiteWorkflowStateStore
 
 from ..core.config import StructureDecompWorkflowConfig
-from ..decomposition.models import DecompUrls
+from ..decomposition.models import SegmentationUrls
 from ..alignment.models import AlignmentUrls
 from cjm_fasthtml_card_stack.core.models import CardStackUrls
 from ..selection.services.source import SourceService
@@ -275,8 +275,8 @@ def _create_step_flow(
         transcriptions = workflow._source_service.query_transcriptions(limit=50)
         return {"sources": sources, "transcriptions": transcriptions}
     
-    def load_decomposition_data(request) -> Dict[str, Any]:
-        """Load data for decomposition step."""
+    def load_segmentation_data(request) -> Dict[str, Any]:
+        """Load data for segmentation step."""
         # Data is loaded via init route, not data_loader
         return {}
     
@@ -292,12 +292,12 @@ def _create_step_flow(
         selected_sources = selection_state.get("selected_sources", [])
         return len(selected_sources) > 0
     
-    def validate_decomposition(state: Dict[str, Any]) -> bool:
-        """Validate that decomposition and alignment are complete (1:1)."""
+    def validate_segmentation(state: Dict[str, Any]) -> bool:
+        """Validate that segmentation and alignment are complete (1:1)."""
         step_states = state.get("step_states", {})
 
-        decomp_state = step_states.get("decomposition", {})
-        segments = decomp_state.get("segments", [])
+        seg_state = step_states.get("segmentation", {})
+        segments = seg_state.get("segments", [])
 
         alignment_state = step_states.get("alignment", {})
         vad_chunks = alignment_state.get("vad_chunks", [])
@@ -332,7 +332,7 @@ def _create_step_flow(
         """Render combined segment & align step with URL bundles from workflow."""
         return render_combined_step(
             ctx=ctx,
-            decomp_urls=getattr(workflow, '_decomp_urls', DecompUrls()),
+            seg_urls=getattr(workflow, '_seg_urls', SegmentationUrls()),
             align_urls=getattr(workflow, '_align_urls', AlignmentUrls()),
             switch_chrome_url=getattr(workflow, '_switch_chrome_url', ''),
         )
@@ -355,11 +355,11 @@ def _create_step_flow(
                 next_button_text="Continue"
             ),
             Step(
-                id="decomposition",
+                id="segmentation",
                 title="Segment & Align",
                 render=render_combined_step_with_urls,
-                validate=validate_decomposition,
-                data_loader=load_decomposition_data,
+                validate=validate_segmentation,
+                data_loader=load_segmentation_data,
                 data_keys=["segments"],
                 show_back=True,
                 show_cancel=True,

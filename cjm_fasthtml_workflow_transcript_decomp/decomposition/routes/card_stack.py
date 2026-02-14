@@ -20,22 +20,22 @@ from cjm_fasthtml_card_stack.routes.handlers import (
 from cjm_fasthtml_interactions.core.state_store import get_session_id
 
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.card_stack_config import (
-    DECOMP_CS_CONFIG, DECOMP_CS_IDS,
+    SEG_CS_CONFIG, SEG_CS_IDS,
 )
-from ..models import DecompUrls
+from ..models import SegmentationUrls
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.segment_card import (
     create_segment_card_renderer
 )
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.routes.core import (
-    _to_segments, _load_decomp_context, _get_decomp_state,
-    _build_card_stack_state, _update_decomp_state,
+    _to_segments, _load_seg_context, _get_seg_state,
+    _build_card_stack_state, _update_seg_state,
 )
 
 from ...workflow.workflow import StructureDecompWorkflow
 
 # %% ../../../nbs/decomposition/routes/card_stack.ipynb #cs-builders
 def _make_renderer(
-    urls: DecompUrls,  # URL bundle
+    urls: SegmentationUrls,  # URL bundle
     is_split_mode: bool = False,  # Whether split mode is active
     caret_position: int = 0,  # Caret position for split mode
 ) -> Any:  # Card renderer callback
@@ -53,7 +53,7 @@ def _make_renderer(
 def _build_slots_oob(
     segment_dicts: List[Dict[str, Any]],  # Serialized segments
     state: CardStackState,  # Card stack viewport state
-    urls: DecompUrls,  # URL bundle
+    urls: SegmentationUrls,  # URL bundle
     caret_position: int = 0,  # Caret position for split mode
 ) -> List[Any]:  # OOB slot elements
     """Build OOB slot updates for the viewport sections."""
@@ -61,8 +61,8 @@ def _build_slots_oob(
     return build_slots_response(
         card_items=_to_segments(segment_dicts),
         state=state,
-        config=DECOMP_CS_CONFIG,
-        ids=DECOMP_CS_IDS,
+        config=SEG_CS_CONFIG,
+        ids=SEG_CS_IDS,
         urls=urls.card_stack,
         render_card=_make_renderer(urls, is_split_mode=is_split, caret_position=caret_position),
     )
@@ -71,7 +71,7 @@ def _build_slots_oob(
 def _build_nav_response(
     segment_dicts: List[Dict[str, Any]],  # Serialized segments
     state: CardStackState,  # Card stack viewport state
-    urls: DecompUrls,  # URL bundle
+    urls: SegmentationUrls,  # URL bundle
     caret_position: int = 0,  # Caret position for split mode
 ) -> Tuple:  # OOB elements (slots + progress + focus)
     """Build OOB response for navigation and mode changes."""
@@ -79,23 +79,23 @@ def _build_nav_response(
     return build_nav_response(
         card_items=_to_segments(segment_dicts),
         state=state,
-        config=DECOMP_CS_CONFIG,
-        ids=DECOMP_CS_IDS,
+        config=SEG_CS_CONFIG,
+        ids=SEG_CS_IDS,
         urls=urls.card_stack,
         render_card=_make_renderer(urls, is_split_mode=is_split, caret_position=caret_position),
         progress_label="Segment",
     )
 
 # %% ../../../nbs/decomposition/routes/card_stack.ipynb #cs-navigate
-def _handle_decomp_navigate(
+def _handle_seg_navigate(
     workflow: StructureDecompWorkflow,  # The workflow instance
     sess,  # FastHTML session object
     direction: str,  # Navigation direction: "up", "down", "first", "last", "page_up", "page_down"
-    urls: DecompUrls,  # URL bundle for decomposition routes
+    urls: SegmentationUrls,  # URL bundle for segmentation routes
 ):  # OOB slot updates with progress and focus
     """Navigate to a different segment in the viewport using OOB slot swaps."""
     session_id = get_session_id(sess)
-    ctx = _load_decomp_context(workflow, session_id)
+    ctx = _load_seg_context(workflow, session_id)
     segments = _to_segments(ctx.segment_dicts)
     
     state = _build_card_stack_state(ctx)
@@ -105,53 +105,53 @@ def _handle_decomp_navigate(
         direction=direction,
         card_items=segments,
         state=state,
-        config=DECOMP_CS_CONFIG,
-        ids=DECOMP_CS_IDS,
+        config=SEG_CS_CONFIG,
+        ids=SEG_CS_IDS,
         urls=urls.card_stack,
         render_card=renderer,
         progress_label="Segment",
     )
     
-    _update_decomp_state(workflow, session_id, focused_index=state.focused_index)
+    _update_seg_state(workflow, session_id, focused_index=state.focused_index)
     return result
 
 # %% ../../../nbs/decomposition/routes/card_stack.ipynb #cs-split-mode
-def _handle_decomp_enter_split_mode(
+def _handle_seg_enter_split_mode(
     workflow: StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess,  # FastHTML session object
     segment_index: int,  # Index of segment to enter split mode for
-    urls: DecompUrls,  # URL bundle for decomposition routes
+    urls: SegmentationUrls,  # URL bundle for segmentation routes
 ):  # OOB slot updates with split mode active for focused segment
     """Enter split mode for a specific segment."""
     session_id = get_session_id(sess)
-    ctx = _load_decomp_context(workflow, session_id)
-    _update_decomp_state(workflow, session_id, focused_index=segment_index)
+    ctx = _load_seg_context(workflow, session_id)
+    _update_seg_state(workflow, session_id, focused_index=segment_index)
 
     state = _build_card_stack_state(ctx, active_mode="split")
     state.focused_index = segment_index
     return _build_nav_response(ctx.segment_dicts, state, urls, caret_position=0)
 
 # %% ../../../nbs/decomposition/routes/card_stack.ipynb #gdmdhfg1dkc
-def _handle_decomp_exit_split_mode(
+def _handle_seg_exit_split_mode(
     workflow: StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    urls: DecompUrls,  # URL bundle for decomposition routes
+    urls: SegmentationUrls,  # URL bundle for segmentation routes
 ):  # OOB slot updates with split mode deactivated
     """Exit split mode."""
     session_id = get_session_id(sess)
-    ctx = _load_decomp_context(workflow, session_id)
+    ctx = _load_seg_context(workflow, session_id)
     state = _build_card_stack_state(ctx)
     return _build_slots_oob(ctx.segment_dicts, state, urls)
 
 # %% ../../../nbs/decomposition/routes/card_stack.ipynb #cs-viewport
-async def _handle_decomp_update_viewport(
+async def _handle_seg_update_viewport(
     workflow: StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess,  # FastHTML session object
     visible_count: int,  # New number of visible cards
-    urls: DecompUrls,  # URL bundle for decomposition routes
+    urls: SegmentationUrls,  # URL bundle for segmentation routes
 ):  # Full viewport component (outerHTML swap)
     """Update the viewport with a new card count.
 
@@ -159,7 +159,7 @@ async def _handle_decomp_update_viewport(
     Saves the new visible_count and is_auto_mode to state.
     """
     session_id = get_session_id(sess)
-    ctx = _load_decomp_context(workflow, session_id)
+    ctx = _load_seg_context(workflow, session_id)
     segments = _to_segments(ctx.segment_dicts)
     
     state = _build_card_stack_state(ctx)
@@ -169,8 +169,8 @@ async def _handle_decomp_update_viewport(
         visible_count=visible_count,
         card_items=segments,
         state=state,
-        config=DECOMP_CS_CONFIG,
-        ids=DECOMP_CS_IDS,
+        config=SEG_CS_CONFIG,
+        ids=SEG_CS_IDS,
         urls=urls.card_stack,
         render_card=renderer,
     )
@@ -180,7 +180,7 @@ async def _handle_decomp_update_viewport(
     is_auto_str = form_data.get("is_auto", "false")
     is_auto_mode = is_auto_str.lower() == "true"
     
-    _update_decomp_state(
+    _update_seg_state(
         workflow, session_id,
         visible_count=state.visible_count,
         is_auto_mode=is_auto_mode,
@@ -188,7 +188,7 @@ async def _handle_decomp_update_viewport(
     return result
 
 # %% ../../../nbs/decomposition/routes/card_stack.ipynb #cs-save-width
-def _handle_decomp_save_width(
+def _handle_seg_save_width(
     workflow: StructureDecompWorkflow,  # The workflow instance
     sess,  # FastHTML session object
     card_width: int,  # Card stack width in rem
@@ -199,19 +199,19 @@ def _handle_decomp_save_width(
     Returns nothing since the client uses hx-swap='none'.
     """
     session_id = get_session_id(sess)
-    decomp_state = _get_decomp_state(workflow, session_id)
-    current_width = decomp_state.get("card_width", DEFAULT_CARD_WIDTH)
+    seg_state = _get_seg_state(workflow, session_id)
+    current_width = seg_state.get("card_width", DEFAULT_CARD_WIDTH)
     state = CardStackState(card_width=current_width)
-    card_stack_save_width(state, card_width, DECOMP_CS_CONFIG)
-    _update_decomp_state(workflow, session_id, card_width=state.card_width)
+    card_stack_save_width(state, card_width, SEG_CS_CONFIG)
+    _update_seg_state(workflow, session_id, card_width=state.card_width)
 
 # %% ../../../nbs/decomposition/routes/card_stack.ipynb #dqih3rnyzo
 def init_card_stack_router(
     workflow: StructureDecompWorkflow,  # The workflow instance
-    prefix: str,  # Route prefix (e.g., "/workflow/decomp/card_stack")
-    urls: DecompUrls,  # URL bundle (populated after routes defined)
+    prefix: str,  # Route prefix (e.g., "/workflow/seg/card_stack")
+    urls: SegmentationUrls,  # URL bundle (populated after routes defined)
 ) -> Tuple[APIRouter, Dict[str, Callable]]:  # (router, route_dict)
-    """Initialize card stack routes for decomposition."""
+    """Initialize card stack routes for segmentation."""
     router = APIRouter(prefix=prefix)
 
     # -------------------------------------------------------------------------
@@ -221,32 +221,32 @@ def init_card_stack_router(
     @router
     def nav_up(request, sess):
         """Navigate to previous segment."""
-        return _handle_decomp_navigate(workflow, sess, direction="up", urls=urls)
+        return _handle_seg_navigate(workflow, sess, direction="up", urls=urls)
 
     @router
     def nav_down(request, sess):
         """Navigate to next segment."""
-        return _handle_decomp_navigate(workflow, sess, direction="down", urls=urls)
+        return _handle_seg_navigate(workflow, sess, direction="down", urls=urls)
 
     @router
     def nav_first(request, sess):
         """Navigate to first segment."""
-        return _handle_decomp_navigate(workflow, sess, direction="first", urls=urls)
+        return _handle_seg_navigate(workflow, sess, direction="first", urls=urls)
 
     @router
     def nav_last(request, sess):
         """Navigate to last segment."""
-        return _handle_decomp_navigate(workflow, sess, direction="last", urls=urls)
+        return _handle_seg_navigate(workflow, sess, direction="last", urls=urls)
 
     @router
     def nav_page_up(request, sess):
         """Navigate up by page."""
-        return _handle_decomp_navigate(workflow, sess, direction="page_up", urls=urls)
+        return _handle_seg_navigate(workflow, sess, direction="page_up", urls=urls)
 
     @router
     def nav_page_down(request, sess):
         """Navigate down by page."""
-        return _handle_decomp_navigate(workflow, sess, direction="page_down", urls=urls)
+        return _handle_seg_navigate(workflow, sess, direction="page_down", urls=urls)
 
     # -------------------------------------------------------------------------
     # Viewport and Width
@@ -255,14 +255,14 @@ def init_card_stack_router(
     @router
     async def update_viewport(request, sess, visible_count: int):
         """Update viewport with new card count (full outerHTML swap)."""
-        return await _handle_decomp_update_viewport(
+        return await _handle_seg_update_viewport(
             workflow, request, sess, visible_count, urls=urls,
         )
 
     @router
     def save_width(request, sess, card_width: int):
         """Save card stack width to server state."""
-        return _handle_decomp_save_width(workflow, sess, card_width)
+        return _handle_seg_save_width(workflow, sess, card_width)
 
     # -------------------------------------------------------------------------
     # Split Mode
@@ -271,14 +271,14 @@ def init_card_stack_router(
     @router
     def enter_split(request, sess, segment_index: int):
         """Enter split mode for a specific segment."""
-        return _handle_decomp_enter_split_mode(
+        return _handle_seg_enter_split_mode(
             workflow, request, sess, segment_index, urls=urls,
         )
 
     @router
     def exit_split(request, sess):
         """Exit split mode."""
-        return _handle_decomp_exit_split_mode(workflow, request, sess, urls=urls)
+        return _handle_seg_exit_split_mode(workflow, request, sess, urls=urls)
 
     # -------------------------------------------------------------------------
     # Route Dict
