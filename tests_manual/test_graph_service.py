@@ -9,10 +9,9 @@ from pathlib import Path
 
 from cjm_plugin_system.core.manager import PluginManager
 
-from cjm_fasthtml_workflow_transcript_decomp.services.graph import GraphService
-from cjm_fasthtml_workflow_transcript_decomp.core.models import (
-    WorkingDocument, WorkingSegment
-)
+from cjm_fasthtml_workflow_transcript_decomp.review.services.graph import GraphService
+from cjm_fasthtml_workflow_transcript_decomp.review.models import WorkingDocument
+from cjm_fasthtml_workflow_transcript_decomp.decomposition.models import TextSegment
 
 
 async def main():
@@ -44,7 +43,7 @@ async def main():
     )
 
     working_doc.segments = [
-        WorkingSegment(
+        TextSegment(
             index=0,
             text="Laying Plans",
             source_id="job_123",
@@ -54,7 +53,7 @@ async def main():
             start_time=0.0,
             end_time=1.5,
         ),
-        WorkingSegment(
+        TextSegment(
             index=1,
             text="Sun Tzu said: The art of war is of vital importance to the state.",
             source_id="job_123",
@@ -64,7 +63,7 @@ async def main():
             start_time=1.5,
             end_time=5.0,
         ),
-        WorkingSegment(
+        TextSegment(
             index=2,
             text="It is a matter of life and death, a road either to safety or to ruin.",
             source_id="job_123",

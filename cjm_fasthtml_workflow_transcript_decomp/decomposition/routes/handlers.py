@@ -20,7 +20,7 @@ from cjm_workflow_state.history import pop_history
 from cjm_fasthtml_tailwind.utilities.layout import display_tw
 
 from ...combined.html_ids import CombinedHtmlIds
-from ..models import WorkingSegment, DecompUrls
+from ..models import TextSegment, DecompUrls
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.step_renderer import (
     render_decomp_column_body, render_decomp_stats, render_toolbar,
     render_decomp_footer_content, render_decomp_mini_stats_text,
@@ -40,7 +40,7 @@ from cjm_fasthtml_workflow_transcript_decomp.core.services.text_utils import (
     word_index_to_char_position,
 )
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.services.segmentation import (
-    split_segment_at_position, merge_segments, reindex_segments,
+    split_segment_at_position, merge_text_segments, reindex_segments,
     reconstruct_source_blocks
 )
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.routes.core import (
@@ -277,7 +277,7 @@ async def _handle_decomp_split(
     history_depth = _push_history(workflow, session_id, ctx.segment_dicts, segment_index)
 
     # Get the segment and convert word index to character position
-    segment = WorkingSegment.from_dict(ctx.segment_dicts[segment_index])
+    segment = TextSegment.from_dict(ctx.segment_dicts[segment_index])
     char_position = word_index_to_char_position(segment.text, word_index)
 
     # Can't split at beginning or end
@@ -338,9 +338,9 @@ def _handle_decomp_merge(
     history_depth = _push_history(workflow, session_id, ctx.segment_dicts, segment_index)
     
     # Merge segments
-    prev_segment = WorkingSegment.from_dict(ctx.segment_dicts[segment_index - 1])
-    curr_segment = WorkingSegment.from_dict(ctx.segment_dicts[segment_index])
-    merged = merge_segments(prev_segment, curr_segment)
+    prev_segment = TextSegment.from_dict(ctx.segment_dicts[segment_index - 1])
+    curr_segment = TextSegment.from_dict(ctx.segment_dicts[segment_index])
+    merged = merge_text_segments(prev_segment, curr_segment)
     
     # Build and reindex new segments list
     new_segments = ctx.segment_dicts[:segment_index - 1]

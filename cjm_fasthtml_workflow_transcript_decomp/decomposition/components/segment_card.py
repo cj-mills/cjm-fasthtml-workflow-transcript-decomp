@@ -53,14 +53,14 @@ from cjm_fasthtml_token_selector.core.models import TokenSelectorState
 from ..html_ids import DecompositionHtmlIds
 
 # Local imports
-from ..models import WorkingSegment
+from ..models import TextSegment
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.card_stack_config import (
     DECOMP_TS_CONFIG, DECOMP_TS_IDS,
 )
 
 # %% ../../../nbs/decomposition/components/segment_card.ipynb #e5f6a7b8
 def _render_card_metadata(
-    segment:WorkingSegment,  # Segment to render metadata for
+    segment:TextSegment,  # Segment to render metadata for
 ) -> Any:  # Metadata component
     """Render the left metadata column of a segment card."""
     return Div(
@@ -78,7 +78,7 @@ def _render_card_metadata(
 
 # %% ../../../nbs/decomposition/components/segment_card.ipynb #a7b8c9d0
 def _render_view_mode_content(
-    segment: WorkingSegment,  # Segment to render
+    segment: TextSegment,  # Segment to render
     card_role: CardRole,  # Role of this card in viewport
     enter_split_url: str,  # URL to enter split mode
 ) -> Any:  # View mode content component
@@ -125,7 +125,7 @@ def _render_view_mode_content(
 
 # %% ../../../nbs/decomposition/components/segment_card.ipynb #74o4ayrtop4
 def _render_split_mode_content(
-    segment:WorkingSegment,  # Segment to render
+    segment:TextSegment,  # Segment to render
     caret_position:int,  # Current caret position (token index)
     split_url:str,  # URL to execute split
     exit_split_url:str,  # URL to exit split mode
@@ -176,7 +176,7 @@ def _render_split_mode_content(
 
 # %% ../../../nbs/decomposition/components/segment_card.ipynb #e1f2a3b4
 def _render_card_actions(
-    segment: WorkingSegment,  # Segment this card represents
+    segment: TextSegment,  # Segment this card represents
     merge_url: str,  # URL for merge action
     enter_split_url: str,  # URL to enter split mode
     show_merge: bool = True,  # Whether to show merge button (first card can't merge)
@@ -219,7 +219,7 @@ def _render_card_actions(
 
 # %% ../../../nbs/decomposition/components/segment_card.ipynb #a3b4c5d6
 def render_segment_card(
-    segment: WorkingSegment,  # Segment to render
+    segment: TextSegment,  # Segment to render
     card_role: CardRole,  # Role of this card in viewport ("focused" or "context")
     is_split_mode: bool,  # Whether this card is in split mode
     caret_position: int,  # Caret position for split mode (word index)
@@ -229,10 +229,7 @@ def render_segment_card(
     exit_split_url: str,  # URL to exit split mode
     is_first_segment: bool = False,  # Whether this is the first segment (can't merge)
 ) -> Any:  # Segment card component
-    """Render a segment card with view or split mode content.
-    
-    Note: Focus ring styling is NOT applied here - it's on the slot wrapper.
-    """
+    """Render a segment card with view or split mode content."""
     is_focused = card_role == "focused"
     is_context = card_role == "context"
     
@@ -293,14 +290,9 @@ def create_segment_card_renderer(
     is_split_mode: bool = False,  # Whether split mode is active
     caret_position: int = 0,  # Caret position for split mode (word index)
 ) -> Callable:  # Card renderer callback: (item, CardRenderContext) -> FT
-    """Create a card renderer callback for segment cards.
-
-    Returns a callback compatible with the card stack library's
-    ``render_card`` parameter. Captures split/merge URLs and mode
-    state in a closure so the viewport stays domain-agnostic.
-    """
+    """Create a card renderer callback for segment cards."""
     def _render(
-        item: Any,  # WorkingSegment instance
+        item: Any,  # TextSegment instance
         context: CardRenderContext,  # Render context from card stack library
     ) -> Any:  # Rendered segment card component
         """Render a segment card for the given item and viewport context."""

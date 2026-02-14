@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 from cjm_source_provider.models import SourceBlock
 
 # Cross-package imports: primary owners are in page-specific packages
-from ..decomposition.models import WorkingSegment
+from ..decomposition.models import TextSegment
 from ..alignment.models import VADChunk
 
 # %% ../../nbs/review/models.ipynb #review-models-state
@@ -40,7 +40,7 @@ class WorkingDocument:
     combined_text: str = ""  # Concatenated text from all sources
     
     # Working segments (Phase 2 output, Phase 3 input/output)
-    segments: List[WorkingSegment] = field(default_factory=list)  # Decomposed segments
+    segments: List[TextSegment] = field(default_factory=list)  # Decomposed segments
     
     # VAD data (Phase 3)
     vad_chunks: List[VADChunk] = field(default_factory=list)  # VAD time ranges
@@ -71,7 +71,7 @@ class WorkingDocument:
             media_path=data.get('media_path'),
             source_blocks=[SourceBlock(**b) for b in data.get('source_blocks', [])],
             combined_text=data.get('combined_text', ''),
-            segments=[WorkingSegment.from_dict(s) for s in data.get('segments', [])],
+            segments=[TextSegment.from_dict(s) for s in data.get('segments', [])],
             vad_chunks=[VADChunk.from_dict(c) for c in data.get('vad_chunks', [])],
             audio_duration=data.get('audio_duration')
         )

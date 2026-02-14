@@ -16,7 +16,7 @@ from cjm_graph_domains.domains.structure import Document, Segment
 from cjm_graph_domains.domains.relations import StructureRelations
 
 from ..models import WorkingDocument
-from ...decomposition.models import WorkingSegment
+from ...decomposition.models import TextSegment
 
 # %% ../../../nbs/review/services/graph.ipynb #3be5680e
 class GraphService:
@@ -51,7 +51,7 @@ class GraphService:
     
     def _create_source_ref(
         self,
-        segment: WorkingSegment  # Working segment with source info
+        segment: TextSegment  # Text segment with source info
     ) -> Optional[SourceRef]:  # SourceRef or None if no source info
         """Create a SourceRef from segment source information."""
         if not segment.source_id or not segment.source_provider_id:

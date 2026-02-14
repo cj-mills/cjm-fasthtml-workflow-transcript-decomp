@@ -12,7 +12,7 @@ import asyncio
 from cjm_plugin_system.core.manager import PluginManager
 
 from ..models import VADChunk
-from ...decomposition.models import WorkingSegment
+from ...decomposition.models import TextSegment
 
 # %% ../../../nbs/alignment/services/alignment.ipynb #1f748582
 class AlignmentService:
@@ -87,15 +87,15 @@ class AlignmentService:
 
 # %% ../../../nbs/alignment/services/alignment.ipynb #xe88wntlhs
 def get_segments_without_time(
-    segments:List[WorkingSegment],  # All segments
-) -> List[WorkingSegment]:  # Segments missing time alignment
+    segments:List[TextSegment],  # All segments
+) -> List[TextSegment]:  # Segments missing time alignment
     """Get all segments that don't have time alignment."""
     return [s for s in segments if s.start_time is None or s.end_time is None]
 
 
 #| export
 def check_alignment_ready(
-    segments:List[WorkingSegment],  # Text segments
+    segments:List[TextSegment],  # Text segments
     chunks:List[VADChunk],  # VAD chunks
 ) -> bool:  # True if counts match and alignment can proceed
     """Check if segment and VAD chunk counts match for 1:1 alignment."""
@@ -104,14 +104,10 @@ def check_alignment_ready(
 
 #| export
 def populate_segment_times(
-    segments:List[WorkingSegment],  # Text segments to populate (modified in place)
+    segments:List[TextSegment],  # Text segments to populate (modified in place)
     chunks:List[VADChunk],  # VAD chunks providing timestamps
 ) -> bool:  # True if times were populated (counts matched)
-    """Copy timestamps from VAD chunks to segments using 1:1 index mapping.
-    
-    Segments are modified in place. Returns False without modification
-    if counts don't match.
-    """
+    """Copy timestamps from VAD chunks to segments using 1:1 index mapping."""
     if not check_alignment_ready(segments, chunks):
         return False
     

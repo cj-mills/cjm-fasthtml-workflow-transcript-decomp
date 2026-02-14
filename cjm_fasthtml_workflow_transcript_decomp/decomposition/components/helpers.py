@@ -11,7 +11,7 @@ from typing import Any, Dict, List
 from cjm_fasthtml_interactions.core.context import InteractionContext
 
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.models import (
-    WorkingSegment, DecompositionStepState
+    TextSegment, DecompositionStepState
 )
 
 # %% ../../../nbs/decomposition/components/helpers.ipynb #e5f6a7b8
@@ -25,11 +25,11 @@ def _get_decomposition_state(
 # %% ../../../nbs/decomposition/components/helpers.ipynb #rvxle78vfj
 def _get_segments(
     ctx: InteractionContext  # Interaction context with state
-) -> List[WorkingSegment]:  # List of WorkingSegment objects
-    """Get the list of segments from step state as WorkingSegment objects."""
+) -> List[TextSegment]:  # List of TextSegment objects
+    """Get the list of segments from step state as TextSegment objects."""
     state = _get_decomposition_state(ctx)
     segment_dicts = state.get("segments", [])
-    return [WorkingSegment.from_dict(s) for s in segment_dicts]
+    return [TextSegment.from_dict(s) for s in segment_dicts]
 
 # %% ../../../nbs/decomposition/components/helpers.ipynb #2dliq35ph
 def _is_initialized(

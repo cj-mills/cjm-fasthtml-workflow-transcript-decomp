@@ -51,7 +51,7 @@ from ..html_ids import DecompositionHtmlIds
 from ...combined.html_ids import CombinedHtmlIds
 
 # Local imports
-from ..models import WorkingSegment, DecompUrls
+from ..models import TextSegment, DecompUrls
 from ...core.services.text_utils import calculate_segment_stats
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.segment_card import (
     create_segment_card_renderer
@@ -134,7 +134,7 @@ def render_toolbar(
 
 # %% ../../../nbs/decomposition/components/step_renderer.ipynb #tjzrhzbqhr
 def render_decomp_stats(
-    segments: List[WorkingSegment],  # Current segments
+    segments: List[TextSegment],  # Current segments
     oob: bool = False,  # Whether to render as OOB swap
 ) -> Any:  # Statistics component
     """Render decomposition statistics."""
@@ -151,7 +151,7 @@ def render_decomp_stats(
 
 # %% ../../../nbs/decomposition/components/step_renderer.ipynb #fejdhubsh4g
 def render_decomp_column_body(
-    segments:List[WorkingSegment],  # Segments to display
+    segments:List[TextSegment],  # Segments to display
     focused_index:int,  # Currently focused segment index
     visible_count:int,  # Number of visible cards in viewport
     card_width:int,  # Card stack width in rem
@@ -232,7 +232,7 @@ def render_decomp_column_body(
 
 # %% ../../../nbs/decomposition/components/step_renderer.ipynb #a3b4c5d6
 def render_decomp_footer_content(
-    segments:List[WorkingSegment],  # Current segments
+    segments:List[TextSegment],  # Current segments
     focused_index:int,  # Currently focused segment index
 ) -> Any:  # Footer content with progress indicator and stats
     """Render footer content with progress indicator and segment statistics."""
@@ -247,7 +247,7 @@ def render_decomp_footer_content(
 
 # %% ../../../nbs/decomposition/components/step_renderer.ipynb #bobhvv4culv
 def render_decomp_mini_stats_text(
-    segments:List[WorkingSegment],  # Current segments
+    segments:List[TextSegment],  # Current segments
 ) -> str:  # Compact stats string for column header badge
     """Generate compact stats string for the decomposition column header badge."""
     stats = calculate_segment_stats(segments)

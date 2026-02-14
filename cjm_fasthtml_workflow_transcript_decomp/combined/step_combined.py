@@ -43,7 +43,7 @@ from cjm_fasthtml_card_stack.core.constants import DEFAULT_VISIBLE_COUNT, DEFAUL
 # HTML IDs (page-specific)
 from .html_ids import CombinedHtmlIds
 from ..decomposition.html_ids import DecompositionHtmlIds
-from ..decomposition.models import WorkingSegment, DecompUrls
+from ..decomposition.models import TextSegment, DecompUrls
 from ..alignment.models import VADChunk, AlignmentUrls
 
 # Decomposition state getters
@@ -117,7 +117,7 @@ def _render_column_header(
 
 # %% ../../nbs/combined/step_combined.ipynb #zw8jc4n30b
 def render_decomp_mini_stats_badge(
-    segments:List[WorkingSegment],  # Current segments
+    segments:List[TextSegment],  # Current segments
     oob:bool=False,  # Whether to render as OOB swap
 ) -> Any:  # Mini-stats badge Span
     """Render the decomposition mini-stats badge for the column header."""
@@ -238,7 +238,7 @@ def _render_shared_chrome(
 
     # --- Toolbar ---
     if is_init and urls:
-        segments = [WorkingSegment.from_dict(s) for s in decomp_state.get("segments", [])]
+        segments = [TextSegment.from_dict(s) for s in decomp_state.get("segments", [])]
         history = decomp_state.get("history", [])
         visible_count = decomp_state.get("visible_count", DEFAULT_VISIBLE_COUNT)
         toolbar_content = render_toolbar(
@@ -275,7 +275,7 @@ def _render_shared_chrome(
     chunk_count = len(align_state.get("vad_chunks", [])) if align_state else 0
     
     if is_init:
-        segments = [WorkingSegment.from_dict(s) for s in decomp_state.get("segments", [])]
+        segments = [TextSegment.from_dict(s) for s in decomp_state.get("segments", [])]
         focused_index = decomp_state.get("focused_index", 0)
         column_footer = render_decomp_footer_content(segments, focused_index)
     else:

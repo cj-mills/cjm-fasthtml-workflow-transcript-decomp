@@ -16,7 +16,7 @@ from cjm_fasthtml_card_stack.core.constants import DEFAULT_VISIBLE_COUNT, DEFAUL
 from cjm_fasthtml_interactions.core.state_store import get_session_id
 
 from ...combined.html_ids import CombinedHtmlIds
-from ...decomposition.models import WorkingSegment, DecompUrls
+from ...decomposition.models import TextSegment, DecompUrls
 from ...alignment.models import VADChunk, AlignmentUrls
 from ...workflow.workflow import StructureDecompWorkflow
 
@@ -79,7 +79,7 @@ async def _handle_switch_chrome(
 
     if active_column == "decomp":
         # Decomp chrome
-        segments = [WorkingSegment.from_dict(s) for s in decomp_state.get("segments", [])]
+        segments = [TextSegment.from_dict(s) for s in decomp_state.get("segments", [])]
         history = decomp_state.get("history", [])
         focused_index = decomp_state.get("focused_index", 0)
         visible_count = decomp_state.get("visible_count", DEFAULT_VISIBLE_COUNT)

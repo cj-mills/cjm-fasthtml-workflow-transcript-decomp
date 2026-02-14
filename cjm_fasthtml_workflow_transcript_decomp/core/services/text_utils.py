@@ -8,7 +8,7 @@ __all__ = ['count_words', 'get_word_list', 'word_index_to_char_position', 'calcu
 # %% ../../../nbs/core/services/text_utils.ipynb #tu-imports
 from typing import List, Dict, Any
 
-from ...decomposition.models import WorkingSegment
+from ...decomposition.models import TextSegment
 
 # %% ../../../nbs/core/services/text_utils.ipynb #tu-count-words
 def count_words(
@@ -57,7 +57,7 @@ def word_index_to_char_position(
 
 # %% ../../../nbs/core/services/text_utils.ipynb #tu-calc-stats
 def calculate_segment_stats(
-    segments: List[WorkingSegment]  # List of segments to analyze
+    segments: List[TextSegment]  # List of segments to analyze
 ) -> Dict[str, Any]:  # Statistics dictionary with total_words, total_segments
     """Calculate aggregate statistics for a list of segments."""
     total_words = sum(count_words(s.text) for s in segments)

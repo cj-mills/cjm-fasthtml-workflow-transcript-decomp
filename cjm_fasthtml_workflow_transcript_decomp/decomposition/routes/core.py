@@ -15,7 +15,7 @@ from cjm_fasthtml_interactions.core.state_store import get_session_id
 from cjm_workflow_state.history import push_history
 
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.models import (
-    WorkingSegment, DecompositionStepState
+    TextSegment, DecompositionStepState
 )
 from ...alignment.models import VADChunk
 from cjm_fasthtml_workflow_transcript_decomp.alignment.services.alignment import (
@@ -39,9 +39,9 @@ class DecompContext(NamedTuple):
 # %% ../../../nbs/decomposition/routes/core.ipynb #9xn32hs4tak
 def _to_segments(
     segment_dicts: List[Dict[str, Any]]  # Serialized segment dictionaries
-) -> List[WorkingSegment]:  # Deserialized WorkingSegment objects
-    """Convert segment dictionaries to WorkingSegment objects."""
-    return [WorkingSegment.from_dict(s) for s in segment_dicts]
+) -> List[TextSegment]:  # Deserialized TextSegment objects
+    """Convert segment dictionaries to TextSegment objects."""
+    return [TextSegment.from_dict(s) for s in segment_dicts]
 
 # %% ../../../nbs/decomposition/routes/core.ipynb #dc-core-getters
 def _get_decomp_state(
@@ -188,16 +188,12 @@ def _try_auto_populate_times(
     session_id:str,  # Session identifier string
     segment_dicts:List[Dict[str, Any]],  # Current segment dictionaries
 ) -> List[Dict[str, Any]]:  # Updated segment dicts (with times if counts matched)
-    """Check if segment/VAD counts match and populate times if ready.
-    
-    Returns the segment dicts with times populated if counts matched,
-    or the original dicts unchanged if counts don't match.
-    """
+    """Check if segment/VAD counts match and populate times if ready."""
     chunks = _get_vad_chunks(workflow, session_id)
     if not chunks:
         return segment_dicts
     
-    segments = [WorkingSegment.from_dict(s) for s in segment_dicts]
+    segments = [TextSegment.from_dict(s) for s in segment_dicts]
     
     if populate_segment_times(segments, chunks):
         if DEBUG_DECOMP_STATE:

@@ -162,184 +162,183 @@ graph LR
     workflow_workflow[workflow.workflow<br/>workflow]
 
     alignment_components_helpers --> alignment_models
-    alignment_components_step_renderer --> alignment_components_card_stack_config
     alignment_components_step_renderer --> alignment_models
+    alignment_components_step_renderer --> alignment_components_card_stack_config
+    alignment_components_step_renderer --> combined_html_ids
+    alignment_components_step_renderer --> alignment_html_ids
     alignment_components_step_renderer --> alignment_components_vad_card
     alignment_components_step_renderer --> alignment_components_callbacks
-    alignment_components_step_renderer --> alignment_html_ids
-    alignment_components_step_renderer --> combined_html_ids
-    alignment_components_vad_card --> alignment_models
-    alignment_components_vad_card --> alignment_html_ids
     alignment_components_vad_card --> core_services_formatting
+    alignment_components_vad_card --> alignment_html_ids
+    alignment_components_vad_card --> alignment_models
+    alignment_routes_card_stack --> alignment_routes_core
+    alignment_routes_card_stack --> workflow_workflow
+    alignment_routes_card_stack --> alignment_models
     alignment_routes_card_stack --> alignment_components_card_stack_config
     alignment_routes_card_stack --> alignment_components_vad_card
-    alignment_routes_card_stack --> alignment_routes_core
-    alignment_routes_card_stack --> alignment_models
-    alignment_routes_card_stack --> workflow_workflow
     alignment_routes_core --> alignment_models
     alignment_routes_handlers --> alignment_components_step_renderer
-    alignment_routes_handlers --> alignment_models
-    alignment_routes_handlers --> alignment_components_card_stack_config
-    alignment_routes_handlers --> combined_step_combined
-    alignment_routes_handlers --> alignment_routes_card_stack
     alignment_routes_handlers --> alignment_routes_core
+    alignment_routes_handlers --> combined_step_combined
     alignment_routes_handlers --> workflow_workflow
+    alignment_routes_handlers --> alignment_models
     alignment_routes_handlers --> combined_html_ids
+    alignment_routes_handlers --> alignment_routes_card_stack
+    alignment_routes_handlers --> alignment_components_card_stack_config
     alignment_routes_init --> alignment_routes_handlers
     alignment_routes_init --> workflow_workflow
-    alignment_routes_init --> alignment_models
     alignment_routes_init --> alignment_routes_card_stack
-    alignment_services_alignment --> alignment_models
+    alignment_routes_init --> alignment_models
     alignment_services_alignment --> decomposition_models
+    alignment_services_alignment --> alignment_models
     combined_keyboard_config --> decomposition_components_card_stack_config
     combined_keyboard_config --> decomposition_components_keyboard_config
-    combined_keyboard_config --> alignment_components_keyboard_config
-    combined_keyboard_config --> alignment_components_card_stack_config
-    combined_keyboard_config --> combined_html_ids
     combined_keyboard_config --> decomposition_models
     combined_keyboard_config --> alignment_models
-    combined_step_combined --> combined_keyboard_config
+    combined_keyboard_config --> alignment_components_card_stack_config
+    combined_keyboard_config --> combined_html_ids
+    combined_keyboard_config --> alignment_components_keyboard_config
+    combined_step_combined --> alignment_components_step_renderer
+    combined_step_combined --> decomposition_components_step_renderer
     combined_step_combined --> alignment_components_helpers
     combined_step_combined --> decomposition_components_helpers
-    combined_step_combined --> alignment_components_step_renderer
     combined_step_combined --> combined_html_ids
-    combined_step_combined --> alignment_components_card_stack_config
-    combined_step_combined --> decomposition_components_step_renderer
     combined_step_combined --> decomposition_models
-    combined_step_combined --> decomposition_components_card_stack_config
-    combined_step_combined --> alignment_models
     combined_step_combined --> decomposition_html_ids
+    combined_step_combined --> decomposition_components_card_stack_config
+    combined_step_combined --> combined_keyboard_config
+    combined_step_combined --> alignment_models
+    combined_step_combined --> alignment_components_card_stack_config
     core_services_text_utils --> decomposition_models
     decomposition_components_helpers --> decomposition_models
     decomposition_components_keyboard_config --> decomposition_components_card_stack_config
-    decomposition_components_segment_card --> decomposition_html_ids
     decomposition_components_segment_card --> decomposition_components_card_stack_config
+    decomposition_components_segment_card --> decomposition_html_ids
     decomposition_components_segment_card --> decomposition_models
-    decomposition_components_step_renderer --> core_services_text_utils
     decomposition_components_step_renderer --> decomposition_components_card_stack_config
-    decomposition_components_step_renderer --> combined_html_ids
-    decomposition_components_step_renderer --> decomposition_html_ids
     decomposition_components_step_renderer --> decomposition_models
+    decomposition_components_step_renderer --> decomposition_html_ids
+    decomposition_components_step_renderer --> combined_html_ids
     decomposition_components_step_renderer --> decomposition_components_callbacks
     decomposition_components_step_renderer --> decomposition_components_segment_card
+    decomposition_components_step_renderer --> core_services_text_utils
     decomposition_routes_card_stack --> decomposition_components_card_stack_config
     decomposition_routes_card_stack --> decomposition_routes_core
-    decomposition_routes_card_stack --> decomposition_models
     decomposition_routes_card_stack --> workflow_workflow
+    decomposition_routes_card_stack --> decomposition_models
     decomposition_routes_card_stack --> decomposition_components_segment_card
     decomposition_routes_core --> workflow_workflow
+    decomposition_routes_core --> alignment_services_alignment
     decomposition_routes_core --> decomposition_models
     decomposition_routes_core --> alignment_models
-    decomposition_routes_core --> alignment_services_alignment
-    decomposition_routes_handlers --> combined_step_combined
-    decomposition_routes_handlers --> decomposition_components_card_stack_config
-    decomposition_routes_handlers --> decomposition_services_segmentation
-    decomposition_routes_handlers --> combined_keyboard_config
     decomposition_routes_handlers --> decomposition_routes_core
     decomposition_routes_handlers --> decomposition_components_step_renderer
+    decomposition_routes_handlers --> decomposition_components_card_stack_config
     decomposition_routes_handlers --> decomposition_routes_card_stack
-    decomposition_routes_handlers --> decomposition_models
     decomposition_routes_handlers --> core_services_text_utils
+    decomposition_routes_handlers --> combined_keyboard_config
+    decomposition_routes_handlers --> combined_step_combined
     decomposition_routes_handlers --> workflow_workflow
+    decomposition_routes_handlers --> decomposition_services_segmentation
+    decomposition_routes_handlers --> decomposition_models
     decomposition_routes_handlers --> combined_html_ids
+    decomposition_routes_init --> workflow_workflow
     decomposition_routes_init --> decomposition_routes_handlers
     decomposition_routes_init --> decomposition_routes_card_stack
-    decomposition_routes_init --> workflow_workflow
     decomposition_routes_init --> decomposition_models
     decomposition_services_segmentation --> decomposition_models
     review_components_step_renderer --> review_html_ids
     review_models --> decomposition_models
     review_models --> alignment_models
-    review_services_graph --> core_models
     review_services_graph --> review_models
     review_services_graph --> decomposition_models
     routes_core_audio --> workflow_workflow
-    routes_core_chrome --> decomposition_components_card_stack_config
-    routes_core_chrome --> combined_step_combined
-    routes_core_chrome --> alignment_models
-    routes_core_chrome --> combined_keyboard_config
-    routes_core_chrome --> alignment_components_step_renderer
-    routes_core_chrome --> alignment_components_card_stack_config
     routes_core_chrome --> decomposition_components_step_renderer
-    routes_core_chrome --> decomposition_models
+    routes_core_chrome --> decomposition_components_card_stack_config
+    routes_core_chrome --> alignment_components_step_renderer
+    routes_core_chrome --> combined_keyboard_config
+    routes_core_chrome --> combined_step_combined
     routes_core_chrome --> workflow_workflow
+    routes_core_chrome --> decomposition_models
+    routes_core_chrome --> alignment_models
     routes_core_chrome --> combined_html_ids
-    routes_core_init --> routes_core_audio
-    routes_core_init --> routes_core_sources
+    routes_core_chrome --> alignment_components_card_stack_config
     routes_core_init --> workflow_workflow
     routes_core_init --> routes_core_chrome
+    routes_core_init --> routes_core_sources
+    routes_core_init --> routes_core_audio
     routes_core_init --> routes_core_status
     routes_core_sources --> workflow_workflow
     routes_core_status --> workflow_workflow
     routes_init --> decomposition_routes_init
     routes_init --> workflow_workflow
-    routes_init --> alignment_routes_init
-    routes_init --> selection_routes_init
     routes_init --> routes_core_init
+    routes_init --> selection_routes_init
+    routes_init --> alignment_routes_init
     selection_components_helpers --> selection_models
-    selection_components_local_files --> selection_html_ids
     selection_components_local_files --> selection_components_helpers
+    selection_components_local_files --> selection_html_ids
     selection_components_preview_panel --> selection_html_ids
     selection_components_selection_queue --> selection_html_ids
-    selection_components_source_browser --> core_services_formatting
     selection_components_source_browser --> selection_services_source_utils
     selection_components_source_browser --> core_services_text_utils
+    selection_components_source_browser --> core_services_formatting
     selection_components_source_browser --> selection_html_ids
-    selection_components_step_renderer --> selection_models
-    selection_components_step_renderer --> selection_components_local_files
     selection_components_step_renderer --> core_services_text_utils
     selection_components_step_renderer --> selection_components_helpers
-    selection_components_step_renderer --> selection_html_ids
     selection_components_step_renderer --> selection_components_selection_queue
-    selection_components_step_renderer --> selection_components_source_browser
+    selection_components_step_renderer --> selection_models
     selection_components_step_renderer --> selection_components_preview_panel
+    selection_components_step_renderer --> selection_components_local_files
+    selection_components_step_renderer --> selection_components_source_browser
+    selection_components_step_renderer --> selection_html_ids
     selection_routes_core --> selection_models
-    selection_routes_core --> workflow_workflow
-    selection_routes_core --> selection_components_selection_queue
-    selection_routes_core --> selection_components_step_renderer
     selection_routes_core --> selection_components_source_browser
+    selection_routes_core --> workflow_workflow
+    selection_routes_core --> selection_components_step_renderer
+    selection_routes_core --> selection_components_selection_queue
     selection_routes_filtering --> selection_models
-    selection_routes_filtering --> selection_services_source_utils
-    selection_routes_filtering --> selection_routes_core
-    selection_routes_filtering --> workflow_workflow
     selection_routes_filtering --> selection_components_source_browser
-    selection_routes_init --> selection_routes_tabs
+    selection_routes_filtering --> workflow_workflow
+    selection_routes_filtering --> selection_routes_core
+    selection_routes_filtering --> selection_services_source_utils
     selection_routes_init --> selection_models
-    selection_routes_init --> workflow_workflow
     selection_routes_init --> selection_routes_filtering
     selection_routes_init --> selection_routes_local_files
+    selection_routes_init --> workflow_workflow
     selection_routes_init --> selection_routes_queue
+    selection_routes_init --> selection_routes_tabs
     selection_routes_local_files --> selection_models
-    selection_routes_local_files --> selection_routes_core
-    selection_routes_local_files --> selection_components_local_files
     selection_routes_local_files --> selection_services_source
     selection_routes_local_files --> workflow_workflow
+    selection_routes_local_files --> selection_routes_core
+    selection_routes_local_files --> selection_components_local_files
     selection_routes_queue --> selection_models
+    selection_routes_queue --> selection_components_preview_panel
+    selection_routes_queue --> workflow_workflow
     selection_routes_queue --> selection_routes_core
     selection_routes_queue --> selection_services_source_utils
-    selection_routes_queue --> workflow_workflow
-    selection_routes_queue --> selection_components_preview_panel
-    selection_routes_tabs --> selection_routes_local_files
     selection_routes_tabs --> selection_models
+    selection_routes_tabs --> selection_routes_local_files
+    selection_routes_tabs --> workflow_workflow
+    selection_routes_tabs --> selection_components_local_files
     selection_routes_tabs --> selection_components_step_renderer
     selection_routes_tabs --> selection_components_source_browser
-    selection_routes_tabs --> selection_components_local_files
-    selection_routes_tabs --> workflow_workflow
-    selection_routes_tabs --> selection_routes_core
     selection_routes_tabs --> selection_services_source_utils
-    workflow_workflow --> review_services_graph
-    workflow_workflow --> decomposition_services_segmentation
+    selection_routes_tabs --> selection_routes_core
     workflow_workflow --> selection_services_source
-    workflow_workflow --> core_config
-    workflow_workflow --> selection_components_step_renderer
-    workflow_workflow --> alignment_services_alignment
-    workflow_workflow --> decomposition_models
-    workflow_workflow --> combined_step_combined
-    workflow_workflow --> alignment_models
     workflow_workflow --> review_components_step_renderer
+    workflow_workflow --> decomposition_models
+    workflow_workflow --> review_services_graph
+    workflow_workflow --> alignment_models
+    workflow_workflow --> alignment_services_alignment
+    workflow_workflow --> decomposition_services_segmentation
+    workflow_workflow --> selection_components_step_renderer
+    workflow_workflow --> combined_step_combined
+    workflow_workflow --> core_config
 ```
 
-*176 cross-module dependencies detected*
+*175 cross-module dependencies detected*
 
 ## CLI Reference
 
@@ -368,14 +367,14 @@ from cjm_fasthtml_workflow_transcript_decomp.alignment.services.alignment import
 
 ``` python
 def get_segments_without_time(
-    segments:List[WorkingSegment],  # All segments
-) -> List[WorkingSegment]:  # Segments missing time alignment
+    segments:List[TextSegment],  # All segments
+) -> List[TextSegment]:  # Segments missing time alignment
     "Get all segments that don't have time alignment."
 ```
 
 ``` python
 def check_alignment_ready(
-    segments:List[WorkingSegment],  # Text segments
+    segments:List[TextSegment],  # Text segments
     chunks:List[VADChunk],  # VAD chunks
 ) -> bool:  # True if counts match and alignment can proceed
     "Check if segment and VAD chunk counts match for 1:1 alignment."
@@ -383,15 +382,10 @@ def check_alignment_ready(
 
 ``` python
 def populate_segment_times(
-    segments:List[WorkingSegment],  # Text segments to populate (modified in place)
+    segments:List[TextSegment],  # Text segments to populate (modified in place)
     chunks:List[VADChunk],  # VAD chunks providing timestamps
 ) -> bool:  # True if times were populated (counts matched)
-    """
-    Copy timestamps from VAD chunks to segments using 1:1 index mapping.
-    
-    Segments are modified in place. Returns False without modification
-    if counts don't match.
-    """
+    "Copy timestamps from VAD chunks to segments using 1:1 index mapping."
 ```
 
 #### Classes
@@ -966,8 +960,8 @@ from cjm_fasthtml_workflow_transcript_decomp.decomposition.routes.core import (
 ``` python
 def _to_segments(
     segment_dicts: List[Dict[str, Any]]  # Serialized segment dictionaries
-) -> List[WorkingSegment]:  # Deserialized WorkingSegment objects
-    "Convert segment dictionaries to WorkingSegment objects."
+) -> List[TextSegment]:  # Deserialized TextSegment objects
+    "Convert segment dictionaries to TextSegment objects."
 ```
 
 ``` python
@@ -1042,12 +1036,7 @@ def _try_auto_populate_times(
     session_id:str,  # Session identifier string
     segment_dicts:List[Dict[str, Any]],  # Current segment dictionaries
 ) -> List[Dict[str, Any]]:  # Updated segment dicts (with times if counts matched)
-    """
-    Check if segment/VAD counts match and populate times if ready.
-    
-    Returns the segment dicts with times populated if counts matched,
-    or the original dicts unchanged if counts don't match.
-    """
+    "Check if segment/VAD counts match and populate times if ready."
 ```
 
 #### Classes
@@ -1555,8 +1544,8 @@ def _get_decomposition_state(
 ``` python
 def _get_segments(
     ctx: InteractionContext  # Interaction context with state
-) -> List[WorkingSegment]:  # List of WorkingSegment objects
-    "Get the list of segments from step state as WorkingSegment objects."
+) -> List[TextSegment]:  # List of TextSegment objects
+    "Get the list of segments from step state as TextSegment objects."
 ```
 
 ``` python
@@ -2270,7 +2259,7 @@ class AlignmentUrls:
 
 ``` python
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.models import (
-    WorkingSegment,
+    TextSegment,
     DecompositionStepState,
     DecompUrls
 )
@@ -2280,8 +2269,8 @@ from cjm_fasthtml_workflow_transcript_decomp.decomposition.models import (
 
 ``` python
 @dataclass
-class WorkingSegment:
-    "A segment during workflow processing before graph commit."
+class TextSegment:
+    "A text segment during workflow processing before graph commit."
     
     index: int  # Sequence position (0-indexed)
     text: str  # Segment text content
@@ -2300,13 +2289,13 @@ class WorkingSegment:
         def from_dict(
             cls,
             data: Dict[str, Any]  # Dictionary representation
-        ) -> "WorkingSegment":  # Reconstructed WorkingSegment
+        ) -> "TextSegment":  # Reconstructed TextSegment
         "Convert to dictionary for JSON serialization."
     
     def from_dict(
             cls,
             data: Dict[str, Any]  # Dictionary representation
-        ) -> "WorkingSegment":  # Reconstructed WorkingSegment
+        ) -> "TextSegment":  # Reconstructed TextSegment
         "Create from dictionary."
 ```
 
@@ -2362,7 +2351,7 @@ class WorkingDocument:
     media_path: Optional[str]  # Path to primary source media
     source_blocks: List[SourceBlock] = field(...)  # Ordered source blocks
     combined_text: str = ''  # Concatenated text from all sources
-    segments: List[WorkingSegment] = field(...)  # Decomposed segments
+    segments: List[TextSegment] = field(...)  # Decomposed segments
     vad_chunks: List[VADChunk] = field(...)  # VAD time ranges
     audio_duration: Optional[float]  # Total audio duration in seconds
     
@@ -2546,14 +2535,14 @@ from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.segment_ca
 
 ``` python
 def _render_card_metadata(
-    segment:WorkingSegment,  # Segment to render metadata for
+    segment:TextSegment,  # Segment to render metadata for
 ) -> Any:  # Metadata component
     "Render the left metadata column of a segment card."
 ```
 
 ``` python
 def _render_view_mode_content(
-    segment: WorkingSegment,  # Segment to render
+    segment: TextSegment,  # Segment to render
     card_role: CardRole,  # Role of this card in viewport
     enter_split_url: str,  # URL to enter split mode
 ) -> Any:  # View mode content component
@@ -2562,7 +2551,7 @@ def _render_view_mode_content(
 
 ``` python
 def _render_split_mode_content(
-    segment:WorkingSegment,  # Segment to render
+    segment:TextSegment,  # Segment to render
     caret_position:int,  # Current caret position (token index)
     split_url:str,  # URL to execute split
     exit_split_url:str,  # URL to exit split mode
@@ -2577,11 +2566,7 @@ def _render_card_actions(
 
 ``` python
 def render_segment_card(
-    """
-    Render a segment card with view or split mode content.
-    
-    Note: Focus ring styling is NOT applied here - it's on the slot wrapper.
-    """
+    "Render a segment card with view or split mode content."
 ```
 
 ``` python
@@ -2593,13 +2578,7 @@ def create_segment_card_renderer(
     is_split_mode: bool = False,  # Whether split mode is active
     caret_position: int = 0,  # Caret position for split mode (word index)
 ) -> Callable:  # Card renderer callback: (item, CardRenderContext) -> FT
-    """
-    Create a card renderer callback for segment cards.
-    
-    Returns a callback compatible with the card stack library's
-    ``render_card`` parameter. Captures split/merge URLs and mode
-    state in a closure so the viewport stays domain-agnostic.
-    """
+    "Create a card renderer callback for segment cards."
 ```
 
 ### segmentation (`segmentation.ipynb`)
@@ -2612,7 +2591,7 @@ def create_segment_card_renderer(
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.services.segmentation import (
     SegmentationService,
     split_segment_at_position,
-    merge_segments,
+    merge_text_segments,
     reindex_segments,
     reconstruct_source_blocks
 )
@@ -2622,25 +2601,25 @@ from cjm_fasthtml_workflow_transcript_decomp.decomposition.services.segmentation
 
 ``` python
 def split_segment_at_position(
-    segment: WorkingSegment,  # Segment to split
+    segment: TextSegment,  # Segment to split
     char_position: int  # Character position to split at (relative to segment text)
-) -> tuple[WorkingSegment, WorkingSegment]:  # Two new segments
+) -> tuple[TextSegment, TextSegment]:  # Two new segments
     "Split a segment into two at the given character position."
 ```
 
 ``` python
-def merge_segments(
-    first: WorkingSegment,  # First segment (earlier in sequence)
-    second: WorkingSegment,  # Second segment (later in sequence)
+def merge_text_segments(
+    first: TextSegment,  # First segment (earlier in sequence)
+    second: TextSegment,  # Second segment (later in sequence)
     separator: str = " "  # Text separator between segments
-) -> WorkingSegment:  # Merged segment
+) -> TextSegment:  # Merged segment
     "Merge two adjacent segments into one."
 ```
 
 ``` python
 def reindex_segments(
-    segments: List[WorkingSegment]  # List of segments to reindex
-) -> List[WorkingSegment]:  # Segments with corrected indices
+    segments: List[TextSegment]  # List of segments to reindex
+) -> List[TextSegment]:  # Segments with corrected indices
     "Reindex segments to have sequential indices starting from 0."
 ```
 
@@ -2690,7 +2669,7 @@ class SegmentationService:
             text: str,  # Text to split into sentences
             source_id: Optional[str] = None,  # Source block ID for traceability
             source_provider_id: Optional[str] = None  # Source provider identifier for traceability
-        ) -> List[WorkingSegment]:  # List of WorkingSegment objects
+        ) -> List[TextSegment]:  # List of TextSegment objects
         "Split text into sentences asynchronously."
     
     def split_sentences(
@@ -2698,13 +2677,13 @@ class SegmentationService:
             text: str,  # Text to split into sentences
             source_id: Optional[str] = None,  # Source block ID for traceability
             source_provider_id: Optional[str] = None  # Source provider identifier for traceability
-        ) -> List[WorkingSegment]:  # List of WorkingSegment objects
+        ) -> List[TextSegment]:  # List of TextSegment objects
         "Split text into sentences synchronously."
     
     async def split_combined_sources_async(
             self,
             source_blocks: List[SourceBlock]  # Ordered list of source blocks
-        ) -> List[WorkingSegment]:  # Combined list of WorkingSegments with proper traceability
+        ) -> List[TextSegment]:  # Combined list of TextSegments with proper traceability
         "Split multiple source blocks into segments with proper source tracking."
 ```
 
@@ -3296,7 +3275,7 @@ def _render_column_header(
 
 ``` python
 def render_decomp_mini_stats_badge(
-    segments:List[WorkingSegment],  # Current segments
+    segments:List[TextSegment],  # Current segments
     oob:bool=False,  # Whether to render as OOB swap
 ) -> Any:  # Mini-stats badge Span
     "Render the decomposition mini-stats badge for the column header."
@@ -3510,7 +3489,7 @@ def render_toolbar(
 
 ``` python
 def render_decomp_stats(
-    segments: List[WorkingSegment],  # Current segments
+    segments: List[TextSegment],  # Current segments
     oob: bool = False,  # Whether to render as OOB swap
 ) -> Any:  # Statistics component
     "Render decomposition statistics."
@@ -3518,7 +3497,7 @@ def render_decomp_stats(
 
 ``` python
 def render_decomp_column_body(
-    segments:List[WorkingSegment],  # Segments to display
+    segments:List[TextSegment],  # Segments to display
     focused_index:int,  # Currently focused segment index
     visible_count:int,  # Number of visible cards in viewport
     card_width:int,  # Card stack width in rem
@@ -3530,7 +3509,7 @@ def render_decomp_column_body(
 
 ``` python
 def render_decomp_footer_content(
-    segments:List[WorkingSegment],  # Current segments
+    segments:List[TextSegment],  # Current segments
     focused_index:int,  # Currently focused segment index
 ) -> Any:  # Footer content with progress indicator and stats
     "Render footer content with progress indicator and segment statistics."
@@ -3538,7 +3517,7 @@ def render_decomp_footer_content(
 
 ``` python
 def render_decomp_mini_stats_text(
-    segments:List[WorkingSegment],  # Current segments
+    segments:List[TextSegment],  # Current segments
 ) -> str:  # Compact stats string for column header badge
     "Generate compact stats string for the decomposition column header badge."
 ```
@@ -3750,7 +3729,7 @@ def word_index_to_char_position(
 
 ``` python
 def calculate_segment_stats(
-    segments: List[WorkingSegment]  # List of segments to analyze
+    segments: List[TextSegment]  # List of segments to analyze
 ) -> Dict[str, Any]:  # Statistics dictionary with total_words, total_segments
     "Calculate aggregate statistics for a list of segments."
 ```
