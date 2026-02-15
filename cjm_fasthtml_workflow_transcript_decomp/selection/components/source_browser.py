@@ -43,13 +43,12 @@ from cjm_fasthtml_tailwind.core.base import combine_classes
 
 # Local imports
 from ..html_ids import SelectionHtmlIds
+from cjm_fasthtml_workflow_transcript_decomp.selection.utils import (
+    count_words, format_date, format_audio_filename
+)
 from cjm_fasthtml_workflow_transcript_decomp.selection.services.source_utils import (
     extract_batch_id, group_transcriptions, is_source_selected,
     check_audio_exists, extract_model_name
-)
-from ...core.services.text_utils import count_words
-from cjm_fasthtml_workflow_transcript_decomp.core.services.formatting import (
-    format_date, format_audio_filename
 )
 
 # %% ../../../nbs/selection/components/source_browser.ipynb #d332b55d

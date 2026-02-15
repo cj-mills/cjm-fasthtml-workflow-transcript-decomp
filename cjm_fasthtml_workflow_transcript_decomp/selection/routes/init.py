@@ -11,16 +11,18 @@ from typing import List, Dict, Callable, Tuple
 from fasthtml.common import APIRouter
 
 from ..models import SelectionUrls
+from .core import WorkflowStateStore
+from ..services.source import SourceService
 from .queue import init_queue_router
 from .filtering import init_filtering_router
 from .local_files import init_local_files_router
 from .tabs import init_tabs_router
 
-from ...workflow.workflow import StructureDecompWorkflow
-
 # %% ../../../nbs/selection/routes/init.ipynb #e5f6a7b8
 def init_selection_routers(
-    workflow: StructureDecompWorkflow,  # The workflow instance
+    state_store: WorkflowStateStore,  # The workflow state store
+    source_service: SourceService,  # The source service for queries
+    workflow_id: str,  # The workflow identifier
     prefix: str,  # Base prefix for selection routes (e.g., "/workflow/selection")
 ) -> Tuple[List[APIRouter], SelectionUrls, Dict[str, Callable]]:  # (routers, urls, merged_routes)
     """Initialize and return all selection routers with URL bundle."""
@@ -30,16 +32,16 @@ def init_selection_routers(
 
     # Initialize focused routers (they reference urls which will be populated below)
     queue_router, queue_routes = init_queue_router(
-        workflow, f"{prefix}/queue", urls
+        state_store, workflow_id, source_service, f"{prefix}/queue", urls
     )
     filtering_router, filtering_routes = init_filtering_router(
-        workflow, f"{prefix}/filtering", urls
+        state_store, workflow_id, source_service, f"{prefix}/filtering", urls
     )
     local_files_router, local_files_routes = init_local_files_router(
-        workflow, f"{prefix}/local_files", urls
+        state_store, workflow_id, source_service, f"{prefix}/local_files", urls
     )
     tabs_router, tabs_routes = init_tabs_router(
-        workflow, f"{prefix}/tabs", urls
+        state_store, workflow_id, source_service, f"{prefix}/tabs", urls
     )
 
     # Now populate the URL bundle using .to() on route functions

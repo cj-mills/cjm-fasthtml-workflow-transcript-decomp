@@ -36,8 +36,13 @@ def init_routers(
     core_routers, core_routes = init_core_routers(
         workflow, f"{base_prefix}/core"
     )
+    
+    # Selection routers now use dependency injection
     selection_routers, selection_urls, selection_routes = init_selection_routers(
-        workflow, f"{base_prefix}/selection"
+        state_store=workflow.state_store,
+        source_service=workflow.source_service,
+        workflow_id=workflow.config.workflow_id,
+        prefix=f"{base_prefix}/selection",
     )
     
     # Pass wrapped handlers for cross-domain coordination (alignment status OOB)

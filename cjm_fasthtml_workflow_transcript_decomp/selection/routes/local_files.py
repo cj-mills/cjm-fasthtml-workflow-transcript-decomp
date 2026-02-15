@@ -17,16 +17,16 @@ from cjm_fasthtml_interactions.core.state_store import get_session_id
 
 from ..models import SelectionUrls
 from cjm_fasthtml_workflow_transcript_decomp.selection.routes.core import (
-    _get_step_state, _update_step_state
+    WorkflowStateStore, _get_step_state, _update_step_state
 )
 from cjm_fasthtml_workflow_transcript_decomp.selection.components.local_files import (
     _render_local_files_browser,
     _create_db_browser_config,
     _get_file_browser_state
 )
-from ..services.source import validate_and_toggle_external_db
-
-from ...workflow.workflow import StructureDecompWorkflow
+from cjm_fasthtml_workflow_transcript_decomp.selection.services.source import (
+    SourceService, validate_and_toggle_external_db
+)
 
 # %% ../../../nbs/selection/routes/local_files.ipynb #4e82cb18
 # Shared provider and config instances
@@ -43,7 +43,9 @@ def _get_local_files_provider() -> LocalFileSystemProvider:
 
 # %% ../../../nbs/selection/routes/local_files.ipynb #p7fzs0moict
 def _handle_browse_directory(
-    workflow: StructureDecompWorkflow,  # The workflow instance
+    state_store: WorkflowStateStore,  # The workflow state store
+    workflow_id: str,  # The workflow identifier
+    source_service: SourceService,  # The source service for external db ops
     request,  # FastHTML request object
     sess,  # FastHTML session object
     path: str,  # Directory path to browse
@@ -62,7 +64,7 @@ def _handle_browse_directory(
         normalized_path = provider.get_home_path()
     
     # Get current state and update browser state
-    step_state = _get_step_state(workflow, session_id)
+    step_state = _get_step_state(state_store, workflow_id, session_id)
     external_db_paths = step_state.get("external_db_paths", [])
     browser_state = _get_file_browser_state(step_state, provider.get_home_path())
     browser_state.current_path = normalized_path
@@ -72,7 +74,7 @@ def _handle_browse_directory(
     
     # Save updated state
     _update_step_state(
-        workflow, session_id,
+        state_store, workflow_id, session_id,
         file_browser_state=browser_state.to_dict(),
         current_browse_path=normalized_path
     )
@@ -100,7 +102,9 @@ def _get_local_files_config() -> FileBrowserConfig:
 
 # %% ../../../nbs/selection/routes/local_files.ipynb #93af0a77
 def _handle_add_external_source(
-    workflow: StructureDecompWorkflow,  # The workflow instance
+    state_store: WorkflowStateStore,  # The workflow state store
+    workflow_id: str,  # The workflow identifier
+    source_service: SourceService,  # The source service for external db ops
     request,  # FastHTML request object
     sess,  # FastHTML session object
     path: str,  # Path to the .db file (from file-browser select_url)
@@ -112,20 +116,20 @@ def _handle_add_external_source(
     config = _get_local_files_config()
     
     # Get current state
-    step_state = _get_step_state(workflow, session_id)
+    step_state = _get_step_state(state_store, workflow_id, session_id)
     external_db_paths = step_state.get("external_db_paths", [])
     browser_state = _get_file_browser_state(step_state, provider.get_home_path())
     
     # Validate and toggle
     external_db_paths, error_message = validate_and_toggle_external_db(
-        workflow.source_service, path, external_db_paths
+        source_service, path, external_db_paths
     )
-    _update_step_state(workflow, session_id, external_db_paths=external_db_paths)
-    workflow.source_service.set_external_paths(external_db_paths)
+    _update_step_state(state_store, workflow_id, session_id, external_db_paths=external_db_paths)
+    source_service.set_external_paths(external_db_paths)
     
     # Sync browser selection state with external_db_paths for checkbox display
     browser_state.selection.selected_paths = list(external_db_paths)
-    _update_step_state(workflow, session_id, file_browser_state=browser_state.to_dict())
+    _update_step_state(state_store, workflow_id, session_id, file_browser_state=browser_state.to_dict())
     
     return _render_local_files_browser(
         browser_state=browser_state,
@@ -143,7 +147,9 @@ def _handle_add_external_source(
 
 # %% ../../../nbs/selection/routes/local_files.ipynb #f74d25a2
 def _handle_remove_external_source(
-    workflow: StructureDecompWorkflow,  # The workflow instance
+    state_store: WorkflowStateStore,  # The workflow state store
+    workflow_id: str,  # The workflow identifier
+    source_service: SourceService,  # The source service for external db ops
     request,  # FastHTML request object
     sess,  # FastHTML session object
     db_path: str,  # Path to the .db file to remove
@@ -155,19 +161,19 @@ def _handle_remove_external_source(
     config = _get_local_files_config()
     
     # Get current state
-    step_state = _get_step_state(workflow, session_id)
+    step_state = _get_step_state(state_store, workflow_id, session_id)
     external_db_paths = step_state.get("external_db_paths", [])
     browser_state = _get_file_browser_state(step_state, provider.get_home_path())
     
     # Remove the path if it exists
     if db_path in external_db_paths:
         external_db_paths.remove(db_path)
-        _update_step_state(workflow, session_id, external_db_paths=external_db_paths)
-        workflow.source_service.set_external_paths(external_db_paths)
+        _update_step_state(state_store, workflow_id, session_id, external_db_paths=external_db_paths)
+        source_service.set_external_paths(external_db_paths)
     
     # Sync browser selection state with external_db_paths for checkbox display
     browser_state.selection.selected_paths = list(external_db_paths)
-    _update_step_state(workflow, session_id, file_browser_state=browser_state.to_dict())
+    _update_step_state(state_store, workflow_id, session_id, file_browser_state=browser_state.to_dict())
     
     return _render_local_files_browser(
         browser_state=browser_state,
@@ -184,7 +190,9 @@ def _handle_remove_external_source(
 
 # %% ../../../nbs/selection/routes/local_files.ipynb #rdrpw4jrxpc
 def init_local_files_router(
-    workflow: StructureDecompWorkflow,  # The workflow instance
+    state_store: WorkflowStateStore,  # The workflow state store
+    workflow_id: str,  # The workflow identifier
+    source_service: SourceService,  # The source service for external db ops
     prefix: str,  # Route prefix (e.g., "/workflow/selection/local_files")
     urls: SelectionUrls,  # URL bundle for rendering
 ) -> Tuple[APIRouter, Dict[str, Callable]]:  # (router, route_dict)
@@ -195,21 +203,24 @@ def init_local_files_router(
     def browse_directory(request, sess, path: str):
         """Browse a directory in the local files browser."""
         return _handle_browse_directory(
-            workflow, request, sess, path, urls=urls,
+            state_store, workflow_id, source_service,
+            request, sess, path, urls=urls,
         )
 
     @router
     def add_external(request, sess, path: str):
         """Add an external database source (select_url target from file browser)."""
         return _handle_add_external_source(
-            workflow, request, sess, path, urls=urls,
+            state_store, workflow_id, source_service,
+            request, sess, path, urls=urls,
         )
 
     @router
     def remove_external(request, sess, db_path: str):
         """Remove an external database source."""
         return _handle_remove_external_source(
-            workflow, request, sess, db_path, urls=urls,
+            state_store, workflow_id, source_service,
+            request, sess, db_path, urls=urls,
         )
 
     routes = {

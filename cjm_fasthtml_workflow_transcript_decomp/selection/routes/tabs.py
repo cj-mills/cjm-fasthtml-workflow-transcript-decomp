@@ -13,7 +13,9 @@ from fasthtml.common import APIRouter
 from cjm_fasthtml_interactions.core.state_store import get_session_id
 
 from ..models import SelectionUrls
-from .core import _get_step_state
+from cjm_fasthtml_workflow_transcript_decomp.selection.routes.core import (
+    WorkflowStateStore, _get_step_state, _update_step_state
+)
 from cjm_fasthtml_workflow_transcript_decomp.selection.routes.local_files import (
     _get_local_files_provider, _get_local_files_config
 )
@@ -26,13 +28,14 @@ from cjm_fasthtml_workflow_transcript_decomp.selection.components.local_files im
 from cjm_fasthtml_workflow_transcript_decomp.selection.components.step_renderer import (
     _render_tab_headers
 )
+from ..services.source import SourceService
 from ..services.source_utils import calculate_next_tab
-
-from ...workflow.workflow import StructureDecompWorkflow
 
 # %% ../../../nbs/selection/routes/tabs.ipynb #4d0109d3
 def _handle_tab_switch(
-    workflow: "StructureDecompWorkflow",  # The workflow instance
+    state_store: WorkflowStateStore,  # The workflow state store
+    workflow_id: str,  # The workflow identifier
+    source_service: SourceService,  # The source service for queries
     request,  # FastHTML request object
     sess,  # FastHTML session object
     direction: str,  # Direction: "prev", "next", "db", or "files"
@@ -40,28 +43,27 @@ def _handle_tab_switch(
 ):  # Tuple of inner content and OOB tab headers
     """Switch between Plugin DB and Local Files tabs."""
     session_id = get_session_id(sess)
-    from cjm_fasthtml_workflow_transcript_decomp.selection.routes.core import _update_step_state
     
     # Get current state
-    step_state = _get_step_state(workflow, session_id)
+    step_state = _get_step_state(state_store, workflow_id, session_id)
     selected_sources = step_state.get("selected_sources", [])
     grouping_mode = step_state.get("grouping_mode", "media_path")
     external_db_paths = step_state.get("external_db_paths", [])
     
     # Determine new tab
-    workflow_state = workflow.state_store.get_state(workflow.config.workflow_id, session_id)
+    workflow_state = state_store.get_state(workflow_id, session_id)
     current_tab = workflow_state.get("source_tab", "db")
     new_tab = calculate_next_tab(direction, current_tab, ["db", "files"])
     
     # Save new tab state
     workflow_state["source_tab"] = new_tab
-    workflow.state_store.update_state(workflow.config.workflow_id, session_id, workflow_state)
+    state_store.update_state(workflow_id, session_id, workflow_state)
     
     # Render the content for the new active tab
     if new_tab == "db":
         # Get transcriptions for source browser
-        all_transcriptions = workflow.source_service.query_transcriptions(limit=500)
-        sources = workflow.source_service.get_available_sources()
+        all_transcriptions = source_service.query_transcriptions(limit=500)
+        sources = source_service.get_available_sources()
         
         content = _render_source_browser(
             transcriptions=all_transcriptions,
@@ -83,7 +85,7 @@ def _handle_tab_switch(
         
         # Sync browser selection state with external_db_paths for checkbox display
         browser_state.selection.selected_paths = list(external_db_paths)
-        _update_step_state(workflow, session_id, file_browser_state=browser_state.to_dict())
+        _update_step_state(state_store, workflow_id, session_id, file_browser_state=browser_state.to_dict())
         
         content = _render_local_files_browser(
             browser_state=browser_state,
@@ -107,7 +109,9 @@ def _handle_tab_switch(
 
 # %% ../../../nbs/selection/routes/tabs.ipynb #qaovu542uyo
 def init_tabs_router(
-    workflow: StructureDecompWorkflow,  # The workflow instance
+    state_store: WorkflowStateStore,  # The workflow state store
+    workflow_id: str,  # The workflow identifier
+    source_service: SourceService,  # The source service for queries
     prefix: str,  # Route prefix (e.g., "/workflow/selection/tabs")
     urls: SelectionUrls,  # URL bundle for rendering
 ) -> Tuple[APIRouter, Dict[str, Callable]]:  # (router, route_dict)
@@ -118,7 +122,8 @@ def init_tabs_router(
     def tab_switch(request, sess, direction: str):
         """Switch between source tabs."""
         return _handle_tab_switch(
-            workflow, request, sess, direction, urls=urls,
+            state_store, workflow_id, source_service,
+            request, sess, direction, urls=urls,
         )
 
     routes = {

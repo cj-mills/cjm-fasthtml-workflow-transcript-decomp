@@ -23,6 +23,7 @@ from cjm_plugin_system.core.manager import PluginManager
 from cjm_workflow_state.state_store import SQLiteWorkflowStateStore
 
 from ..core.config import StructureDecompWorkflowConfig
+from ..selection.models import SelectionUrls
 from ..decomposition.models import SegmentationUrls
 from ..alignment.models import AlignmentUrls
 from cjm_fasthtml_card_stack.core.models import CardStackUrls
@@ -319,12 +320,32 @@ def _create_step_flow(
             id=workflow.config.container_id
         )
     
-    # Create render wrapper for selection step that injects URLs
+    # Create render wrapper for selection step with explicit parameters
     def render_selection_step_with_urls(ctx: InteractionContext):
-        """Render selection step with URL bundle from workflow."""
+        """Render selection step extracting state and passing explicit parameters."""
+        # Extract data from context (populated by data_loader)
+        sources = ctx.get_data("sources", [])
+        transcriptions = ctx.get_data("transcriptions", [])
+        
+        # Extract step state
+        step_state = ctx.state.get("step_states", {}).get("selection", {})
+        selected_sources = step_state.get("selected_sources", [])
+        grouping_mode = step_state.get("grouping_mode", "media_path")
+        external_db_paths = step_state.get("external_db_paths", [])
+        file_browser_state = step_state.get("file_browser_state", {})
+        
+        # Active tab from workflow state (not step state)
+        active_tab = ctx.get("source_tab", "db")
+        
         return render_selection_step(
-            ctx=ctx,
-            urls=getattr(workflow, '_selection_urls', None),
+            sources=sources,
+            transcriptions=transcriptions,
+            selected_sources=selected_sources,
+            grouping_mode=grouping_mode,
+            external_db_paths=external_db_paths,
+            file_browser_state=file_browser_state,
+            active_tab=active_tab,
+            urls=getattr(workflow, '_selection_urls', SelectionUrls()),
         )
     
     # Create render wrapper for combined step that injects URL bundles

@@ -12,7 +12,6 @@ from typing import Any, Dict, List, Optional
 from fasthtml.common import (
     Div, H2, P, Span, Input, Script, Details, Summary
 )
-from cjm_fasthtml_interactions.core.context import InteractionContext
 
 # DaisyUI components
 from cjm_fasthtml_daisyui.components.data_display.badge import badge, badge_colors, badge_sizes
@@ -38,6 +37,7 @@ from cjm_fasthtml_tailwind.core.base import combine_classes
 # Local imports
 from ..html_ids import SelectionHtmlIds
 from ..models import SelectionUrls
+from ..utils import count_words
 
 # Keyboard navigation library
 from cjm_fasthtml_keyboard_navigation.core.focus_zone import FocusZone
@@ -49,10 +49,8 @@ from cjm_fasthtml_keyboard_navigation.components.hints import render_keyboard_hi
 
 # Selection component imports
 from cjm_fasthtml_workflow_transcript_decomp.selection.components.helpers import (
-    _get_selected_sources, _get_grouping_mode, _get_selection_state,
     _generate_sortable_init_script
 )
-from ...core.services.text_utils import count_words
 from cjm_fasthtml_workflow_transcript_decomp.selection.components.source_browser import (
     _render_source_browser
 )
@@ -63,12 +61,12 @@ from cjm_fasthtml_workflow_transcript_decomp.selection.components.preview_panel 
     _render_preview_panel
 )
 from cjm_fasthtml_workflow_transcript_decomp.selection.components.local_files import (
-    _get_external_db_paths, _render_local_files_browser,
-    _create_db_browser_config, _get_file_browser_state
+    _render_local_files_browser, _create_db_browser_config
 )
 
 # File browser library
 from cjm_fasthtml_file_browser.providers.local import LocalFileSystemProvider
+from cjm_fasthtml_file_browser.core.models import BrowserState
 
 # %% ../../../nbs/selection/components/step_renderer.ipynb #lexm9ngrt8p
 # Hidden input IDs for keyboard navigation (must match route handler parameter names)
@@ -378,25 +376,16 @@ def _get_step_renderer_config():
 
 # %% ../../../nbs/selection/components/step_renderer.ipynb #5n0esq0hg67
 def render_selection_step(
-    ctx: InteractionContext,  # Interaction context with state and data
-    urls: SelectionUrls = None,  # URL bundle for selection routes
+    sources: List[Dict[str, Any]],  # Available source plugins
+    transcriptions: List[Dict[str, Any]],  # Available transcription records
+    selected_sources: List[Dict[str, str]],  # Ordered selection
+    grouping_mode: str,  # Grouping mode: "media_path" or "batch_id"
+    external_db_paths: List[str],  # External database paths
+    file_browser_state: Dict[str, Any],  # Serialized BrowserState from file-browser library
+    active_tab: str,  # Active tab: "db" or "files"
+    urls: SelectionUrls,  # URL bundle for selection routes
 ) -> Any:  # FastHTML component
     """Render Phase 1: Source Selection & Ordering step with two-column layout."""
-    urls = urls or SelectionUrls()
-    
-    # Get data from context
-    sources = ctx.get_data("sources", [])
-    transcriptions = ctx.get_data("transcriptions", [])
-    selected_sources = _get_selected_sources(ctx)
-    grouping_mode = _get_grouping_mode(ctx)
-    external_db_paths = _get_external_db_paths(ctx)
-    
-    # Get the full selection step state for file browser state
-    step_state = _get_selection_state(ctx)
-    
-    # Active tab (default to 'db')
-    active_tab = ctx.get("source_tab", "db")
-    
     # Create keyboard manager
     kb_manager = _create_selection_keyboard_manager()
     
@@ -466,8 +455,10 @@ def render_selection_step(
         provider = _get_step_renderer_provider()
         config = _get_step_renderer_config()
         
-        # Get browser state from the step state (properly persisted)
-        browser_state = _get_file_browser_state(step_state, provider.get_home_path())
+        # Get browser state from the serialized state dict
+        browser_state = BrowserState.from_dict(file_browser_state) if file_browser_state else BrowserState(
+            current_path=provider.get_home_path()
+        )
         
         active_content = _render_local_files_browser(
             browser_state=browser_state,

@@ -14,20 +14,21 @@ from cjm_fasthtml_interactions.core.state_store import get_session_id
 
 from ..models import SelectionUrls
 from cjm_fasthtml_workflow_transcript_decomp.selection.routes.core import (
-    _get_step_state, _update_step_state, _build_queue_response
+    WorkflowStateStore, _get_step_state, _update_step_state, _build_queue_response
 )
 from cjm_fasthtml_workflow_transcript_decomp.selection.components.source_browser import (
     _render_source_list
 )
+from ..services.source import SourceService
 from cjm_fasthtml_workflow_transcript_decomp.selection.services.source_utils import (
     filter_transcriptions, toggle_source_selection, reorder_item
 )
 
-from ...workflow.workflow import StructureDecompWorkflow
-
 # %% ../../../nbs/selection/routes/filtering.ipynb #c4457084
 def _handle_source_filter(
-    workflow: StructureDecompWorkflow,  # The workflow instance
+    state_store: WorkflowStateStore,  # The workflow state store
+    workflow_id: str,  # The workflow identifier
+    source_service: SourceService,  # The source service for queries
     request,  # FastHTML request object
     sess,  # FastHTML session object
     search: str,  # Search term from input
@@ -35,10 +36,10 @@ def _handle_source_filter(
 ):  # Filtered source list component
     """Filter transcription sources by search term."""
     session_id = get_session_id(sess)
-    step_state = _get_step_state(workflow, session_id)
+    step_state = _get_step_state(state_store, workflow_id, session_id)
     selected_sources = step_state.get("selected_sources", [])
     
-    all_transcriptions = workflow.source_service.query_transcriptions(limit=500)
+    all_transcriptions = source_service.query_transcriptions(limit=500)
     filtered = filter_transcriptions(all_transcriptions, search)
     
     return _render_source_list(
@@ -52,7 +53,9 @@ def _handle_source_filter(
 
 # %% ../../../nbs/selection/routes/filtering.ipynb #6929220b
 def _handle_grouping_change(
-    workflow: StructureDecompWorkflow,  # The workflow instance
+    state_store: WorkflowStateStore,  # The workflow state store
+    workflow_id: str,  # The workflow identifier
+    source_service: SourceService,  # The source service for queries
     request,  # FastHTML request object
     sess,  # FastHTML session object
     grouping_mode: str,  # New grouping mode: "media_path" or "batch_id"
@@ -61,14 +64,14 @@ def _handle_grouping_change(
     """Change the grouping mode and re-render the source list."""
     session_id = get_session_id(sess)
     # Save the new grouping mode to state
-    _update_step_state(workflow, session_id, grouping_mode=grouping_mode)
+    _update_step_state(state_store, workflow_id, session_id, grouping_mode=grouping_mode)
     
     # Get current state for rendering
-    step_state = _get_step_state(workflow, session_id)
+    step_state = _get_step_state(state_store, workflow_id, session_id)
     selected_sources = step_state.get("selected_sources", [])
     
     # Get all transcriptions
-    all_transcriptions = workflow.source_service.query_transcriptions(limit=500)
+    all_transcriptions = source_service.query_transcriptions(limit=500)
     
     # Render source list with new grouping mode
     return _render_source_list(
@@ -83,7 +86,9 @@ def _handle_grouping_change(
 
 # %% ../../../nbs/selection/routes/filtering.ipynb #ef9346c0
 def _handle_selection_toggle_focused(
-    workflow: StructureDecompWorkflow,  # The workflow instance
+    state_store: WorkflowStateStore,  # The workflow state store
+    workflow_id: str,  # The workflow identifier
+    source_service: SourceService,  # The source service for queries
     request,  # FastHTML request object
     sess,  # FastHTML session object
     record_id: str,  # Job ID from focused row (via hx-include)
@@ -92,17 +97,19 @@ def _handle_selection_toggle_focused(
 ):  # Queue component with OOB stats, optionally with OOB source list
     """Toggle selection of the focused row (keyboard shortcut handler)."""
     session_id = get_session_id(sess)
-    step_state = _get_step_state(workflow, session_id)
+    step_state = _get_step_state(state_store, workflow_id, session_id)
     selected_sources = step_state.get("selected_sources", [])
     
     selected_sources = toggle_source_selection(record_id, provider_id, selected_sources)
-    _update_step_state(workflow, session_id, selected_sources)
+    _update_step_state(state_store, workflow_id, session_id, selected_sources)
     
-    return _build_queue_response(workflow, session_id, selected_sources, urls)
+    return _build_queue_response(state_store, workflow_id, source_service, session_id, selected_sources, urls)
 
 # %% ../../../nbs/selection/routes/filtering.ipynb #abadfeaf
 def _handle_keyboard_reorder(
-    workflow: StructureDecompWorkflow,  # The workflow instance
+    state_store: WorkflowStateStore,  # The workflow state store
+    workflow_id: str,  # The workflow identifier
+    source_service: SourceService,  # The source service for queries
     request,  # FastHTML request object
     sess,  # FastHTML session object
     record_id: str,  # Record ID of item to move
@@ -112,19 +119,21 @@ def _handle_keyboard_reorder(
 ):  # Queue component, optionally with OOB source list
     """Move an item up or down in the selection queue via keyboard."""
     session_id = get_session_id(sess)
-    step_state = _get_step_state(workflow, session_id)
+    step_state = _get_step_state(state_store, workflow_id, session_id)
     selected_sources = step_state.get("selected_sources", [])
     
     selected_sources = reorder_item(selected_sources, record_id, provider_id, direction)
-    _update_step_state(workflow, session_id, selected_sources)
+    _update_step_state(state_store, workflow_id, session_id, selected_sources)
     
     return _build_queue_response(
-        workflow, session_id, selected_sources, urls, include_stats=False,
+        state_store, workflow_id, source_service, session_id, selected_sources, urls, include_stats=False,
     )
 
 # %% ../../../nbs/selection/routes/filtering.ipynb #vnsvtxzy7tb
 def init_filtering_router(
-    workflow: StructureDecompWorkflow,  # The workflow instance
+    state_store: WorkflowStateStore,  # The workflow state store
+    workflow_id: str,  # The workflow identifier
+    source_service: SourceService,  # The source service for queries
     prefix: str,  # Route prefix (e.g., "/workflow/selection/filtering")
     urls: SelectionUrls,  # URL bundle for rendering
 ) -> Tuple[APIRouter, Dict[str, Callable]]:  # (router, route_dict)
@@ -135,28 +144,32 @@ def init_filtering_router(
     def toggle_focused(request, sess, record_id: str, provider_id: str):
         """Toggle selection of the focused row (keyboard shortcut)."""
         return _handle_selection_toggle_focused(
-            workflow, request, sess, record_id, provider_id, urls=urls,
+            state_store, workflow_id, source_service,
+            request, sess, record_id, provider_id, urls=urls,
         )
 
     @router
     def keyboard_reorder(request, sess, record_id: str, provider_id: str, direction: str):
         """Move an item up or down in the queue via keyboard (Shift+Up/Down)."""
         return _handle_keyboard_reorder(
-            workflow, request, sess, record_id, provider_id, direction, urls=urls,
+            state_store, workflow_id, source_service,
+            request, sess, record_id, provider_id, direction, urls=urls,
         )
 
     @router
     def filter(request, sess, search: str = ""):
         """Filter source list by search term."""
         return _handle_source_filter(
-            workflow, request, sess, search, urls=urls,
+            state_store, workflow_id, source_service,
+            request, sess, search, urls=urls,
         )
 
     @router
     def grouping_change(request, sess, grouping_mode: str):
         """Change the grouping mode for the source list."""
         return _handle_grouping_change(
-            workflow, request, sess, grouping_mode, urls=urls,
+            state_store, workflow_id, source_service,
+            request, sess, grouping_mode, urls=urls,
         )
 
     routes = {
