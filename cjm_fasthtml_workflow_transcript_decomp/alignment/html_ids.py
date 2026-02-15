@@ -18,6 +18,10 @@ class AlignmentHtmlIds:
         """Convert an ID to a CSS selector format."""
         return f"#{id_str}"
 
+    # Column Layout (matches CombinedHtmlIds values for cross-package compatibility)
+    COLUMN_CONTENT = "sd-align-column-content"  # Content area ID (used by HTMX swaps)
+    MINI_STATS = "sd-align-mini-stats"  # Mini-stats badge ID (used by OOB updates)
+
     # Components
     # (Card stack IDs provided by CardStackHtmlIds from cjm-fasthtml-card-stack with prefix "sd-align")
     ALIGNMENT_TOOLBAR = "sd-align-toolbar"

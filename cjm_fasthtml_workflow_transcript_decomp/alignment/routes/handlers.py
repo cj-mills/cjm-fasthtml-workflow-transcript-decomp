@@ -15,7 +15,8 @@ from cjm_fasthtml_interactions.core.state_store import get_session_id
 from cjm_fasthtml_card_stack.core.models import CardStackState
 from cjm_fasthtml_card_stack.core.constants import DEFAULT_VISIBLE_COUNT, DEFAULT_CARD_WIDTH
 
-from ...combined.html_ids import CombinedHtmlIds
+# Local imports (page-specific, no cross-package dependencies)
+from ..html_ids import AlignmentHtmlIds
 from ..models import VADChunk, AlignmentUrls
 
 # Alignment components (same package)
@@ -52,9 +53,8 @@ async def _handle_align_init(
 ) -> tuple:  # (column_body, mini_stats_oob)
     """Initialize alignment from audio file via VAD plugin.
     
-    Note: KB system is always built by decomp init handler. This handler
-    only returns column body and mini-stats OOB. Alignment status OOB is
-    added by the wrapper in combined/handlers.
+    Returns pure domain response (column body + mini-stats OOB).
+    Alignment status OOB is added by the wrapper in combined/handlers.
     """
     session_id = get_session_id(sess)
 
@@ -124,7 +124,7 @@ async def _handle_align_init(
     # Mini-stats badge OOB update for the column header
     mini_stats_oob = Span(
         render_align_mini_stats_text(chunks),
-        id=CombinedHtmlIds.ALIGNMENT_MINI_STATS,
+        id=AlignmentHtmlIds.MINI_STATS,
         hx_swap_oob="true"
     )
 

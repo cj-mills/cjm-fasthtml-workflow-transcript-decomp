@@ -37,10 +37,8 @@ from cjm_fasthtml_workflow_transcript_decomp.alignment.components.card_stack_con
     ALIGN_CS_CONFIG, ALIGN_CS_IDS, ALIGN_CS_BTN_IDS,
 )
 
-# Local imports
-# HTML IDs (page-specific)
+# Local imports (page-specific, no cross-package dependencies)
 from ..html_ids import AlignmentHtmlIds
-from ...combined.html_ids import CombinedHtmlIds
 from ..models import VADChunk, AlignmentUrls
 from cjm_fasthtml_workflow_transcript_decomp.alignment.components.vad_card import (
     create_vad_card_renderer
@@ -110,7 +108,7 @@ def render_align_column_body(
     urls:AlignmentUrls,  # URL bundle for alignment routes
     kb_system:Any=None,  # Rendered keyboard system (None when KB managed externally)
     media_path:Optional[str]=None,  # Path to audio file for playback
-) -> Any:  # Div with id=ALIGNMENT_COLUMN_CONTENT
+) -> Any:  # Div with id=COLUMN_CONTENT
     """Render the alignment column content area with card stack viewport."""
     if DEBUG_ALIGN_RENDER:
         print(f"[ALIGN_RENDER] render_align_column_body called")
@@ -148,7 +146,7 @@ def render_align_column_body(
         print(f"[ALIGN_RENDER] constructed audio_src: '{audio_src}'")
 
     # Generate JS: library card stack JS + audio focus change callback.
-    # container_id is the column CONTENT area (ALIGNMENT_COLUMN_CONTENT), which is
+    # container_id is the column CONTENT area (COLUMN_CONTENT), which is
     # the immediate parent of the card stack. The column header is accounted for
     # by containerTop (content area starts below the header). This ensures the
     # algorithm only measures actual siblings of the card stack.
@@ -157,7 +155,7 @@ def render_align_column_body(
         button_ids=ALIGN_CS_BTN_IDS,
         config=ALIGN_CS_CONFIG,
         urls=urls.card_stack,
-        container_id=CombinedHtmlIds.ALIGNMENT_COLUMN_CONTENT,
+        container_id=AlignmentHtmlIds.COLUMN_CONTENT,
         focus_input_id=ALIGN_CS_IDS.focused_index_input,
         audio_player_id=AlignmentHtmlIds.AUDIO_PLAYER,
     )
@@ -188,10 +186,9 @@ def render_align_column_body(
         # JavaScript callbacks (library card stack JS + audio playback)
         callbacks_script,
 
-        id=CombinedHtmlIds.ALIGNMENT_COLUMN_CONTENT,
+        id=AlignmentHtmlIds.COLUMN_CONTENT,
         cls=combine_classes(grow(), min_h(0), overflow.hidden, flex_display, flex_direction.col)
     )
-
 
 # %% ../../../nbs/alignment/components/step_renderer.ipynb #align-sr-footer
 def render_align_footer_content(
