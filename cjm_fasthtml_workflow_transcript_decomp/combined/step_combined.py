@@ -46,22 +46,15 @@ from ..decomposition.html_ids import SegmentationHtmlIds
 from ..decomposition.models import TextSegment, SegmentationUrls
 from ..alignment.models import VADChunk, AlignmentUrls
 
-# Decomposition state getters
-from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.helpers import (
-    _is_initialized, _get_segments, _get_focused_index, _get_history,
-    _get_visible_count, _get_card_width,
+# State extraction helpers (combined-level)
+from cjm_fasthtml_workflow_transcript_decomp.combined.helpers import (
+    extract_seg_state, extract_alignment_state,
 )
 
 # Decomposition composable renderers
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.step_renderer import (
     render_seg_column_body, render_toolbar, render_seg_stats,
     render_seg_footer_content, render_seg_mini_stats_text,
-)
-
-# Alignment state getters
-from cjm_fasthtml_workflow_transcript_decomp.alignment.components.helpers import (
-    _is_alignment_initialized, _get_vad_chunks, _get_focused_chunk_index,
-    _get_alignment_visible_count, _get_alignment_card_width, _get_media_path,
 )
 
 # Alignment composable renderers
@@ -216,13 +209,17 @@ def _placeholder(
 
 
 def _render_shared_chrome(
-    seg_state:dict=None,  # Segmentation state dict (None = show placeholders)
-    align_state:dict=None,  # Alignment state dict (None = no VAD data yet)
+    seg_state:dict=None,  # Extracted segmentation state (None = show placeholders)
+    align_state:dict=None,  # Extracted alignment state (None = no VAD data yet)
     urls:SegmentationUrls=None,  # Segmentation URL bundle (required when seg_state provided)
     kb_manager:Any=None,  # Keyboard manager (required when seg_state provided)
 ) -> tuple:  # (hints, toolbar, controls, footer)
-    """Render shared chrome containers, populated with segmentation content when initialized."""
-    is_init = seg_state is not None
+    """Render shared chrome containers, populated with segmentation content when initialized.
+    
+    Takes extracted state dicts from `extract_seg_state()` and `extract_alignment_state()`
+    which contain deserialized TextSegment and VADChunk objects.
+    """
+    is_init = seg_state is not None and seg_state.get("is_initialized", False)
 
     # --- Hints ---
     if is_init and kb_manager:
@@ -238,7 +235,7 @@ def _render_shared_chrome(
 
     # --- Toolbar ---
     if is_init and urls:
-        segments = [TextSegment.from_dict(s) for s in seg_state.get("segments", [])]
+        segments = seg_state.get("segments", [])
         history = seg_state.get("history", [])
         visible_count = seg_state.get("visible_count", DEFAULT_VISIBLE_COUNT)
         toolbar_content = render_toolbar(
@@ -275,7 +272,7 @@ def _render_shared_chrome(
     chunk_count = len(align_state.get("vad_chunks", [])) if align_state else 0
     
     if is_init:
-        segments = [TextSegment.from_dict(s) for s in seg_state.get("segments", [])]
+        segments = seg_state.get("segments", [])
         focused_index = seg_state.get("focused_index", 0)
         column_footer = render_seg_footer_content(segments, focused_index)
     else:
@@ -434,9 +431,12 @@ def render_combined_step(
 
     seg_urls = seg_urls or SegmentationUrls()
 
-    # Check initialization states
-    is_seg_init = _is_initialized(ctx)
-    is_align_init = _is_alignment_initialized(ctx)
+    # Extract state using combined helpers
+    seg_state = extract_seg_state(ctx)
+    align_state = extract_alignment_state(ctx)
+    
+    is_seg_init = seg_state["is_initialized"]
+    is_align_init = align_state["is_initialized"]
 
     if DEBUG_COMBINED_RENDER:
         print(f"[COMBINED_RENDER] is_seg_init: {is_seg_init}")
@@ -447,17 +447,13 @@ def render_combined_step(
     kb_system = None
     zone_change_js = None
 
-    # Get raw state dicts for shared chrome
-    seg_state_dict = ctx.state.get("step_states", {}).get("segmentation", {}) if is_seg_init else None
-    align_state_dict = ctx.state.get("step_states", {}).get("alignment", {})
-
     if is_seg_init:
-        # Build segmentation pieces from state
-        segments = _get_segments(ctx)
-        focused_index = _get_focused_index(ctx)
-        history = _get_history(ctx)
-        visible_count = _get_visible_count(ctx, default=DEFAULT_VISIBLE_COUNT)
-        card_width = _get_card_width(ctx, default=DEFAULT_CARD_WIDTH)
+        # Get values from extracted state
+        segments = seg_state["segments"]
+        focused_index = seg_state["focused_index"]
+        history = seg_state["history"]
+        visible_count = seg_state["visible_count"]
+        card_width = seg_state["card_width"]
 
         # Always build combined KB system with both zones
         # (alignment zone will have no items until alignment init completes)
@@ -480,8 +476,8 @@ def render_combined_step(
 
         # Shared chrome with real segmentation content (includes alignment status)
         hints, toolbar, controls, footer = _render_shared_chrome(
-            seg_state=seg_state_dict,
-            align_state=align_state_dict,
+            seg_state=seg_state,
+            align_state=align_state,
             urls=seg_urls,
             kb_manager=kb_manager,
         )
@@ -495,7 +491,7 @@ def render_combined_step(
     else:
         # Shared chrome with placeholders (includes alignment status)
         hints, toolbar, controls, footer = _render_shared_chrome(
-            align_state=align_state_dict,
+            align_state=align_state,
         )
 
         # Left column with loading state + auto-trigger
@@ -506,13 +502,12 @@ def render_combined_step(
 
     # --- Alignment column ---
     if is_align_init and align_urls:
-        # Render alignment column body from state
-        chunks = _get_vad_chunks(ctx)
-        align_focused = _get_focused_chunk_index(ctx)
-        align_visible = _get_alignment_visible_count(ctx, default=5)
-        align_width = _get_alignment_card_width(ctx, default=40)
-        # Web Audio API handles accurate seeking
-        media_path = _get_media_path(ctx)
+        # Get values from extracted state
+        chunks = align_state["vad_chunks"]
+        align_focused = align_state["focused_index"]
+        align_visible = align_state["visible_count"]
+        align_width = align_state["card_width"]
+        media_path = align_state["media_path"]
 
         if DEBUG_COMBINED_RENDER:
             print(f"[COMBINED_RENDER] media_path: {media_path}")

@@ -17,6 +17,7 @@ from cjm_graph_domains.domains.relations import StructureRelations
 
 from ..models import WorkingDocument
 from ...decomposition.models import TextSegment
+from ...alignment.models import VADChunk
 
 # %% ../../../nbs/review/services/graph.ipynb #3be5680e
 class GraphService:
@@ -24,8 +25,8 @@ class GraphService:
     
     def __init__(
         self,
-        plugin_manager: PluginManager,  # Plugin manager for accessing graph plugin
-        plugin_name: str = "cjm-graph-plugin-sqlite"  # Name of the graph plugin
+        plugin_manager:PluginManager,  # Plugin manager for accessing graph plugin
+        plugin_name:str="cjm-graph-plugin-sqlite",  # Name of the graph plugin
     ):
         """Initialize the graph service."""
         self._manager = plugin_manager
@@ -37,7 +38,7 @@ class GraphService:
     
     def ensure_loaded(
         self,
-        config: Optional[Dict[str, Any]] = None  # Optional plugin configuration
+        config:Optional[Dict[str, Any]]=None,  # Optional plugin configuration
     ) -> bool:  # True if successfully loaded
         """Ensure the graph plugin is loaded."""
         if self.is_available():
@@ -51,7 +52,7 @@ class GraphService:
     
     def _create_source_ref(
         self,
-        segment: TextSegment  # Text segment with source info
+        segment:TextSegment,  # Text segment with source info
     ) -> Optional[SourceRef]:  # SourceRef or None if no source info
         """Create a SourceRef from segment source information."""
         if not segment.source_id or not segment.source_provider_id:
@@ -72,38 +73,51 @@ class GraphService:
     
     async def commit_document_async(
         self,
-        working_doc: WorkingDocument  # Working document to commit
+        title:str,  # Document title
+        text_segments:List[TextSegment],  # Text segments from decomposition
+        vad_chunks:List[VADChunk],  # VAD chunks for timing (1:1 with segments)
+        media_type:str="audio",  # Source media type
     ) -> Dict[str, Any]:  # Result with document_id and segment_ids
-        """Commit a working document to the context graph."""
+        """Commit a document to the context graph.
+        
+        Assembles text segments with VAD timing at commit time.
+        Requires 1:1 alignment: len(text_segments) == len(vad_chunks).
+        """
         if not self.is_available():
             raise RuntimeError(f"Plugin {self._plugin_name} not loaded")
+        
+        if len(text_segments) != len(vad_chunks):
+            raise ValueError(
+                f"Segment and VAD chunk counts must match: "
+                f"{len(text_segments)} segments vs {len(vad_chunks)} chunks"
+            )
         
         # Create Document node
         doc = Document(
             id=str(uuid4()),
-            title=working_doc.title,
-            media_type=working_doc.media_type
+            title=title,
+            media_type=media_type
         )
         
         # Convert to graph node
         doc_node = doc.to_graph_node(sources=[])
         
-        # Create Segment nodes
+        # Create Segment nodes by zipping text with timing
         segment_nodes = []
-        for ws in working_doc.segments:
+        for text_seg, vad_chunk in zip(text_segments, vad_chunks):
             seg = Segment(
                 id=str(uuid4()),
-                text=ws.text,
-                index=ws.index,
-                start_time=ws.start_time,
-                end_time=ws.end_time,
-                start_char=ws.start_char,
-                end_char=ws.end_char
+                text=text_seg.text,
+                index=text_seg.index,
+                start_time=vad_chunk.start_time,
+                end_time=vad_chunk.end_time,
+                start_char=text_seg.start_char,
+                end_char=text_seg.end_char
             )
             
             # Create source reference
             sources = []
-            source_ref = self._create_source_ref(ws)
+            source_ref = self._create_source_ref(text_seg)
             if source_ref:
                 sources.append(source_ref)
             
@@ -169,9 +183,12 @@ class GraphService:
     
     def commit_document(
         self,
-        working_doc: WorkingDocument  # Working document to commit
+        title:str,  # Document title
+        text_segments:List[TextSegment],  # Text segments from decomposition
+        vad_chunks:List[VADChunk],  # VAD chunks for timing
+        media_type:str="audio",  # Source media type
     ) -> Dict[str, Any]:  # Result with document_id and segment_ids
-        """Commit a working document synchronously."""
+        """Commit a document to the context graph synchronously."""
         return asyncio.get_event_loop().run_until_complete(
-            self.commit_document_async(working_doc)
+            self.commit_document_async(title, text_segments, vad_chunks, media_type)
         )
