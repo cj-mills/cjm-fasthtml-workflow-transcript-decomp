@@ -18,6 +18,10 @@ class SegmentationHtmlIds:
         """Convert an ID to a CSS selector format."""
         return f"#{id_str}"
 
+    # Column Layout (used by combined layer but owned here)
+    COLUMN_CONTENT = "sd-seg-column-content"  # Column body content area
+    MINI_STATS = "sd-seg-mini-stats"  # Mini stats badge in column header
+
     # Main Layout
     # (Card stack IDs provided by CardStackHtmlIds from cjm-fasthtml-card-stack)
     # (Token selector IDs provided by TokenSelectorHtmlIds from cjm-fasthtml-token-selector)

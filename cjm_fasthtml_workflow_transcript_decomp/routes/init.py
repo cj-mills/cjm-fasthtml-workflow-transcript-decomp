@@ -18,9 +18,9 @@ from ..alignment.routes.init import init_alignment_routers
 
 # Import wrapped handlers for cross-domain coordination
 from cjm_fasthtml_workflow_transcript_decomp.combined.handlers import (
-    wrapped_seg_init, wrapped_seg_split, wrapped_seg_merge,
+    wrapped_seg_split, wrapped_seg_merge,
     wrapped_seg_undo, wrapped_seg_reset, wrapped_seg_ai_split,
-    wrapped_align_init,
+    create_seg_init_chrome_wrapper, create_align_init_chrome_wrapper,
 )
 
 from ..workflow.workflow import StructureDecompWorkflow
@@ -37,7 +37,7 @@ def init_routers(
         workflow, f"{base_prefix}/core"
     )
     
-    # Selection routers now use dependency injection
+    # Selection routers use dependency injection
     selection_routers, selection_urls, selection_routes = init_selection_routers(
         state_store=workflow.state_store,
         source_service=workflow.source_service,
@@ -46,13 +46,26 @@ def init_routers(
     )
 
     # Alignment routers (need to initialize first to get align_urls for seg init)
+    # Create the align init wrapper first
+    wrapped_align_init = create_align_init_chrome_wrapper()
+    
     align_routers, align_urls, align_routes = init_alignment_routers(
-        workflow, f"{base_prefix}/align",
+        state_store=workflow.state_store,
+        workflow_id=workflow.config.workflow_id,
+        source_service=workflow.source_service,
+        alignment_service=workflow.alignment_service,
+        prefix=f"{base_prefix}/align",
         audio_src_url=core_routes["audio_src"].to(),
         wrapped_init=wrapped_align_init,
     )
     
-    # Pass wrapped handlers for cross-domain coordination (alignment status OOB)
+    # Create the seg init wrapper with URLs needed for KB system
+    wrapped_seg_init = create_seg_init_chrome_wrapper(
+        align_urls=align_urls,
+        switch_chrome_url=core_routes["switch_chrome"].to(),
+    )
+    
+    # Wrapped handlers for cross-domain coordination (alignment status OOB)
     seg_wrapped = {
         "init": wrapped_seg_init,
         "split": wrapped_seg_split,
@@ -62,14 +75,12 @@ def init_routers(
         "ai_split": wrapped_seg_ai_split,
     }
     
-    # Segmentation routers now use dependency injection
+    # Segmentation routers use dependency injection
     seg_routers, seg_urls, seg_routes = init_segmentation_routers(
         state_store=workflow.state_store,
         workflow_id=workflow.config.workflow_id,
         source_service=workflow.source_service,
         segmentation_service=workflow.segmentation_service,
-        align_urls=align_urls,
-        switch_chrome_url=core_routes["switch_chrome"].to(),
         prefix=f"{base_prefix}/seg",
         max_history_depth=workflow.config.max_history_depth,
         wrapped_handlers=seg_wrapped,

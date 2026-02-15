@@ -26,11 +26,9 @@ from cjm_fasthtml_workflow_transcript_decomp.alignment.components.vad_card impor
 )
 from ..models import AlignmentUrls
 from cjm_fasthtml_workflow_transcript_decomp.alignment.routes.core import (
-    _load_alignment_context, _update_alignment_state, _build_card_stack_state,
-    _to_vad_chunks,
+    WorkflowStateStore, _load_alignment_context, _update_alignment_state,
+    _build_card_stack_state, _to_vad_chunks,
 )
-
-from ...workflow.workflow import StructureDecompWorkflow
 
 # %% ../../../nbs/alignment/routes/card_stack.ipynb #align-cs-nav-response
 def _build_nav_response(
@@ -53,14 +51,15 @@ def _build_nav_response(
 
 # %% ../../../nbs/alignment/routes/card_stack.ipynb #align-cs-navigate
 def _handle_align_navigate(
-    workflow:Any,  # StructureDecompWorkflow instance
+    state_store:WorkflowStateStore,  # The workflow state store
+    workflow_id:str,  # The workflow identifier
     sess:Any,  # FastHTML session object
     direction:str,  # Navigation direction: up/down/first/last/page_up/page_down
     urls:AlignmentUrls,  # URL bundle
 ) -> Tuple:  # OOB response elements (slots + progress + focus)
     """Navigate the alignment card stack."""
     session_id = get_session_id(sess)
-    ctx = _load_alignment_context(workflow, session_id)
+    ctx = _load_alignment_context(state_store, workflow_id, session_id)
     chunks = _to_vad_chunks(ctx.chunk_dicts)
 
     state = _build_card_stack_state(ctx)
@@ -77,13 +76,13 @@ def _handle_align_navigate(
         progress_label="VAD Chunk",
     )
 
-    _update_alignment_state(workflow, session_id, focused_chunk_index=state.focused_index)
+    _update_alignment_state(state_store, workflow_id, session_id, focused_chunk_index=state.focused_index)
     return result
-
 
 # %% ../../../nbs/alignment/routes/card_stack.ipynb #align-cs-viewport
 async def _handle_align_update_viewport(
-    workflow:Any,  # StructureDecompWorkflow instance
+    state_store:WorkflowStateStore,  # The workflow state store
+    workflow_id:str,  # The workflow identifier
     request:Any,  # FastHTML request object
     sess:Any,  # FastHTML session object
     visible_count:int,  # New visible card count
@@ -91,7 +90,7 @@ async def _handle_align_update_viewport(
 ) -> Tuple:  # OOB section elements for viewport update
     """Update viewport with new card count via OOB section swaps."""
     session_id = get_session_id(sess)
-    ctx = _load_alignment_context(workflow, session_id)
+    ctx = _load_alignment_context(state_store, workflow_id, session_id)
     chunks = _to_vad_chunks(ctx.chunk_dicts)
 
     state = _build_card_stack_state(ctx)
@@ -113,31 +112,32 @@ async def _handle_align_update_viewport(
     is_auto_mode = is_auto_str.lower() == "true"
 
     _update_alignment_state(
-        workflow, session_id,
+        state_store, workflow_id, session_id,
         visible_count=state.visible_count,
         is_auto_mode=is_auto_mode,
     )
     return result
 
-
 # %% ../../../nbs/alignment/routes/card_stack.ipynb #align-cs-save-width
 def _handle_align_save_width(
-    workflow:Any,  # StructureDecompWorkflow instance
+    state_store:WorkflowStateStore,  # The workflow state store
+    workflow_id:str,  # The workflow identifier
     sess:Any,  # FastHTML session object
     card_width:int,  # Card stack width in rem to save
 ) -> None:  # No response body (swap=none on client)
     """Save card stack width to server state with config bounds validation."""
     session_id = get_session_id(sess)
-    ctx = _load_alignment_context(workflow, session_id)
+    ctx = _load_alignment_context(state_store, workflow_id, session_id)
     state = _build_card_stack_state(ctx)
     card_stack_save_width(state, card_width, ALIGN_CS_CONFIG)
-    _update_alignment_state(workflow, session_id, card_width=state.card_width)
+    _update_alignment_state(state_store, workflow_id, session_id, card_width=state.card_width)
 
 # %% ../../../nbs/alignment/routes/card_stack.ipynb #tc03qnio4z9
 def init_card_stack_router(
-    workflow: StructureDecompWorkflow,  # The workflow instance
-    prefix: str,  # Route prefix (e.g., "/workflow/align/card_stack")
-    urls: AlignmentUrls,  # URL bundle (populated after routes defined)
+    state_store:WorkflowStateStore,  # The workflow state store
+    workflow_id:str,  # The workflow identifier
+    prefix:str,  # Route prefix (e.g., "/workflow/align/card_stack")
+    urls:AlignmentUrls,  # URL bundle (populated after routes defined)
 ) -> Tuple[APIRouter, Dict[str, Callable]]:  # (router, route_dict)
     """Initialize card stack routes for alignment."""
     router = APIRouter(prefix=prefix)
@@ -149,32 +149,32 @@ def init_card_stack_router(
     @router
     def nav_up(request, sess):
         """Navigate to previous VAD chunk."""
-        return _handle_align_navigate(workflow, sess, direction="up", urls=urls)
+        return _handle_align_navigate(state_store, workflow_id, sess, direction="up", urls=urls)
 
     @router
     def nav_down(request, sess):
         """Navigate to next VAD chunk."""
-        return _handle_align_navigate(workflow, sess, direction="down", urls=urls)
+        return _handle_align_navigate(state_store, workflow_id, sess, direction="down", urls=urls)
 
     @router
     def nav_first(request, sess):
         """Navigate to first VAD chunk."""
-        return _handle_align_navigate(workflow, sess, direction="first", urls=urls)
+        return _handle_align_navigate(state_store, workflow_id, sess, direction="first", urls=urls)
 
     @router
     def nav_last(request, sess):
         """Navigate to last VAD chunk."""
-        return _handle_align_navigate(workflow, sess, direction="last", urls=urls)
+        return _handle_align_navigate(state_store, workflow_id, sess, direction="last", urls=urls)
 
     @router
     def nav_page_up(request, sess):
         """Navigate up by page in alignment."""
-        return _handle_align_navigate(workflow, sess, direction="page_up", urls=urls)
+        return _handle_align_navigate(state_store, workflow_id, sess, direction="page_up", urls=urls)
 
     @router
     def nav_page_down(request, sess):
         """Navigate down by page in alignment."""
-        return _handle_align_navigate(workflow, sess, direction="page_down", urls=urls)
+        return _handle_align_navigate(state_store, workflow_id, sess, direction="page_down", urls=urls)
 
     # -------------------------------------------------------------------------
     # Viewport and Width
@@ -184,13 +184,13 @@ def init_card_stack_router(
     async def update_viewport(request, sess, visible_count: int):
         """Update alignment viewport with new card count."""
         return await _handle_align_update_viewport(
-            workflow, request, sess, visible_count, urls=urls,
+            state_store, workflow_id, request, sess, visible_count, urls=urls,
         )
 
     @router
     def save_width(request, sess, card_width: int):
         """Save alignment card stack width to server state."""
-        return _handle_align_save_width(workflow, sess, card_width)
+        return _handle_align_save_width(state_store, workflow_id, sess, card_width)
 
     # -------------------------------------------------------------------------
     # Route Dict

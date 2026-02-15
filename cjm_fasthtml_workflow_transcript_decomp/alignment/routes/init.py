@@ -13,17 +13,21 @@ from fasthtml.common import APIRouter
 from cjm_fasthtml_card_stack.core.models import CardStackUrls
 
 from ..models import AlignmentUrls
+from ..services.alignment import AlignmentService
+from .core import WorkflowStateStore
 from .card_stack import init_card_stack_router
 from .handlers import init_workflow_router
-
-from ...workflow.workflow import StructureDecompWorkflow
+from ...selection.services.source import SourceService
 
 # %% ../../../nbs/alignment/routes/init.ipynb #e5f6a7b8
 def init_alignment_routers(
-    workflow: StructureDecompWorkflow,  # The workflow instance
-    prefix: str,  # Base prefix for alignment routes (e.g., "/workflow/align")
-    audio_src_url: str,  # URL for audio_src route (from core router)
-    wrapped_init: Callable = None,  # Optional wrapped init handler
+    state_store:WorkflowStateStore,  # The workflow state store
+    workflow_id:str,  # The workflow identifier
+    source_service:SourceService,  # Service for fetching source blocks
+    alignment_service:AlignmentService,  # Service for VAD analysis
+    prefix:str,  # Base prefix for alignment routes (e.g., "/workflow/align")
+    audio_src_url:str,  # URL for audio_src route (from core router)
+    wrapped_init:Callable=None,  # Optional wrapped init handler
 ) -> Tuple[List[APIRouter], AlignmentUrls, Dict[str, Callable]]:  # (routers, urls, merged_routes)
     """Initialize and return all alignment routers with URL bundle."""
     # Create empty URL bundle (populated after routes are defined)
@@ -31,10 +35,11 @@ def init_alignment_routers(
 
     # Initialize focused routers
     card_stack_router, card_stack_routes = init_card_stack_router(
-        workflow, f"{prefix}/card_stack", urls
+        state_store, workflow_id, f"{prefix}/card_stack", urls
     )
     workflow_router, workflow_routes = init_workflow_router(
-        workflow, f"{prefix}/workflow", urls,
+        state_store, workflow_id, source_service, alignment_service,
+        f"{prefix}/workflow", urls,
         handler_init=wrapped_init,
     )
 

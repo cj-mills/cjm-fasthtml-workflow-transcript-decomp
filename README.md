@@ -170,188 +170,191 @@ graph LR
     workflow_workflow[workflow.workflow<br/>workflow]
 
     alignment_components_helpers --> alignment_models
-    alignment_components_step_renderer --> alignment_html_ids
-    alignment_components_step_renderer --> alignment_models
     alignment_components_step_renderer --> alignment_components_card_stack_config
+    alignment_components_step_renderer --> alignment_models
+    alignment_components_step_renderer --> alignment_html_ids
     alignment_components_step_renderer --> alignment_components_vad_card
     alignment_components_step_renderer --> alignment_components_callbacks
-    alignment_components_vad_card --> alignment_html_ids
     alignment_components_vad_card --> alignment_models
+    alignment_components_vad_card --> alignment_html_ids
     alignment_components_vad_card --> core_services_formatting
     alignment_routes_card_stack --> alignment_components_card_stack_config
-    alignment_routes_card_stack --> alignment_components_vad_card
     alignment_routes_card_stack --> alignment_models
     alignment_routes_card_stack --> alignment_routes_core
-    alignment_routes_card_stack --> workflow_workflow
+    alignment_routes_card_stack --> alignment_components_vad_card
     alignment_routes_core --> alignment_models
-    alignment_routes_handlers --> alignment_html_ids
     alignment_routes_handlers --> alignment_models
-    alignment_routes_handlers --> alignment_components_card_stack_config
+    alignment_routes_handlers --> selection_services_source
+    alignment_routes_handlers --> alignment_html_ids
     alignment_routes_handlers --> alignment_components_step_renderer
-    alignment_routes_handlers --> alignment_routes_card_stack
     alignment_routes_handlers --> alignment_routes_core
-    alignment_routes_handlers --> workflow_workflow
-    alignment_routes_init --> alignment_routes_card_stack
-    alignment_routes_init --> alignment_models
-    alignment_routes_init --> workflow_workflow
+    alignment_routes_handlers --> alignment_services_alignment
+    alignment_routes_init --> alignment_services_alignment
     alignment_routes_init --> alignment_routes_handlers
+    alignment_routes_init --> selection_services_source
+    alignment_routes_init --> alignment_routes_core
+    alignment_routes_init --> alignment_models
+    alignment_routes_init --> alignment_routes_card_stack
     alignment_services_alignment --> alignment_models
     combined_handlers --> decomposition_routes_handlers
+    combined_handlers --> decomposition_models
+    combined_handlers --> combined_keyboard_config
+    combined_handlers --> alignment_models
+    combined_handlers --> selection_services_source
     combined_handlers --> alignment_routes_handlers
-    combined_handlers --> decomposition_routes_core
+    combined_handlers --> decomposition_components_card_stack_config
     combined_handlers --> combined_step_combined
-    combined_helpers --> alignment_models
+    combined_handlers --> decomposition_components_step_renderer
+    combined_handlers --> combined_html_ids
+    combined_handlers --> alignment_services_alignment
+    combined_handlers --> decomposition_routes_core
+    combined_handlers --> alignment_routes_core
     combined_helpers --> decomposition_models
+    combined_helpers --> alignment_models
     combined_keyboard_config --> decomposition_components_keyboard_config
-    combined_keyboard_config --> decomposition_components_card_stack_config
     combined_keyboard_config --> alignment_components_card_stack_config
     combined_keyboard_config --> alignment_models
-    combined_keyboard_config --> decomposition_models
+    combined_keyboard_config --> decomposition_components_card_stack_config
     combined_keyboard_config --> combined_html_ids
     combined_keyboard_config --> alignment_components_keyboard_config
-    combined_step_combined --> alignment_models
-    combined_step_combined --> alignment_components_card_stack_config
-    combined_step_combined --> combined_helpers
-    combined_step_combined --> combined_keyboard_config
+    combined_keyboard_config --> decomposition_models
+    combined_step_combined --> decomposition_components_card_stack_config
     combined_step_combined --> decomposition_models
-    combined_step_combined --> decomposition_html_ids
+    combined_step_combined --> combined_keyboard_config
+    combined_step_combined --> alignment_models
+    combined_step_combined --> combined_helpers
+    combined_step_combined --> alignment_components_card_stack_config
+    combined_step_combined --> decomposition_components_step_renderer
     combined_step_combined --> alignment_components_step_renderer
     combined_step_combined --> combined_html_ids
-    combined_step_combined --> decomposition_components_card_stack_config
-    combined_step_combined --> decomposition_components_step_renderer
+    combined_step_combined --> decomposition_html_ids
     core_services_text_utils --> decomposition_models
     decomposition_components_helpers --> decomposition_models
     decomposition_components_keyboard_config --> decomposition_components_card_stack_config
+    decomposition_components_segment_card --> decomposition_models
     decomposition_components_segment_card --> decomposition_components_card_stack_config
     decomposition_components_segment_card --> decomposition_html_ids
-    decomposition_components_segment_card --> decomposition_models
     decomposition_components_step_renderer --> decomposition_components_card_stack_config
-    decomposition_components_step_renderer --> decomposition_components_segment_card
     decomposition_components_step_renderer --> decomposition_models
+    decomposition_components_step_renderer --> decomposition_components_segment_card
     decomposition_components_step_renderer --> decomposition_html_ids
-    decomposition_components_step_renderer --> combined_html_ids
     decomposition_components_step_renderer --> decomposition_components_callbacks
     decomposition_components_step_renderer --> decomposition_utils
     decomposition_routes_card_stack --> decomposition_components_segment_card
-    decomposition_routes_card_stack --> decomposition_models
-    decomposition_routes_card_stack --> decomposition_routes_core
     decomposition_routes_card_stack --> decomposition_components_card_stack_config
+    decomposition_routes_card_stack --> decomposition_routes_core
+    decomposition_routes_card_stack --> decomposition_models
     decomposition_routes_core --> decomposition_models
-    decomposition_routes_handlers --> decomposition_utils
-    decomposition_routes_handlers --> decomposition_components_card_stack_config
-    decomposition_routes_handlers --> combined_keyboard_config
-    decomposition_routes_handlers --> alignment_models
-    decomposition_routes_handlers --> decomposition_routes_core
-    decomposition_routes_handlers --> selection_services_source
     decomposition_routes_handlers --> decomposition_models
-    decomposition_routes_handlers --> combined_step_combined
     decomposition_routes_handlers --> decomposition_services_segmentation
-    decomposition_routes_handlers --> combined_html_ids
     decomposition_routes_handlers --> decomposition_routes_card_stack
+    decomposition_routes_handlers --> selection_services_source
+    decomposition_routes_handlers --> decomposition_routes_core
+    decomposition_routes_handlers --> decomposition_components_card_stack_config
     decomposition_routes_handlers --> decomposition_components_step_renderer
-    decomposition_routes_init --> decomposition_services_segmentation
-    decomposition_routes_init --> decomposition_routes_core
-    decomposition_routes_init --> decomposition_models
-    decomposition_routes_init --> selection_services_source
-    decomposition_routes_init --> alignment_models
-    decomposition_routes_init --> decomposition_routes_handlers
+    decomposition_routes_handlers --> decomposition_utils
     decomposition_routes_init --> decomposition_routes_card_stack
+    decomposition_routes_init --> selection_services_source
+    decomposition_routes_init --> decomposition_routes_core
+    decomposition_routes_init --> decomposition_routes_handlers
+    decomposition_routes_init --> decomposition_services_segmentation
+    decomposition_routes_init --> decomposition_models
     decomposition_services_segmentation --> decomposition_models
     decomposition_utils --> decomposition_models
     review_components_step_renderer --> review_html_ids
-    review_models --> alignment_models
     review_models --> decomposition_models
-    review_services_graph --> alignment_models
-    review_services_graph --> review_models
+    review_models --> alignment_models
     review_services_graph --> decomposition_models
+    review_services_graph --> review_models
+    review_services_graph --> alignment_models
     routes_core_audio --> workflow_workflow
+    routes_core_chrome --> decomposition_models
+    routes_core_chrome --> combined_keyboard_config
     routes_core_chrome --> alignment_models
     routes_core_chrome --> alignment_components_card_stack_config
-    routes_core_chrome --> combined_keyboard_config
-    routes_core_chrome --> alignment_components_step_renderer
-    routes_core_chrome --> decomposition_models
-    routes_core_chrome --> combined_step_combined
-    routes_core_chrome --> combined_html_ids
     routes_core_chrome --> decomposition_components_card_stack_config
-    routes_core_chrome --> workflow_workflow
+    routes_core_chrome --> combined_step_combined
     routes_core_chrome --> decomposition_components_step_renderer
+    routes_core_chrome --> alignment_components_step_renderer
+    routes_core_chrome --> combined_html_ids
+    routes_core_chrome --> workflow_workflow
     routes_core_init --> routes_core_chrome
     routes_core_init --> routes_core_status
-    routes_core_init --> routes_core_sources
     routes_core_init --> routes_core_audio
+    routes_core_init --> routes_core_sources
     routes_core_init --> workflow_workflow
     routes_core_sources --> workflow_workflow
     routes_core_status --> workflow_workflow
     routes_init --> combined_handlers
     routes_init --> selection_routes_init
-    routes_init --> decomposition_routes_init
     routes_init --> alignment_routes_init
     routes_init --> workflow_workflow
+    routes_init --> decomposition_routes_init
     routes_init --> routes_core_init
     selection_components_helpers --> selection_models
     selection_components_local_files --> selection_html_ids
     selection_components_local_files --> selection_components_helpers
     selection_components_preview_panel --> selection_html_ids
     selection_components_selection_queue --> selection_html_ids
-    selection_components_source_browser --> selection_utils
     selection_components_source_browser --> selection_services_source_utils
+    selection_components_source_browser --> selection_utils
     selection_components_source_browser --> selection_html_ids
     selection_components_step_renderer --> selection_models
-    selection_components_step_renderer --> selection_components_local_files
-    selection_components_step_renderer --> selection_components_helpers
     selection_components_step_renderer --> selection_utils
-    selection_components_step_renderer --> selection_html_ids
-    selection_components_step_renderer --> selection_components_source_browser
-    selection_components_step_renderer --> selection_components_selection_queue
     selection_components_step_renderer --> selection_components_preview_panel
-    selection_routes_core --> selection_components_source_browser
+    selection_components_step_renderer --> selection_html_ids
+    selection_components_step_renderer --> selection_components_local_files
+    selection_components_step_renderer --> selection_components_selection_queue
+    selection_components_step_renderer --> selection_components_helpers
+    selection_components_step_renderer --> selection_components_source_browser
+    selection_routes_core --> selection_components_selection_queue
+    selection_routes_core --> selection_components_step_renderer
     selection_routes_core --> selection_services_source
     selection_routes_core --> selection_models
-    selection_routes_core --> selection_components_step_renderer
-    selection_routes_core --> selection_components_selection_queue
+    selection_routes_core --> selection_components_source_browser
     selection_routes_filtering --> selection_routes_core
     selection_routes_filtering --> selection_services_source_utils
-    selection_routes_filtering --> selection_components_source_browser
     selection_routes_filtering --> selection_services_source
     selection_routes_filtering --> selection_models
-    selection_routes_init --> selection_services_source
-    selection_routes_init --> selection_routes_local_files
-    selection_routes_init --> selection_models
-    selection_routes_init --> selection_routes_filtering
+    selection_routes_filtering --> selection_components_source_browser
     selection_routes_init --> selection_routes_queue
+    selection_routes_init --> selection_routes_local_files
+    selection_routes_init --> selection_routes_filtering
     selection_routes_init --> selection_routes_tabs
+    selection_routes_init --> selection_services_source
+    selection_routes_init --> selection_models
     selection_routes_init --> selection_routes_core
     selection_routes_local_files --> selection_services_source
-    selection_routes_local_files --> selection_models
-    selection_routes_local_files --> selection_components_local_files
     selection_routes_local_files --> selection_routes_core
-    selection_routes_queue --> selection_routes_core
+    selection_routes_local_files --> selection_components_local_files
+    selection_routes_local_files --> selection_models
     selection_routes_queue --> selection_services_source_utils
+    selection_routes_queue --> selection_routes_core
+    selection_routes_queue --> selection_components_preview_panel
     selection_routes_queue --> selection_services_source
     selection_routes_queue --> selection_models
-    selection_routes_queue --> selection_components_preview_panel
     selection_routes_tabs --> selection_routes_local_files
-    selection_routes_tabs --> selection_services_source
-    selection_routes_tabs --> selection_components_step_renderer
-    selection_routes_tabs --> selection_services_source_utils
-    selection_routes_tabs --> selection_models
-    selection_routes_tabs --> selection_components_local_files
-    selection_routes_tabs --> selection_components_source_browser
     selection_routes_tabs --> selection_routes_core
+    selection_routes_tabs --> selection_services_source
+    selection_routes_tabs --> selection_components_local_files
+    selection_routes_tabs --> selection_models
+    selection_routes_tabs --> selection_components_source_browser
+    selection_routes_tabs --> selection_services_source_utils
+    selection_routes_tabs --> selection_components_step_renderer
+    workflow_workflow --> review_components_step_renderer
+    workflow_workflow --> core_config
+    workflow_workflow --> selection_services_source
     workflow_workflow --> selection_models
     workflow_workflow --> alignment_models
-    workflow_workflow --> selection_components_step_renderer
-    workflow_workflow --> selection_services_source
-    workflow_workflow --> decomposition_models
-    workflow_workflow --> review_components_step_renderer
-    workflow_workflow --> combined_step_combined
-    workflow_workflow --> alignment_services_alignment
     workflow_workflow --> decomposition_services_segmentation
+    workflow_workflow --> selection_components_step_renderer
+    workflow_workflow --> combined_step_combined
+    workflow_workflow --> decomposition_models
+    workflow_workflow --> alignment_services_alignment
     workflow_workflow --> review_services_graph
-    workflow_workflow --> core_config
 ```
 
-*180 cross-module dependencies detected*
+*183 cross-module dependencies detected*
 
 ## CLI Reference
 
@@ -570,7 +573,8 @@ def _build_nav_response(
 
 ``` python
 def _handle_align_navigate(
-    workflow:Any,  # StructureDecompWorkflow instance
+    state_store:WorkflowStateStore,  # The workflow state store
+    workflow_id:str,  # The workflow identifier
     sess:Any,  # FastHTML session object
     direction:str,  # Navigation direction: up/down/first/last/page_up/page_down
     urls:AlignmentUrls,  # URL bundle
@@ -580,7 +584,8 @@ def _handle_align_navigate(
 
 ``` python
 async def _handle_align_update_viewport(
-    workflow:Any,  # StructureDecompWorkflow instance
+    state_store:WorkflowStateStore,  # The workflow state store
+    workflow_id:str,  # The workflow identifier
     request:Any,  # FastHTML request object
     sess:Any,  # FastHTML session object
     visible_count:int,  # New visible card count
@@ -591,7 +596,8 @@ async def _handle_align_update_viewport(
 
 ``` python
 def _handle_align_save_width(
-    workflow:Any,  # StructureDecompWorkflow instance
+    state_store:WorkflowStateStore,  # The workflow state store
+    workflow_id:str,  # The workflow identifier
     sess:Any,  # FastHTML session object
     card_width:int,  # Card stack width in rem to save
 ) -> None:  # No response body (swap=none on client)
@@ -600,9 +606,10 @@ def _handle_align_save_width(
 
 ``` python
 def init_card_stack_router(
-    workflow: StructureDecompWorkflow,  # The workflow instance
-    prefix: str,  # Route prefix (e.g., "/workflow/align/card_stack")
-    urls: AlignmentUrls,  # URL bundle (populated after routes defined)
+    state_store:WorkflowStateStore,  # The workflow state store
+    workflow_id:str,  # The workflow identifier
+    prefix:str,  # Route prefix (e.g., "/workflow/align/card_stack")
+    urls:AlignmentUrls,  # URL bundle (populated after routes defined)
 ) -> Tuple[APIRouter, Dict[str, Callable]]:  # (router, route_dict)
     "Initialize card stack routes for alignment."
 ```
@@ -877,6 +884,7 @@ DEFAULT_WORKFLOW_CONFIG_DIR
 
 ``` python
 from cjm_fasthtml_workflow_transcript_decomp.alignment.routes.core import (
+    WorkflowStateStore,
     DEBUG_ALIGN_STATE,
     AlignContext
 )
@@ -886,15 +894,26 @@ from cjm_fasthtml_workflow_transcript_decomp.alignment.routes.core import (
 
 ``` python
 def _get_alignment_state(
-    workflow:Any,  # StructureDecompWorkflow instance
+    state_store:WorkflowStateStore,  # The workflow state store
+    workflow_id:str,  # The workflow identifier
     session_id:str,  # Session identifier
 ) -> AlignmentStepState:  # Typed alignment step state
     "Get the alignment step state from the workflow state store."
 ```
 
 ``` python
+def _get_selection_state(
+    state_store:WorkflowStateStore,  # The workflow state store
+    workflow_id:str,  # The workflow identifier
+    session_id:str,  # Session identifier
+) -> Dict[str, Any]:  # Selection step state dictionary
+    "Get the selection step state (Phase 1) from the workflow state store."
+```
+
+``` python
 def _load_alignment_context(
-    workflow:Any,  # StructureDecompWorkflow instance
+    state_store:WorkflowStateStore,  # The workflow state store
+    workflow_id:str,  # The workflow identifier
     session_id:str,  # Session identifier
 ) -> AlignContext:  # Loaded context with all common alignment state
     "Load commonly-needed alignment state values in a single call."
@@ -902,7 +921,8 @@ def _load_alignment_context(
 
 ``` python
 def _update_alignment_state(
-    workflow:Any,  # StructureDecompWorkflow instance
+    state_store:WorkflowStateStore,  # The workflow state store
+    workflow_id:str,  # The workflow identifier
     session_id:str,  # Session identifier
     vad_chunks=None,  # Updated VAD chunks (serialized)
     focused_chunk_index=None,  # Updated focused chunk index
@@ -1317,6 +1337,7 @@ Requires 1:1 alignment: len(text_segments) == len(vad_chunks)."
 ``` python
 from cjm_fasthtml_workflow_transcript_decomp.alignment.routes.handlers import (
     DEBUG_ALIGNMENT,
+    AlignInitResult,
     init_workflow_router
 )
 ```
@@ -1325,33 +1346,51 @@ from cjm_fasthtml_workflow_transcript_decomp.alignment.routes.handlers import (
 
 ``` python
 async def _handle_align_init(
-    workflow:Any,  # StructureDecompWorkflow instance
-    request:Any,  # FastHTML request object
-    sess:Any,  # FastHTML session object
+    state_store:WorkflowStateStore,  # The workflow state store
+    workflow_id:str,  # The workflow identifier
+    source_service:SourceService,  # Service for fetching source blocks
+    alignment_service:AlignmentService,  # Service for VAD analysis
+    request,  # FastHTML request object
+    sess,  # FastHTML session object
     urls:AlignmentUrls,  # URL bundle
-    visible_count:int=5,  # Initial visible card count
-    card_width:int=40,  # Initial card width in rem
-) -> tuple:  # (column_body, mini_stats_oob)
+    visible_count:int=DEFAULT_VISIBLE_COUNT,  # Initial visible card count
+    card_width:int=DEFAULT_CARD_WIDTH,  # Initial card width in rem
+) -> AlignInitResult:  # Pure domain result for wrapper to use
     """
     Initialize alignment from audio file via VAD plugin.
     
-    Returns pure domain response (column body + mini-stats OOB).
-    Alignment status OOB is added by the wrapper in combined/handlers.
+    Returns pure domain data. The combined layer wrapper adds cross-domain
+    coordination (shared chrome, alignment status).
     """
 ```
 
 ``` python
 def init_workflow_router(
-    workflow: StructureDecompWorkflow,  # The workflow instance
-    prefix: str,  # Route prefix (e.g., "/workflow/align/workflow")
-    urls: AlignmentUrls,  # URL bundle (populated after routes defined)
-    handler_init: Callable = None,  # Optional wrapped init handler
+    state_store:WorkflowStateStore,  # The workflow state store
+    workflow_id:str,  # The workflow identifier
+    source_service:SourceService,  # Service for fetching source blocks
+    alignment_service:AlignmentService,  # Service for VAD analysis
+    prefix:str,  # Route prefix (e.g., "/workflow/align/workflow")
+    urls:AlignmentUrls,  # URL bundle (populated after routes defined)
+    handler_init:Callable=None,  # Optional wrapped init handler
 ) -> Tuple[APIRouter, Dict[str, Callable]]:  # (router, route_dict)
     """
     Initialize workflow routes for alignment.
     
     Accepts optional handler override for wrapping with cross-domain
-    coordination (e.g., alignment status OOB updates).
+    coordination (e.g., shared chrome, alignment status OOB updates).
+    """
+```
+
+#### Classes
+
+``` python
+class AlignInitResult(NamedTuple):
+    """
+    Result from pure alignment init handler.
+    
+    Contains domain-specific data for the combined layer wrapper to use
+    when building cross-domain OOB elements (shared chrome, alignment status).
     """
 ```
 
@@ -1370,15 +1409,15 @@ DEBUG_ALIGNMENT = True
 
 ``` python
 from cjm_fasthtml_workflow_transcript_decomp.combined.handlers import (
-    wrapped_seg_init,
     wrapped_seg_split,
     wrapped_seg_merge,
     wrapped_seg_undo,
     wrapped_seg_reset,
     wrapped_seg_ai_split,
-    wrapped_align_init,
     wrap_seg_mutation_handler,
-    wrap_align_mutation_handler
+    wrap_align_mutation_handler,
+    create_seg_init_chrome_wrapper,
+    create_align_init_chrome_wrapper
 )
 ```
 
@@ -1410,8 +1449,47 @@ def wrap_align_mutation_handler(
     """
     Wrap an alignment mutation handler to add alignment status OOB.
     
-    NOTE: Alignment handlers still use (workflow, ...) signature.
-    This wrapper will be updated in Phase 6c prep.
+    The handler is expected to take (state_store, workflow_id, ...) as first params.
+    """
+```
+
+``` python
+def create_seg_init_chrome_wrapper(
+    align_urls:AlignmentUrls,  # URL bundle for alignment routes (for KB system)
+    switch_chrome_url:str,  # URL for chrome switching (for KB system)
+) -> Callable:  # Wrapped handler that builds KB system and shared chrome
+    """
+    Create a wrapper for seg init that builds combined KB system and shared chrome.
+    
+    This is a factory that captures the URLs needed for KB system assembly.
+    """
+```
+
+``` python
+def create_align_init_chrome_wrapper() -> Callable:  # Wrapped handler that adds alignment status
+    """Create a wrapper for align init that adds mini-stats and alignment status.
+    
+    Alignment init is simpler than seg init - it doesn't need to build the
+    full KB system (seg init handles that). It just updates alignment-specific
+    chrome and the alignment status badge.
+    """
+    async def wrapped_align_init(
+        state_store:WorkflowStateStore,
+        workflow_id:str,
+        source_service:SourceService,
+        alignment_service:AlignmentService,
+        request:Any,
+        sess:Any,
+        urls:AlignmentUrls,
+        visible_count:int=5,
+        card_width:int=40,
+    )
+    """
+    Create a wrapper for align init that adds mini-stats and alignment status.
+    
+    Alignment init is simpler than seg init - it doesn't need to build the
+    full KB system (seg init handles that). It just updates alignment-specific
+    chrome and the alignment status badge.
     """
 ```
 
@@ -1425,6 +1503,7 @@ def wrap_align_mutation_handler(
 ``` python
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.routes.handlers import (
     DEBUG_SEG_HANDLERS,
+    SegInitResult,
     init_workflow_router
 )
 ```
@@ -1440,8 +1519,13 @@ def _build_mutation_response(
     urls:SegmentationUrls,  # URL bundle
     is_split_mode:bool=False,  # Whether split mode is active
     is_auto_mode:bool=False,  # Whether card count is in auto-adjust mode
-) -> Tuple:  # OOB elements (slots + progress + focus + stats + toolbar + mini-stats)
-    "Build the standard OOB response for mutation handlers."
+) -> Tuple:  # OOB elements (slots + progress + focus + stats + toolbar)
+    """
+    Build the standard OOB response for mutation handlers.
+    
+    Returns domain-specific OOB elements. The combined layer wrapper
+    adds cross-domain elements (mini-stats badge, alignment status).
+    """
 ```
 
 ``` python
@@ -1450,15 +1534,18 @@ async def _handle_seg_init(
     workflow_id: str,  # The workflow identifier
     source_service: SourceService,  # Service for fetching source blocks
     segmentation_service: SegmentationService,  # Service for NLTK sentence splitting
-    align_urls: AlignmentUrls,  # URL bundle for alignment routes (for KB system)
-    switch_chrome_url: str,  # URL for chrome switching (for KB system)
     request,  # FastHTML request object
     sess,  # FastHTML session object
     urls: SegmentationUrls,  # URL bundle for segmentation routes
     visible_count: int = DEFAULT_VISIBLE_COUNT,  # Number of visible cards
     card_width: int = DEFAULT_CARD_WIDTH,  # Card stack width in rem
-):  # Column body + OOB swaps (shared chrome + KB system container)
-    "Initialize segments from Phase 1 selected sources."
+) -> SegInitResult:  # Pure domain result for wrapper to use
+    """
+    Initialize segments from Phase 1 selected sources.
+    
+    Returns pure domain data. The combined layer wrapper adds cross-domain
+    coordination (KB system, shared chrome, alignment status).
+    """
 ```
 
 ``` python
@@ -1529,8 +1616,6 @@ def init_workflow_router(
     workflow_id: str,  # The workflow identifier
     source_service: SourceService,  # Service for fetching source blocks
     segmentation_service: SegmentationService,  # Service for NLTK sentence splitting
-    align_urls: AlignmentUrls,  # URL bundle for alignment routes (for KB system)
-    switch_chrome_url: str,  # URL for chrome switching (for KB system)
     prefix: str,  # Route prefix (e.g., "/workflow/seg/workflow")
     urls: SegmentationUrls,  # URL bundle (populated after routes defined)
     max_history_depth: int = DEFAULT_MAX_HISTORY_DEPTH,  # Maximum history stack depth
@@ -1545,7 +1630,19 @@ def init_workflow_router(
     Initialize workflow routes for segmentation.
     
     Accepts optional handler overrides for wrapping with cross-domain
-    coordination (e.g., alignment status OOB updates).
+    coordination (e.g., KB system, shared chrome, alignment status).
+    """
+```
+
+#### Classes
+
+``` python
+class SegInitResult(NamedTuple):
+    """
+    Result from pure segmentation init handler.
+    
+    Contains domain-specific data for the combined layer wrapper to use
+    when building cross-domain OOB elements (KB system, shared chrome).
     """
 ```
 
@@ -2017,10 +2114,13 @@ from cjm_fasthtml_workflow_transcript_decomp.alignment.routes.init import (
 
 ``` python
 def init_alignment_routers(
-    workflow: StructureDecompWorkflow,  # The workflow instance
-    prefix: str,  # Base prefix for alignment routes (e.g., "/workflow/align")
-    audio_src_url: str,  # URL for audio_src route (from core router)
-    wrapped_init: Callable = None,  # Optional wrapped init handler
+    state_store:WorkflowStateStore,  # The workflow state store
+    workflow_id:str,  # The workflow identifier
+    source_service:SourceService,  # Service for fetching source blocks
+    alignment_service:AlignmentService,  # Service for VAD analysis
+    prefix:str,  # Base prefix for alignment routes (e.g., "/workflow/align")
+    audio_src_url:str,  # URL for audio_src route (from core router)
+    wrapped_init:Callable=None,  # Optional wrapped init handler
 ) -> Tuple[List[APIRouter], AlignmentUrls, Dict[str, Callable]]:  # (routers, urls, merged_routes)
     "Initialize and return all alignment routers with URL bundle."
 ```
@@ -2042,17 +2142,21 @@ from cjm_fasthtml_workflow_transcript_decomp.decomposition.routes.init import (
 
 ``` python
 def init_segmentation_routers(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    source_service: SourceService,  # Service for fetching source blocks
-    segmentation_service: SegmentationService,  # Service for NLTK sentence splitting
-    align_urls: AlignmentUrls,  # URL bundle for alignment routes (for KB system)
-    switch_chrome_url: str,  # URL for chrome switching (for KB system)
-    prefix: str,  # Base prefix for segmentation routes (e.g., "/workflow/seg")
-    max_history_depth: int = DEFAULT_MAX_HISTORY_DEPTH,  # Maximum history stack depth
-    wrapped_handlers: WrappedHandlers = None,  # Dict with 'init', 'split', 'merge', 'undo', 'reset', 'ai_split' keys
+    state_store:WorkflowStateStore,  # The workflow state store
+    workflow_id:str,  # The workflow identifier
+    source_service:SourceService,  # Service for fetching source blocks
+    segmentation_service:SegmentationService,  # Service for NLTK sentence splitting
+    prefix:str,  # Base prefix for segmentation routes (e.g., "/workflow/seg")
+    max_history_depth:int=DEFAULT_MAX_HISTORY_DEPTH,  # Maximum history stack depth
+    wrapped_handlers:WrappedHandlers=None,  # Dict with 'init', 'split', 'merge', 'undo', 'reset', 'ai_split' keys
 ) -> Tuple[List[APIRouter], SegmentationUrls, Dict[str, Callable]]:  # (routers, urls, merged_routes)
-    "Initialize and return all segmentation routers with URL bundle."
+    """
+    Initialize and return all segmentation routers with URL bundle.
+    
+    The wrapped_handlers dict should contain handlers that already have
+    cross-domain concerns (KB system, alignment status) handled by the
+    combined layer's wrapper factories.
+    """
 ```
 
 ### init (`init.ipynb`)
@@ -3723,7 +3827,7 @@ def render_seg_column_body(
     card_width:int,  # Card stack width in rem
     urls:SegmentationUrls,  # URL bundle for all segmentation routes
     kb_system:Optional[Any]=None,  # Rendered keyboard system (None when KB managed externally)
-) -> Any:  # Div with id=SEG_COLUMN_CONTENT containing viewport + infrastructure
+) -> Any:  # Div with id=COLUMN_CONTENT containing viewport + infrastructure
     "Render the segmentation column content area with card stack viewport."
 ```
 

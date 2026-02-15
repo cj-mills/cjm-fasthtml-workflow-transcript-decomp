@@ -46,9 +46,8 @@ from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.card_stack
     SEG_TS_CONFIG, SEG_TS_IDS,
 )
 
-# HTML IDs (page-specific)
+# HTML IDs (page-specific, no combined imports)
 from ..html_ids import SegmentationHtmlIds
-from ...combined.html_ids import CombinedHtmlIds
 
 # Local imports
 from ..models import TextSegment, SegmentationUrls
@@ -157,7 +156,7 @@ def render_seg_column_body(
     card_width:int,  # Card stack width in rem
     urls:SegmentationUrls,  # URL bundle for all segmentation routes
     kb_system:Optional[Any]=None,  # Rendered keyboard system (None when KB managed externally)
-) -> Any:  # Div with id=SEG_COLUMN_CONTENT containing viewport + infrastructure
+) -> Any:  # Div with id=COLUMN_CONTENT containing viewport + infrastructure
     """Render the segmentation column content area with card stack viewport."""
     # Create card renderer callback
     card_renderer = create_segment_card_renderer(
@@ -186,16 +185,16 @@ def render_seg_column_body(
     )
 
     # Generate JS: library card stack JS + focus change callback.
-    # container_id is the column CONTENT area (SEG_COLUMN_CONTENT), which is
-    # the immediate parent of the card stack. The column header is accounted for
-    # by containerTop (content area starts below the header). This ensures the
-    # algorithm only measures actual siblings of the card stack.
+    # container_id is the column CONTENT area, which is the immediate parent
+    # of the card stack. The column header is accounted for by containerTop
+    # (content area starts below the header). This ensures the algorithm only
+    # measures actual siblings of the card stack.
     callbacks_script = generate_seg_callbacks_script(
         ids=SEG_CS_IDS,
         button_ids=SEG_CS_BTN_IDS,
         config=SEG_CS_CONFIG,
         urls=urls.card_stack,
-        container_id=CombinedHtmlIds.SEG_COLUMN_CONTENT,
+        container_id=SegmentationHtmlIds.COLUMN_CONTENT,
         focus_input_id=SEG_CS_IDS.focused_index_input,
     )
 
@@ -226,7 +225,7 @@ def render_seg_column_body(
         # Token selector JS (caret navigation, display, key repeat)
         ts_script,
 
-        id=CombinedHtmlIds.SEG_COLUMN_CONTENT,
+        id=SegmentationHtmlIds.COLUMN_CONTENT,
         cls=combine_classes(grow(), min_h(0), overflow.hidden, flex_display, flex_direction.col)
     )
 
