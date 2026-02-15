@@ -44,6 +44,13 @@ def init_routers(
         workflow_id=workflow.config.workflow_id,
         prefix=f"{base_prefix}/selection",
     )
+
+    # Alignment routers (need to initialize first to get align_urls for seg init)
+    align_routers, align_urls, align_routes = init_alignment_routers(
+        workflow, f"{base_prefix}/align",
+        audio_src_url=core_routes["audio_src"].to(),
+        wrapped_init=wrapped_align_init,
+    )
     
     # Pass wrapped handlers for cross-domain coordination (alignment status OOB)
     seg_wrapped = {
@@ -54,14 +61,18 @@ def init_routers(
         "reset": wrapped_seg_reset,
         "ai_split": wrapped_seg_ai_split,
     }
+    
+    # Segmentation routers now use dependency injection
     seg_routers, seg_urls, seg_routes = init_segmentation_routers(
-        workflow, f"{base_prefix}/seg",
+        state_store=workflow.state_store,
+        workflow_id=workflow.config.workflow_id,
+        source_service=workflow.source_service,
+        segmentation_service=workflow.segmentation_service,
+        align_urls=align_urls,
+        switch_chrome_url=core_routes["switch_chrome"].to(),
+        prefix=f"{base_prefix}/seg",
+        max_history_depth=workflow.config.max_history_depth,
         wrapped_handlers=seg_wrapped,
-    )
-    align_routers, align_urls, align_routes = init_alignment_routers(
-        workflow, f"{base_prefix}/align",
-        audio_src_url=core_routes["audio_src"].to(),
-        wrapped_init=wrapped_align_init,
     )
 
     # Store URL bundles on workflow for renderer access

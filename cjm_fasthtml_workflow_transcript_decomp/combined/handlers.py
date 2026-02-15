@@ -16,6 +16,7 @@ from cjm_fasthtml_interactions.core.state_store import get_session_id
 from cjm_fasthtml_workflow_transcript_decomp.combined.step_combined import (
     render_alignment_status,
 )
+from ..decomposition.routes.core import WorkflowStateStore
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.routes.handlers import (
     _handle_seg_init, _handle_seg_split, _handle_seg_merge,
     _handle_seg_undo, _handle_seg_reset, _handle_seg_ai_split,
@@ -25,37 +26,74 @@ from cjm_fasthtml_workflow_transcript_decomp.alignment.routes.handlers import (
 )
 
 # %% ../../nbs/combined/handlers.ipynb #e5f6a7b8
+def _find_session_id(args, kwargs):
+    """Find session_id from args or kwargs."""
+    # First check kwargs
+    if 'sess' in kwargs:
+        try:
+            return get_session_id(kwargs['sess'])
+        except:
+            pass
+    
+    # Search args - session objects have a 'session' key
+    for arg in args:
+        try:
+            session_id = get_session_id(arg)
+            if session_id:
+                return session_id
+        except:
+            continue
+    
+    return None
+
+
 def wrap_seg_mutation_handler(
-    handler:Callable,  # Handler function to wrap
+    handler: Callable,  # Handler function to wrap
 ) -> Callable:  # Wrapped handler that appends alignment status OOB
-    """Wrap a segmentation mutation handler to add alignment status OOB."""
+    """Wrap a segmentation mutation handler to add alignment status OOB.
+    
+    The handler is expected to take (state_store, workflow_id, ...) as first params.
+    """
     @wraps(handler)
-    async def wrapped(workflow, request, sess, *args, **kwargs):
+    async def wrapped(
+        state_store: WorkflowStateStore,
+        workflow_id: str,
+        *args,
+        **kwargs
+    ):
         # Call the original handler (async or sync)
         if asyncio.iscoroutinefunction(handler):
-            result = await handler(workflow, request, sess, *args, **kwargs)
+            result = await handler(state_store, workflow_id, *args, **kwargs)
         else:
-            result = handler(workflow, request, sess, *args, **kwargs)
+            result = handler(state_store, workflow_id, *args, **kwargs)
         
-        # Get counts from state for alignment status
-        session_id = get_session_id(sess)
-        workflow_state = workflow.state_store.get_state(
-            workflow.config.workflow_id, session_id
-        )
-        step_states = workflow_state.get("step_states", {})
-        segment_count = len(step_states.get("segmentation", {}).get("segments", []))
-        chunk_count = len(step_states.get("alignment", {}).get("vad_chunks", []))
+        # Find session_id from args/kwargs
+        session_id = _find_session_id(args, kwargs)
         
-        # Append alignment status OOB to result
-        return (*result, render_alignment_status(segment_count, chunk_count, oob=True))
+        if session_id is not None:
+            # Get counts from state for alignment status
+            workflow_state = state_store.get_state(workflow_id, session_id)
+            step_states = workflow_state.get("step_states", {})
+            segment_count = len(step_states.get("segmentation", {}).get("segments", []))
+            chunk_count = len(step_states.get("alignment", {}).get("vad_chunks", []))
+            
+            # Append alignment status OOB to result
+            return (*result, render_alignment_status(segment_count, chunk_count, oob=True))
+        
+        # If we couldn't find session_id, just return the result without the status update
+        return result
     
     return wrapped
 
 # %% ../../nbs/combined/handlers.ipynb #f6a7b8c9
 def wrap_align_mutation_handler(
-    handler:Callable,  # Handler function to wrap
+    handler: Callable,  # Handler function to wrap
 ) -> Callable:  # Wrapped handler that appends alignment status OOB
-    """Wrap an alignment mutation handler to add alignment status OOB."""
+    """Wrap an alignment mutation handler to add alignment status OOB.
+    
+    NOTE: Alignment handlers still use (workflow, ...) signature.
+    This wrapper will be updated in Phase 6c prep.
+    """
     @wraps(handler)
     async def wrapped(workflow, request, sess, *args, **kwargs):
         # Call the original handler (async or sync)

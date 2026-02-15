@@ -6,7 +6,7 @@
 __all__ = ['DEBUG_SEG_HANDLERS', 'init_workflow_router']
 
 # %% ../../../nbs/decomposition/routes/handlers.ipynb #dh-imports
-from typing import List, Dict, Any, Tuple, Callable
+from typing import List, Dict, Any, Tuple, Callable, Optional
 
 from fasthtml.common import Div, Span, Button, APIRouter
 
@@ -36,14 +36,15 @@ from cjm_fasthtml_workflow_transcript_decomp.combined.keyboard_config import (
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.card_stack_config import (
     SEG_CS_CONFIG, SEG_CS_IDS, SEG_TS_IDS,
 )
-from cjm_fasthtml_workflow_transcript_decomp.core.services.text_utils import (
+from cjm_fasthtml_workflow_transcript_decomp.decomposition.utils import (
     word_index_to_char_position,
 )
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.services.segmentation import (
-    split_segment_at_position, merge_text_segments, reindex_segments,
-    reconstruct_source_blocks
+    SegmentationService, split_segment_at_position, merge_text_segments,
+    reindex_segments, reconstruct_source_blocks,
 )
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.routes.core import (
+    WorkflowStateStore, DEFAULT_MAX_HISTORY_DEPTH,
     _to_segments, _load_seg_context, _get_seg_state,
     _get_selection_state, _update_seg_state, _push_history,
     _build_card_stack_state,
@@ -51,8 +52,8 @@ from cjm_fasthtml_workflow_transcript_decomp.decomposition.routes.core import (
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.routes.card_stack import (
     _build_slots_oob, _build_nav_response
 )
-
-from ...workflow.workflow import StructureDecompWorkflow
+from ...selection.services.source import SourceService
+from ...alignment.models import AlignmentUrls
 
 # Debug flag for segmentation handler tracing (set False in production)
 DEBUG_SEG_HANDLERS = True
@@ -91,12 +92,17 @@ def _build_mutation_response(
 
 # %% ../../../nbs/decomposition/routes/handlers.ipynb #dh-init
 async def _handle_seg_init(
-    workflow:StructureDecompWorkflow,  # The workflow instance
+    state_store: WorkflowStateStore,  # The workflow state store
+    workflow_id: str,  # The workflow identifier
+    source_service: SourceService,  # Service for fetching source blocks
+    segmentation_service: SegmentationService,  # Service for NLTK sentence splitting
+    align_urls: AlignmentUrls,  # URL bundle for alignment routes (for KB system)
+    switch_chrome_url: str,  # URL for chrome switching (for KB system)
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    urls:SegmentationUrls,  # URL bundle for segmentation routes
-    visible_count:int=DEFAULT_VISIBLE_COUNT,  # Number of visible cards
-    card_width:int=DEFAULT_CARD_WIDTH,  # Card stack width in rem
+    urls: SegmentationUrls,  # URL bundle for segmentation routes
+    visible_count: int = DEFAULT_VISIBLE_COUNT,  # Number of visible cards
+    card_width: int = DEFAULT_CARD_WIDTH,  # Card stack width in rem
 ):  # Column body + OOB swaps (shared chrome + KB system container)
     """Initialize segments from Phase 1 selected sources."""
     if DEBUG_SEG_HANDLERS:
@@ -105,11 +111,11 @@ async def _handle_seg_init(
     session_id = get_session_id(sess)
 
     # Get selected sources from Phase 1
-    selection_state = _get_selection_state(workflow, session_id)
+    selection_state = _get_selection_state(state_store, workflow_id, session_id)
     selected_sources = selection_state.get("selected_sources", [])
 
     # Read stored viewport preferences (may exist from previous session)
-    seg_state = _get_seg_state(workflow, session_id)
+    seg_state = _get_seg_state(state_store, workflow_id, session_id)
     stored_visible_count = seg_state.get("visible_count", visible_count)
     stored_is_auto_mode = seg_state.get("is_auto_mode", False)
     stored_card_width = seg_state.get("card_width", card_width)
@@ -117,7 +123,7 @@ async def _handle_seg_init(
     if not selected_sources:
         # No sources selected, initialize with empty state
         _update_seg_state(
-            workflow, session_id,
+            state_store, workflow_id, session_id,
             segments=[], initial_segments=[],
             is_initialized=True, focused_index=0,
             history=[], visible_count=stored_visible_count,
@@ -127,17 +133,17 @@ async def _handle_seg_init(
         segment_count = 0
     else:
         # Fetch source blocks via service API
-        source_blocks = workflow.source_service.get_source_blocks(selected_sources)
+        source_blocks = source_service.get_source_blocks(selected_sources)
 
         # Use segmentation service to split into sentences
-        working_segments = await workflow.segmentation_service.split_combined_sources_async(
+        working_segments = await segmentation_service.split_combined_sources_async(
             source_blocks
         )
         segment_dicts = [s.to_dict() for s in working_segments]
 
         # Store in state
         _update_seg_state(
-            workflow, session_id,
+            state_store, workflow_id, session_id,
             segments=segment_dicts,
             initial_segments=segment_dicts.copy(),
             is_initialized=True, focused_index=0,
@@ -154,9 +160,6 @@ async def _handle_seg_init(
     # (alignment zone will have no items until alignment init completes)
     if DEBUG_SEG_HANDLERS:
         print("[SEG_HANDLERS] Building combined KB system")
-
-    align_urls = workflow._align_urls
-    switch_chrome_url = workflow._switch_chrome_url
 
     kb_manager, kb_system = build_combined_kb_system(urls, align_urls)
 
@@ -215,7 +218,7 @@ async def _handle_seg_init(
     
     # Footer needs chunk_count for alignment status display (cross-domain, from combined/)
     # Get VAD chunk count (may be populated if alignment init ran first)
-    workflow_state = workflow.state_store.get_state(workflow.config.workflow_id, session_id)
+    workflow_state = state_store.get_state(workflow_id, session_id)
     chunk_count = len(workflow_state.get("step_states", {}).get("alignment", {}).get("vad_chunks", []))
     
     footer_oob = Div(
@@ -238,15 +241,17 @@ async def _handle_seg_init(
 
 # %% ../../../nbs/decomposition/routes/handlers.ipynb #dh-split
 async def _handle_seg_split(
-    workflow:StructureDecompWorkflow,  # The workflow instance
+    state_store: WorkflowStateStore,  # The workflow state store
+    workflow_id: str,  # The workflow identifier
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    segment_index:int,  # Index of segment to split
-    urls:SegmentationUrls,  # URL bundle for segmentation routes
+    segment_index: int,  # Index of segment to split
+    urls: SegmentationUrls,  # URL bundle for segmentation routes
+    max_history_depth: int = DEFAULT_MAX_HISTORY_DEPTH,  # Maximum history stack depth
 ):  # OOB slot updates with stats, progress, focus, and toolbar
     """Split a segment at the specified word position."""
     session_id = get_session_id(sess)
-    ctx = _load_seg_context(workflow, session_id)
+    ctx = _load_seg_context(state_store, workflow_id, session_id)
 
     # Extract word index from token selector hidden input
     form = await request.form()
@@ -258,7 +263,10 @@ async def _handle_seg_split(
         return _build_slots_oob(ctx.segment_dicts, state, urls)
 
     # Push current state to history before modification
-    history_depth = _push_history(workflow, session_id, ctx.segment_dicts, segment_index)
+    history_depth = _push_history(
+        state_store, workflow_id, session_id,
+        ctx.segment_dicts, segment_index, max_history_depth,
+    )
 
     # Get the segment and convert word index to character position
     segment = TextSegment.from_dict(ctx.segment_dicts[segment_index])
@@ -285,7 +293,8 @@ async def _handle_seg_split(
 
     # Update state — focus moves to the new segment (second half)
     new_focused_index = segment_index + 1
-    _update_seg_state(workflow, session_id,
+    _update_seg_state(
+        state_store, workflow_id, session_id,
         segments=new_segment_dicts, focused_index=new_focused_index,
     )
 
@@ -296,15 +305,17 @@ async def _handle_seg_split(
 
 # %% ../../../nbs/decomposition/routes/handlers.ipynb #dh-merge
 def _handle_seg_merge(
-    workflow:StructureDecompWorkflow,  # The workflow instance
+    state_store: WorkflowStateStore,  # The workflow state store
+    workflow_id: str,  # The workflow identifier
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    segment_index:int,  # Index of segment to merge (merges with previous)
-    urls:SegmentationUrls,  # URL bundle for segmentation routes
+    segment_index: int,  # Index of segment to merge (merges with previous)
+    urls: SegmentationUrls,  # URL bundle for segmentation routes
+    max_history_depth: int = DEFAULT_MAX_HISTORY_DEPTH,  # Maximum history stack depth
 ):  # OOB slot updates with stats, progress, focus, and toolbar
     """Merge a segment with the previous segment."""
     session_id = get_session_id(sess)
-    ctx = _load_seg_context(workflow, session_id)
+    ctx = _load_seg_context(state_store, workflow_id, session_id)
     
     # Can't merge first segment (nothing before it)
     if segment_index <= 0 or segment_index >= len(ctx.segment_dicts):
@@ -312,7 +323,10 @@ def _handle_seg_merge(
         return _build_slots_oob(ctx.segment_dicts, state, urls)
     
     # Push current state to history
-    history_depth = _push_history(workflow, session_id, ctx.segment_dicts, segment_index)
+    history_depth = _push_history(
+        state_store, workflow_id, session_id,
+        ctx.segment_dicts, segment_index, max_history_depth,
+    )
     
     # Merge segments
     prev_segment = TextSegment.from_dict(ctx.segment_dicts[segment_index - 1])
@@ -329,7 +343,8 @@ def _handle_seg_merge(
     
     # Update state — focus moves to merged segment (previous position)
     new_focused_index = segment_index - 1
-    _update_seg_state(workflow, session_id,
+    _update_seg_state(
+        state_store, workflow_id, session_id,
         segments=new_segment_dicts, focused_index=new_focused_index,
     )
     
@@ -340,14 +355,15 @@ def _handle_seg_merge(
 
 # %% ../../../nbs/decomposition/routes/handlers.ipynb #dh-undo
 def _handle_seg_undo(
-    workflow:StructureDecompWorkflow,  # The workflow instance
+    state_store: WorkflowStateStore,  # The workflow state store
+    workflow_id: str,  # The workflow identifier
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    urls:SegmentationUrls,  # URL bundle for segmentation routes
+    urls: SegmentationUrls,  # URL bundle for segmentation routes
 ):  # OOB slot updates with stats, progress, focus, and toolbar
     """Undo the last operation by restoring previous state from history."""
     session_id = get_session_id(sess)
-    ctx = _load_seg_context(workflow, session_id)
+    ctx = _load_seg_context(state_store, workflow_id, session_id)
     
     result = pop_history(ctx.history)
     if result is None:
@@ -358,7 +374,8 @@ def _handle_seg_undo(
     previous_segments = snapshot["segments"]
     new_focused_index = min(snapshot["focused_index"], max(0, len(previous_segments) - 1))
     
-    _update_seg_state(workflow, session_id,
+    _update_seg_state(
+        state_store, workflow_id, session_id,
         segments=previous_segments, history=remaining_history,
         focused_index=new_focused_index,
     )
@@ -370,24 +387,30 @@ def _handle_seg_undo(
 
 # %% ../../../nbs/decomposition/routes/handlers.ipynb #dh-reset
 def _handle_seg_reset(
-    workflow:StructureDecompWorkflow,  # The workflow instance
+    state_store: WorkflowStateStore,  # The workflow state store
+    workflow_id: str,  # The workflow identifier
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    urls:SegmentationUrls,  # URL bundle for segmentation routes
+    urls: SegmentationUrls,  # URL bundle for segmentation routes
+    max_history_depth: int = DEFAULT_MAX_HISTORY_DEPTH,  # Maximum history stack depth
 ):  # OOB slot updates with stats, progress, focus, and toolbar
     """Reset segments to the initial NLTK split result."""
     session_id = get_session_id(sess)
-    ctx = _load_seg_context(workflow, session_id)
-    seg_state = _get_seg_state(workflow, session_id)
+    ctx = _load_seg_context(state_store, workflow_id, session_id)
+    seg_state = _get_seg_state(state_store, workflow_id, session_id)
     initial_segments = seg_state.get("initial_segments", [])
     
     # Push current state to history before reset
     history_depth = 0
     if ctx.segment_dicts:
-        history_depth = _push_history(workflow, session_id, ctx.segment_dicts, ctx.focused_index)
+        history_depth = _push_history(
+            state_store, workflow_id, session_id,
+            ctx.segment_dicts, ctx.focused_index, max_history_depth,
+        )
     
     # Restore initial segments — reset focus to first segment
-    _update_seg_state(workflow, session_id,
+    _update_seg_state(
+        state_store, workflow_id, session_id,
         segments=initial_segments.copy(), focused_index=0,
     )
     
@@ -398,33 +421,40 @@ def _handle_seg_reset(
 
 # %% ../../../nbs/decomposition/routes/handlers.ipynb #dh-ai-split
 async def _handle_seg_ai_split(
-    workflow:StructureDecompWorkflow,  # The workflow instance
+    state_store: WorkflowStateStore,  # The workflow state store
+    workflow_id: str,  # The workflow identifier
+    segmentation_service: SegmentationService,  # Service for NLTK sentence splitting
     request,  # FastHTML request object
     sess,  # FastHTML session object
-    urls:SegmentationUrls,  # URL bundle for segmentation routes
+    urls: SegmentationUrls,  # URL bundle for segmentation routes
+    max_history_depth: int = DEFAULT_MAX_HISTORY_DEPTH,  # Maximum history stack depth
 ):  # OOB slot updates with stats, progress, focus, and toolbar
     """Re-run AI (NLTK) sentence splitting on all current text."""
     session_id = get_session_id(sess)
-    ctx = _load_seg_context(workflow, session_id)
+    ctx = _load_seg_context(state_store, workflow_id, session_id)
     
     if not ctx.segment_dicts:
         state = _build_card_stack_state(ctx)
         return _build_slots_oob([], state, urls)
     
     # Push current state to history
-    history_depth = _push_history(workflow, session_id, ctx.segment_dicts, ctx.focused_index)
+    history_depth = _push_history(
+        state_store, workflow_id, session_id,
+        ctx.segment_dicts, ctx.focused_index, max_history_depth,
+    )
     
     # Reconstruct source blocks from current segments
     source_blocks = reconstruct_source_blocks(ctx.segment_dicts)
     
     # Re-run NLTK splitting
-    working_segments = await workflow.segmentation_service.split_combined_sources_async(
+    working_segments = await segmentation_service.split_combined_sources_async(
         source_blocks
     )
     new_segment_dicts = [s.to_dict() for s in working_segments]
     
     # Update state — reset focus to first segment
-    _update_seg_state(workflow, session_id,
+    _update_seg_state(
+        state_store, workflow_id, session_id,
         segments=new_segment_dicts, focused_index=0,
     )
     
@@ -435,9 +465,15 @@ async def _handle_seg_ai_split(
 
 # %% ../../../nbs/decomposition/routes/handlers.ipynb #ul6toz93cyp
 def init_workflow_router(
-    workflow: StructureDecompWorkflow,  # The workflow instance
+    state_store: WorkflowStateStore,  # The workflow state store
+    workflow_id: str,  # The workflow identifier
+    source_service: SourceService,  # Service for fetching source blocks
+    segmentation_service: SegmentationService,  # Service for NLTK sentence splitting
+    align_urls: AlignmentUrls,  # URL bundle for alignment routes (for KB system)
+    switch_chrome_url: str,  # URL for chrome switching (for KB system)
     prefix: str,  # Route prefix (e.g., "/workflow/seg/workflow")
     urls: SegmentationUrls,  # URL bundle (populated after routes defined)
+    max_history_depth: int = DEFAULT_MAX_HISTORY_DEPTH,  # Maximum history stack depth
     handler_init: Callable = None,  # Optional wrapped init handler
     handler_split: Callable = None,  # Optional wrapped split handler
     handler_merge: Callable = None,  # Optional wrapped merge handler
@@ -467,18 +503,26 @@ def init_workflow_router(
     @router
     async def init(request, sess):
         """Initialize segments from Phase 1 selected sources."""
-        return await _init(workflow, request, sess, urls=urls)
+        return await _init(
+            state_store, workflow_id, source_service, segmentation_service,
+            align_urls, switch_chrome_url, request, sess, urls=urls,
+        )
 
     @router
     async def split(request, sess, segment_index: int):
         """Split a segment at the specified word position."""
-        return await _split(workflow, request, sess, segment_index, urls=urls)
+        return await _split(
+            state_store, workflow_id, request, sess, segment_index,
+            urls=urls, max_history_depth=max_history_depth,
+        )
 
     @router
     async def merge(request, sess, segment_index: int):
         """Merge a segment with the previous segment."""
-        # Wrapped handler is always async
-        result = _merge(workflow, request, sess, segment_index, urls=urls)
+        result = _merge(
+            state_store, workflow_id, request, sess, segment_index,
+            urls=urls, max_history_depth=max_history_depth,
+        )
         if hasattr(result, '__await__'):
             return await result
         return result
@@ -486,7 +530,7 @@ def init_workflow_router(
     @router
     async def undo(request, sess):
         """Undo the last segmentation operation."""
-        result = _undo(workflow, request, sess, urls=urls)
+        result = _undo(state_store, workflow_id, request, sess, urls=urls)
         if hasattr(result, '__await__'):
             return await result
         return result
@@ -494,7 +538,10 @@ def init_workflow_router(
     @router
     async def reset(request, sess):
         """Reset segments to the initial NLTK split result."""
-        result = _reset(workflow, request, sess, urls=urls)
+        result = _reset(
+            state_store, workflow_id, request, sess,
+            urls=urls, max_history_depth=max_history_depth,
+        )
         if hasattr(result, '__await__'):
             return await result
         return result
@@ -502,7 +549,10 @@ def init_workflow_router(
     @router
     async def ai_split(request, sess):
         """Re-run AI (NLTK) sentence splitting on all current text."""
-        return await _ai_split(workflow, request, sess, urls=urls)
+        return await _ai_split(
+            state_store, workflow_id, segmentation_service, request, sess,
+            urls=urls, max_history_depth=max_history_depth,
+        )
 
     # -------------------------------------------------------------------------
     # Route Dict

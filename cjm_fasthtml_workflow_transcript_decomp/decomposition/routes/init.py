@@ -13,10 +13,14 @@ from fasthtml.common import APIRouter
 from cjm_fasthtml_card_stack.core.models import CardStackUrls
 
 from ..models import SegmentationUrls
+from cjm_fasthtml_workflow_transcript_decomp.decomposition.routes.core import (
+    WorkflowStateStore, DEFAULT_MAX_HISTORY_DEPTH,
+)
 from .card_stack import init_card_stack_router
 from .handlers import init_workflow_router
-
-from ...workflow.workflow import StructureDecompWorkflow
+from ..services.segmentation import SegmentationService
+from ...selection.services.source import SourceService
+from ...alignment.models import AlignmentUrls
 
 
 # Type alias for wrapped handlers dict
@@ -24,8 +28,14 @@ WrappedHandlers = Dict[str, Callable]
 
 # %% ../../../nbs/decomposition/routes/init.ipynb #e5f6a7b8
 def init_segmentation_routers(
-    workflow: StructureDecompWorkflow,  # The workflow instance
+    state_store: WorkflowStateStore,  # The workflow state store
+    workflow_id: str,  # The workflow identifier
+    source_service: SourceService,  # Service for fetching source blocks
+    segmentation_service: SegmentationService,  # Service for NLTK sentence splitting
+    align_urls: AlignmentUrls,  # URL bundle for alignment routes (for KB system)
+    switch_chrome_url: str,  # URL for chrome switching (for KB system)
     prefix: str,  # Base prefix for segmentation routes (e.g., "/workflow/seg")
+    max_history_depth: int = DEFAULT_MAX_HISTORY_DEPTH,  # Maximum history stack depth
     wrapped_handlers: WrappedHandlers = None,  # Dict with 'init', 'split', 'merge', 'undo', 'reset', 'ai_split' keys
 ) -> Tuple[List[APIRouter], SegmentationUrls, Dict[str, Callable]]:  # (routers, urls, merged_routes)
     """Initialize and return all segmentation routers with URL bundle."""
@@ -35,10 +45,14 @@ def init_segmentation_routers(
 
     # Initialize focused routers
     card_stack_router, card_stack_routes = init_card_stack_router(
-        workflow, f"{prefix}/card_stack", urls
+        state_store, workflow_id, f"{prefix}/card_stack", urls
     )
     workflow_router, workflow_routes = init_workflow_router(
-        workflow, f"{prefix}/workflow", urls,
+        state_store, workflow_id,
+        source_service, segmentation_service,
+        align_urls, switch_chrome_url,
+        f"{prefix}/workflow", urls,
+        max_history_depth=max_history_depth,
         handler_init=wrapped_handlers.get("init"),
         handler_split=wrapped_handlers.get("split"),
         handler_merge=wrapped_handlers.get("merge"),

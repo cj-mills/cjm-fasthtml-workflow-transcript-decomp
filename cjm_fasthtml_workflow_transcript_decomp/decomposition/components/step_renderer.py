@@ -52,7 +52,7 @@ from ...combined.html_ids import CombinedHtmlIds
 
 # Local imports
 from ..models import TextSegment, SegmentationUrls
-from ...core.services.text_utils import calculate_segment_stats
+from ..utils import calculate_segment_stats
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.segment_card import (
     create_segment_card_renderer
 )
