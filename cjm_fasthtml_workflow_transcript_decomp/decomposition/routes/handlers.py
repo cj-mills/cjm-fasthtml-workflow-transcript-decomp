@@ -39,7 +39,7 @@ from cjm_fasthtml_workflow_transcript_decomp.decomposition.routes.core import (
 from cjm_fasthtml_workflow_transcript_decomp.decomposition.routes.card_stack import (
     _build_slots_oob, _build_nav_response
 )
-from ...selection.services.source import SourceService
+from cjm_transcript_source_select.services.source import SourceService
 
 # Debug flag for segmentation handler tracing (set False in production)
 DEBUG_SEG_HANDLERS = True

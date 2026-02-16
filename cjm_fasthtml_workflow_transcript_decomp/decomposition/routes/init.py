@@ -19,7 +19,7 @@ from cjm_fasthtml_workflow_transcript_decomp.decomposition.routes.core import (
 from .card_stack import init_card_stack_router
 from .handlers import init_workflow_router
 from ..services.segmentation import SegmentationService
-from ...selection.services.source import SourceService
+from cjm_transcript_source_select.services.source import SourceService
 
 
 # Type alias for wrapped handlers dict

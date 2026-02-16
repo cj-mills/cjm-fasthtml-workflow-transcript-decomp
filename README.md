@@ -75,31 +75,10 @@ pip install cjm_fasthtml_workflow_transcript_decomp
     │   │   ├── sources.ipynb  # Source data retrieval route handlers
     │   │   └── status.ipynb   # Workflow status and lifecycle route handlers
     │   └── init.ipynb  # Router initialization for the structure decomposition workflow
-    ├── selection/ (17)
-    │   ├── components/ (6)
-    │   │   ├── helpers.ipynb          # Shared helper functions for the selection module
-    │   │   ├── local_files.ipynb      # Local files browser for importing external .db files
-    │   │   ├── preview_panel.ipynb    # Collapsible preview panel for displaying selected content
-    │   │   ├── selection_queue.ipynb  # Selection queue component with drag-drop reordering
-    │   │   ├── source_browser.ipynb   # Source browser components for displaying and filtering transcription sources
-    │   │   └── step_renderer.ipynb    # Phase 1 step renderer: Source Selection & Ordering with two-column layout and collapsible preview
-    │   ├── routes/ (6)
-    │   │   ├── core.ipynb         # Selection step state management helpers
-    │   │   ├── filtering.ipynb    # Filtering, grouping, and keyboard navigation route handlers
-    │   │   ├── init.ipynb         # Router assembly for Phase 1 selection routes
-    │   │   ├── local_files.ipynb  # Local files browser route handlers
-    │   │   ├── queue.ipynb        # Selection queue route handlers for Phase 1
-    │   │   └── tabs.ipynb         # Tab switching route handlers
-    │   ├── services/ (2)
-    │   │   ├── source.ipynb        # Source service for federated transcription queries via DuckDB
-    │   │   └── source_utils.ipynb  # Source record operations for metadata extraction, grouping, and validation
-    │   ├── html_ids.ipynb  # HTML ID constants for Phase 1: Source Selection & Ordering
-    │   ├── models.ipynb    # Data models and URL bundles for Phase 1: Source Selection & Ordering
-    │   └── utils.ipynb     # Display formatting and word counting utilities for the selection step
     └── workflow/ (1)
         └── workflow.ipynb  # Main workflow class for structure decomposition
 
-Total: 65 notebooks across 8 directories
+Total: 48 notebooks across 7 directories
 
 ## Module Dependencies
 
@@ -152,211 +131,135 @@ graph LR
     routes_core_sources[routes.core.sources<br/>sources]
     routes_core_status[routes.core.status<br/>status]
     routes_init[routes.init<br/>init]
-    selection_components_helpers[selection.components.helpers<br/>helpers]
-    selection_components_local_files[selection.components.local_files<br/>local_files]
-    selection_components_preview_panel[selection.components.preview_panel<br/>preview_panel]
-    selection_components_selection_queue[selection.components.selection_queue<br/>selection_queue]
-    selection_components_source_browser[selection.components.source_browser<br/>source_browser]
-    selection_components_step_renderer[selection.components.step_renderer<br/>step_renderer]
-    selection_html_ids[selection.html_ids<br/>html_ids]
-    selection_models[selection.models<br/>models]
-    selection_routes_core[selection.routes.core<br/>core]
-    selection_routes_filtering[selection.routes.filtering<br/>filtering]
-    selection_routes_init[selection.routes.init<br/>init]
-    selection_routes_local_files[selection.routes.local_files<br/>local_files]
-    selection_routes_queue[selection.routes.queue<br/>queue]
-    selection_routes_tabs[selection.routes.tabs<br/>tabs]
-    selection_services_source[selection.services.source<br/>source]
-    selection_services_source_utils[selection.services.source_utils<br/>source_utils]
-    selection_utils[selection.utils<br/>utils]
     workflow_workflow[workflow.workflow<br/>workflow]
 
     alignment_components_helpers --> alignment_models
-    alignment_components_step_renderer --> alignment_components_card_stack_config
     alignment_components_step_renderer --> alignment_models
-    alignment_components_step_renderer --> alignment_components_callbacks
-    alignment_components_step_renderer --> alignment_html_ids
+    alignment_components_step_renderer --> alignment_components_card_stack_config
     alignment_components_step_renderer --> alignment_components_vad_card
-    alignment_components_vad_card --> alignment_models
+    alignment_components_step_renderer --> alignment_html_ids
+    alignment_components_step_renderer --> alignment_components_callbacks
     alignment_components_vad_card --> alignment_utils
     alignment_components_vad_card --> alignment_html_ids
+    alignment_components_vad_card --> alignment_models
     alignment_routes_card_stack --> alignment_routes_core
-    alignment_routes_card_stack --> alignment_components_card_stack_config
     alignment_routes_card_stack --> alignment_models
+    alignment_routes_card_stack --> alignment_components_card_stack_config
     alignment_routes_card_stack --> alignment_components_vad_card
     alignment_routes_core --> alignment_models
+    alignment_routes_handlers --> alignment_models
     alignment_routes_handlers --> alignment_components_step_renderer
     alignment_routes_handlers --> alignment_routes_core
-    alignment_routes_handlers --> selection_services_source
-    alignment_routes_handlers --> alignment_models
     alignment_routes_handlers --> alignment_services_alignment
     alignment_routes_handlers --> alignment_html_ids
-    alignment_routes_init --> alignment_services_alignment
     alignment_routes_init --> alignment_routes_core
-    alignment_routes_init --> alignment_models
-    alignment_routes_init --> selection_services_source
     alignment_routes_init --> alignment_routes_card_stack
+    alignment_routes_init --> alignment_models
     alignment_routes_init --> alignment_routes_handlers
+    alignment_routes_init --> alignment_services_alignment
     alignment_services_alignment --> alignment_models
-    combined_handlers --> decomposition_models
-    combined_handlers --> decomposition_routes_handlers
-    combined_handlers --> alignment_routes_handlers
-    combined_handlers --> decomposition_components_card_stack_config
-    combined_handlers --> alignment_routes_core
-    combined_handlers --> combined_step_combined
-    combined_handlers --> decomposition_routes_core
-    combined_handlers --> selection_services_source
     combined_handlers --> combined_keyboard_config
+    combined_handlers --> decomposition_routes_handlers
     combined_handlers --> alignment_models
+    combined_handlers --> combined_step_combined
+    combined_handlers --> alignment_routes_handlers
     combined_handlers --> decomposition_components_step_renderer
+    combined_handlers --> decomposition_routes_core
+    combined_handlers --> decomposition_components_card_stack_config
     combined_handlers --> alignment_services_alignment
+    combined_handlers --> decomposition_models
+    combined_handlers --> alignment_routes_core
     combined_handlers --> combined_html_ids
-    combined_helpers --> decomposition_models
     combined_helpers --> alignment_models
-    combined_keyboard_config --> decomposition_components_card_stack_config
+    combined_helpers --> decomposition_models
+    combined_keyboard_config --> alignment_models
     combined_keyboard_config --> alignment_components_card_stack_config
+    combined_keyboard_config --> decomposition_components_card_stack_config
+    combined_keyboard_config --> alignment_components_keyboard_config
     combined_keyboard_config --> decomposition_components_keyboard_config
     combined_keyboard_config --> decomposition_models
-    combined_keyboard_config --> alignment_models
     combined_keyboard_config --> combined_html_ids
-    combined_keyboard_config --> alignment_components_keyboard_config
-    combined_step_combined --> decomposition_models
-    combined_step_combined --> decomposition_components_step_renderer
-    combined_step_combined --> decomposition_components_card_stack_config
-    combined_step_combined --> alignment_components_step_renderer
-    combined_step_combined --> alignment_components_card_stack_config
     combined_step_combined --> combined_keyboard_config
     combined_step_combined --> alignment_models
+    combined_step_combined --> alignment_components_card_stack_config
+    combined_step_combined --> decomposition_components_step_renderer
+    combined_step_combined --> alignment_components_step_renderer
+    combined_step_combined --> decomposition_components_card_stack_config
+    combined_step_combined --> decomposition_html_ids
+    combined_step_combined --> decomposition_models
     combined_step_combined --> combined_helpers
     combined_step_combined --> combined_html_ids
-    combined_step_combined --> decomposition_html_ids
     core_services_text_utils --> decomposition_models
     decomposition_components_helpers --> decomposition_models
     decomposition_components_keyboard_config --> decomposition_components_card_stack_config
-    decomposition_components_segment_card --> decomposition_models
     decomposition_components_segment_card --> decomposition_components_card_stack_config
     decomposition_components_segment_card --> decomposition_html_ids
+    decomposition_components_segment_card --> decomposition_models
     decomposition_components_step_renderer --> decomposition_components_card_stack_config
-    decomposition_components_step_renderer --> decomposition_models
-    decomposition_components_step_renderer --> decomposition_components_segment_card
-    decomposition_components_step_renderer --> decomposition_utils
-    decomposition_components_step_renderer --> decomposition_components_callbacks
     decomposition_components_step_renderer --> decomposition_html_ids
+    decomposition_components_step_renderer --> decomposition_utils
+    decomposition_components_step_renderer --> decomposition_components_segment_card
+    decomposition_components_step_renderer --> decomposition_models
+    decomposition_components_step_renderer --> decomposition_components_callbacks
     decomposition_routes_card_stack --> decomposition_routes_core
     decomposition_routes_card_stack --> decomposition_components_card_stack_config
     decomposition_routes_card_stack --> decomposition_components_segment_card
     decomposition_routes_card_stack --> decomposition_models
     decomposition_routes_core --> decomposition_models
-    decomposition_routes_handlers --> decomposition_models
-    decomposition_routes_handlers --> decomposition_components_step_renderer
+    decomposition_routes_handlers --> decomposition_routes_card_stack
     decomposition_routes_handlers --> decomposition_routes_core
+    decomposition_routes_handlers --> decomposition_components_step_renderer
     decomposition_routes_handlers --> decomposition_services_segmentation
     decomposition_routes_handlers --> decomposition_components_card_stack_config
     decomposition_routes_handlers --> decomposition_utils
-    decomposition_routes_handlers --> selection_services_source
-    decomposition_routes_handlers --> decomposition_routes_card_stack
-    decomposition_routes_init --> decomposition_routes_handlers
-    decomposition_routes_init --> decomposition_services_segmentation
+    decomposition_routes_handlers --> decomposition_models
     decomposition_routes_init --> decomposition_routes_core
-    decomposition_routes_init --> decomposition_models
+    decomposition_routes_init --> decomposition_routes_handlers
     decomposition_routes_init --> decomposition_routes_card_stack
-    decomposition_routes_init --> selection_services_source
+    decomposition_routes_init --> decomposition_services_segmentation
+    decomposition_routes_init --> decomposition_models
     decomposition_services_segmentation --> decomposition_models
     decomposition_utils --> decomposition_models
     review_components_step_renderer --> review_html_ids
-    review_models --> decomposition_models
     review_models --> alignment_models
-    review_services_graph --> review_models
+    review_models --> decomposition_models
     review_services_graph --> decomposition_models
     review_services_graph --> alignment_models
+    review_services_graph --> review_models
     routes_core_audio --> workflow_workflow
-    routes_core_chrome --> decomposition_models
-    routes_core_chrome --> decomposition_components_card_stack_config
+    routes_core_chrome --> alignment_models
     routes_core_chrome --> alignment_components_card_stack_config
+    routes_core_chrome --> decomposition_components_step_renderer
     routes_core_chrome --> alignment_components_step_renderer
     routes_core_chrome --> combined_keyboard_config
-    routes_core_chrome --> alignment_models
     routes_core_chrome --> combined_step_combined
+    routes_core_chrome --> decomposition_components_card_stack_config
     routes_core_chrome --> workflow_workflow
-    routes_core_chrome --> decomposition_components_step_renderer
+    routes_core_chrome --> decomposition_models
     routes_core_chrome --> combined_html_ids
-    routes_core_init --> workflow_workflow
-    routes_core_init --> routes_core_chrome
-    routes_core_init --> routes_core_sources
-    routes_core_init --> routes_core_audio
     routes_core_init --> routes_core_status
+    routes_core_init --> routes_core_sources
+    routes_core_init --> routes_core_chrome
+    routes_core_init --> routes_core_audio
+    routes_core_init --> workflow_workflow
     routes_core_sources --> workflow_workflow
     routes_core_status --> workflow_workflow
-    routes_init --> decomposition_routes_init
     routes_init --> combined_handlers
-    routes_init --> workflow_workflow
-    routes_init --> routes_core_init
     routes_init --> alignment_routes_init
-    routes_init --> selection_routes_init
-    selection_components_helpers --> selection_models
-    selection_components_local_files --> selection_html_ids
-    selection_components_local_files --> selection_components_helpers
-    selection_components_preview_panel --> selection_html_ids
-    selection_components_selection_queue --> selection_html_ids
-    selection_components_source_browser --> selection_services_source_utils
-    selection_components_source_browser --> selection_html_ids
-    selection_components_source_browser --> selection_utils
-    selection_components_step_renderer --> selection_components_selection_queue
-    selection_components_step_renderer --> selection_components_local_files
-    selection_components_step_renderer --> selection_html_ids
-    selection_components_step_renderer --> selection_components_helpers
-    selection_components_step_renderer --> selection_models
-    selection_components_step_renderer --> selection_utils
-    selection_components_step_renderer --> selection_components_source_browser
-    selection_components_step_renderer --> selection_components_preview_panel
-    selection_routes_core --> selection_models
-    selection_routes_core --> selection_components_selection_queue
-    selection_routes_core --> selection_components_source_browser
-    selection_routes_core --> selection_services_source
-    selection_routes_core --> selection_components_step_renderer
-    selection_routes_filtering --> selection_services_source_utils
-    selection_routes_filtering --> selection_models
-    selection_routes_filtering --> selection_routes_core
-    selection_routes_filtering --> selection_components_source_browser
-    selection_routes_filtering --> selection_services_source
-    selection_routes_init --> selection_routes_queue
-    selection_routes_init --> selection_routes_filtering
-    selection_routes_init --> selection_models
-    selection_routes_init --> selection_routes_core
-    selection_routes_init --> selection_routes_local_files
-    selection_routes_init --> selection_routes_tabs
-    selection_routes_init --> selection_services_source
-    selection_routes_local_files --> selection_services_source
-    selection_routes_local_files --> selection_models
-    selection_routes_local_files --> selection_routes_core
-    selection_routes_local_files --> selection_components_local_files
-    selection_routes_queue --> selection_models
-    selection_routes_queue --> selection_routes_core
-    selection_routes_queue --> selection_services_source_utils
-    selection_routes_queue --> selection_components_preview_panel
-    selection_routes_queue --> selection_services_source
-    selection_routes_tabs --> selection_components_step_renderer
-    selection_routes_tabs --> selection_models
-    selection_routes_tabs --> selection_routes_core
-    selection_routes_tabs --> selection_components_local_files
-    selection_routes_tabs --> selection_components_source_browser
-    selection_routes_tabs --> selection_services_source_utils
-    selection_routes_tabs --> selection_services_source
-    selection_routes_tabs --> selection_routes_local_files
-    workflow_workflow --> review_components_step_renderer
-    workflow_workflow --> decomposition_services_segmentation
-    workflow_workflow --> selection_services_source
-    workflow_workflow --> review_services_graph
-    workflow_workflow --> core_config
-    workflow_workflow --> decomposition_models
-    workflow_workflow --> selection_components_step_renderer
-    workflow_workflow --> alignment_services_alignment
-    workflow_workflow --> selection_models
+    routes_init --> routes_core_init
+    routes_init --> decomposition_routes_init
+    routes_init --> workflow_workflow
     workflow_workflow --> alignment_models
+    workflow_workflow --> core_config
+    workflow_workflow --> alignment_services_alignment
+    workflow_workflow --> review_services_graph
+    workflow_workflow --> decomposition_services_segmentation
+    workflow_workflow --> decomposition_models
     workflow_workflow --> combined_step_combined
+    workflow_workflow --> review_components_step_renderer
 ```
 
-*183 cross-module dependencies detected*
+*124 cross-module dependencies detected*
 
 ## CLI Reference
 
@@ -1077,145 +980,6 @@ DEBUG_SEG_STATE = False
 DEFAULT_MAX_HISTORY_DEPTH = 50
 ```
 
-### core (`core.ipynb`)
-
-> Selection step state management helpers
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.selection.routes.core import (
-    DEBUG_SELECTION_STATE,
-    WorkflowStateStore
-)
-```
-
-#### Functions
-
-``` python
-def _get_step_state(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    session_id: str  # Session identifier string
-) -> Dict[str, Any]:  # Step state dictionary
-    "Get the selection step state from the workflow state store."
-```
-
-``` python
-def _get_active_source_tab(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    session_id: str  # Session identifier string
-) -> str:  # Active tab: "db" or "files"
-    "Get the currently active source tab from workflow state."
-```
-
-``` python
-def _build_queue_response(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    source_service: SourceService,  # The source service for querying transcriptions
-    session_id: str,  # Session identifier string
-    selected_sources: List[Dict[str, str]],  # Current selected sources after mutation
-    urls: SelectionUrls,  # URL bundle for rendering
-    include_stats: bool = True,  # Include OOB stats swap
-    include_source_list: bool = True,  # Include conditional OOB source list swap
-    grouping_mode: str = None,  # Override grouping mode for source list rendering
-) -> Union[Any, Tuple]:  # Single component or tuple of components with OOB swaps
-    "Build the standard response for queue-mutating handlers."
-```
-
-``` python
-def _update_step_state(
-    "Update the selection step state in the workflow state store."
-```
-
-#### Variables
-
-``` python
-DEBUG_SELECTION_STATE = False
-```
-
-### filtering (`filtering.ipynb`)
-
-> Filtering, grouping, and keyboard navigation route handlers
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.selection.routes.filtering import (
-    init_filtering_router
-)
-```
-
-#### Functions
-
-``` python
-def _handle_source_filter(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    source_service: SourceService,  # The source service for queries
-    request,  # FastHTML request object
-    sess,  # FastHTML session object
-    search: str,  # Search term from input
-    urls: SelectionUrls,  # URL bundle for rendering
-):  # Filtered source list component
-    "Filter transcription sources by search term."
-```
-
-``` python
-def _handle_grouping_change(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    source_service: SourceService,  # The source service for queries
-    request,  # FastHTML request object
-    sess,  # FastHTML session object
-    grouping_mode: str,  # New grouping mode: "media_path" or "batch_id"
-    urls: SelectionUrls,  # URL bundle for rendering
-):  # Updated source list component
-    "Change the grouping mode and re-render the source list."
-```
-
-``` python
-def _handle_selection_toggle_focused(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    source_service: SourceService,  # The source service for queries
-    request,  # FastHTML request object
-    sess,  # FastHTML session object
-    record_id: str,  # Job ID from focused row (via hx-include)
-    provider_id: str,  # Plugin name from focused row (via hx-include)
-    urls: SelectionUrls,  # URL bundle for rendering
-):  # Queue component with OOB stats, optionally with OOB source list
-    "Toggle selection of the focused row (keyboard shortcut handler)."
-```
-
-``` python
-def _handle_keyboard_reorder(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    source_service: SourceService,  # The source service for queries
-    request,  # FastHTML request object
-    sess,  # FastHTML session object
-    record_id: str,  # Record ID of item to move
-    provider_id: str,  # Provider ID of item to move
-    direction: str,  # Direction to move: "up" or "down"
-    urls: SelectionUrls,  # URL bundle for rendering
-):  # Queue component, optionally with OOB source list
-    "Move an item up or down in the selection queue via keyboard."
-```
-
-``` python
-def init_filtering_router(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    source_service: SourceService,  # The source service for queries
-    prefix: str,  # Route prefix (e.g., "/workflow/selection/filtering")
-    urls: SelectionUrls,  # URL bundle for rendering
-) -> Tuple[APIRouter, Dict[str, Callable]]:  # (router, route_dict)
-    "Initialize filtering and keyboard navigation routes."
-```
-
 ### formatting (`formatting.ipynb`)
 
 > Display formatting utilities for dates, times, and filenames
@@ -1877,48 +1641,6 @@ def _get_focused_index(
     "Get the currently focused segment index."
 ```
 
-### helpers (`helpers.ipynb`)
-
-> Shared helper functions for the selection module
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.selection.components.helpers import *
-```
-
-#### Functions
-
-``` python
-def _get_selection_state(
-    ctx: InteractionContext  # Interaction context with state
-) -> SelectionStepState:  # Typed selection step state
-    "Get the full selection step state from context."
-```
-
-``` python
-def _get_selected_sources(
-    ctx: InteractionContext  # Interaction context with state
-) -> List[SelectedSource]:  # List of selected source dicts
-    "Get the list of selected sources from step state."
-```
-
-``` python
-def _get_grouping_mode(
-    ctx: InteractionContext  # Interaction context with state
-) -> str:  # Grouping mode: "media_path" or "batch_id"
-    "Get the current grouping mode from step state."
-```
-
-``` python
-def _generate_sortable_init_script(
-    container_selector: str = ".sortable",  # CSS selector for sortable containers
-    handle_selector: str = ".drag-handle",  # CSS selector for drag handles
-    animation_ms: int = 150,  # Animation duration in milliseconds
-) -> str:  # JavaScript initialization script
-    "Generate Sortable.js initialization script for htmx integration."
-```
-
 ### html_ids (`html_ids.ipynb`)
 
 > HTML ID constants for Phase 2 Right Column: VAD Alignment
@@ -2058,48 +1780,6 @@ class ReviewHtmlIds:
         "Convert an ID to a CSS selector format."
 ```
 
-### html_ids (`html_ids.ipynb`)
-
-> HTML ID constants for Phase 1: Source Selection & Ordering
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.selection.html_ids import (
-    SelectionHtmlIds
-)
-```
-
-#### Classes
-
-``` python
-class SelectionHtmlIds:
-    "HTML ID constants for Phase 1: Source Selection & Ordering."
-    
-    def as_selector(
-            id_str:str  # The HTML ID to convert
-        ) -> str:  # CSS selector with # prefix
-        "Convert an ID to a CSS selector format."
-    
-    def source_checkbox(
-            record_id:str,  # Record identifier
-            provider_id:str  # Provider identifier
-        ) -> str:  # HTML ID for the source checkbox
-        "Generate HTML ID for a source selection checkbox."
-    
-    def source_row(
-            record_id:str,  # Record identifier
-            provider_id:str  # Provider identifier
-        ) -> str:  # HTML ID for the source row
-        "Generate HTML ID for a source browser row."
-    
-    def queue_item(
-            record_id:str,  # Record identifier
-            provider_id:str  # Provider identifier
-        ) -> str:  # HTML ID for the queue item
-        "Generate HTML ID for a queue item."
-```
-
 ### init (`init.ipynb`)
 
 > Router assembly for Phase 2 alignment routes
@@ -2202,30 +1882,6 @@ def init_routers(
     workflow: "StructureDecompWorkflow",  # The workflow instance
 ) -> List[APIRouter]:  # List of configured routers
     "Initialize and return all workflow routers."
-```
-
-### init (`init.ipynb`)
-
-> Router assembly for Phase 1 selection routes
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.selection.routes.init import (
-    init_selection_routers
-)
-```
-
-#### Functions
-
-``` python
-def init_selection_routers(
-    state_store: WorkflowStateStore,  # The workflow state store
-    source_service: SourceService,  # The source service for queries
-    workflow_id: str,  # The workflow identifier
-    prefix: str,  # Base prefix for selection routes (e.g., "/workflow/selection")
-) -> Tuple[List[APIRouter], SelectionUrls, Dict[str, Callable]]:  # (routers, urls, merged_routes)
-    "Initialize and return all selection routers with URL bundle."
 ```
 
 ### keyboard_config (`keyboard_config.ipynb`)
@@ -2344,157 +2000,6 @@ SD_SEG_EXIT_SPLIT_BTN = 'sd-seg-exit-split-btn'
 SD_SEG_SPLIT_BTN = 'sd-seg-split-btn'
 SD_SEG_MERGE_BTN = 'sd-seg-merge-btn'
 SD_SEG_UNDO_BTN = 'sd-seg-undo-btn'
-```
-
-### local_files (`local_files.ipynb`)
-
-> Local files browser for importing external .db files
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.selection.components.local_files import *
-```
-
-#### Functions
-
-``` python
-def _get_external_db_paths(
-    ctx: InteractionContext  # Interaction context with state
-) -> List[str]:  # List of external database paths
-    "Get the list of external database paths from step state."
-```
-
-``` python
-def _get_current_browse_path(
-    ctx: InteractionContext  # Interaction context with state
-) -> str:  # Current browse path
-    "Get the current browse path from step state."
-```
-
-``` python
-def _get_file_browser_state(
-    step_state: Dict[str, Any],  # Selection step state dictionary
-    default_path: Optional[str] = None  # Default path if no state exists
-) -> BrowserState:  # BrowserState for file browser
-    "Get or create BrowserState from step state."
-```
-
-``` python
-def _create_db_browser_config() -> FileBrowserConfig:  # Configured FileBrowserConfig for .db file selection
-    "Create file browser config for .db file selection."
-```
-
-``` python
-def _render_external_sources_list(
-    external_paths: List[str],  # List of added external database paths
-    remove_url: str,  # URL for removing external source
-) -> Any:  # External sources list component
-    "Render the list of added external database sources with scrollable paths."
-```
-
-``` python
-def _render_local_files_browser(
-    browser_state: Optional[BrowserState] = None,  # Current browser state
-    external_paths: Optional[List[str]] = None,  # List of added external database paths
-    provider: Optional[LocalFileSystemProvider] = None,  # File system provider
-    config: Optional[FileBrowserConfig] = None,  # Browser configuration
-    navigate_url: str = "",  # URL for browsing directories
-    select_url: str = "",  # URL for adding external source (maps path to db_path)
-    remove_url: str = "",  # URL for removing external source
-    refresh_url: str = "",  # URL for refreshing browser
-    path_input_url: str = "",  # URL for direct path input
-    home_path: Optional[str] = None,  # Home directory path
-    error_message: Optional[str] = None,  # Error message to display
-) -> Any:  # Local files browser component
-    "Render the local files browser for adding external .db files."
-```
-
-### local_files (`local_files.ipynb`)
-
-> Local files browser route handlers
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.selection.routes.local_files import (
-    init_local_files_router
-)
-```
-
-#### Functions
-
-``` python
-def _get_local_files_provider() -> LocalFileSystemProvider:
-    """Get or create the local files provider singleton."""
-    global _local_files_provider
-    if _local_files_provider is None
-    "Get or create the local files provider singleton."
-```
-
-``` python
-def _handle_browse_directory(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    source_service: SourceService,  # The source service for external db ops
-    request,  # FastHTML request object
-    sess,  # FastHTML session object
-    path: str,  # Directory path to browse
-    urls: SelectionUrls,  # URL bundle for rendering
-):  # Local files browser component
-    "Browse a directory and return the local files browser component."
-```
-
-``` python
-def _get_local_files_config() -> FileBrowserConfig:
-    """Get or create the local files config singleton."""
-    global _local_files_config
-    if _local_files_config is None
-    "Get or create the local files config singleton."
-```
-
-``` python
-def _handle_add_external_source(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    source_service: SourceService,  # The source service for external db ops
-    request,  # FastHTML request object
-    sess,  # FastHTML session object
-    path: str,  # Path to the .db file (from file-browser select_url)
-    urls: SelectionUrls,  # URL bundle for rendering
-):  # Local files browser component
-    "Toggle an external database source (add if not present, remove if present)."
-```
-
-``` python
-def _handle_remove_external_source(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    source_service: SourceService,  # The source service for external db ops
-    request,  # FastHTML request object
-    sess,  # FastHTML session object
-    db_path: str,  # Path to the .db file to remove
-    urls: SelectionUrls,  # URL bundle for rendering
-):  # Local files browser component
-    "Remove an external database source from the Added Sources list."
-```
-
-``` python
-def init_local_files_router(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    source_service: SourceService,  # The source service for external db ops
-    prefix: str,  # Route prefix (e.g., "/workflow/selection/local_files")
-    urls: SelectionUrls,  # URL bundle for rendering
-) -> Tuple[APIRouter, Dict[str, Callable]]:  # (router, route_dict)
-    "Initialize local files browser routes."
-```
-
-#### Variables
-
-``` python
-_local_files_provider: Optional[LocalFileSystemProvider] = None
-_local_files_config: Optional[FileBrowserConfig] = None
 ```
 
 ### models (`models.ipynb`)
@@ -2677,168 +2182,6 @@ class WorkingDocument:
         "Create from dictionary."
 ```
 
-### models (`models.ipynb`)
-
-> Data models and URL bundles for Phase 1: Source Selection & Ordering
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.selection.models import (
-    SelectionStepState,
-    SelectionUrls
-)
-```
-
-#### Classes
-
-``` python
-class SelectionStepState(TypedDict):
-    "State for Phase 1: Source Selection & Ordering."
-```
-
-``` python
-@dataclass
-class SelectionUrls:
-    "URL bundle for Phase 1 selection route handlers and renderers."
-    
-    add: str = ''  # Add source to queue
-    remove: str = ''  # Remove source from queue
-    reorder: str = ''  # Reorder queue items
-    clear: str = ''  # Clear all from queue
-    select_all: str = ''  # Select all in a group
-    preview: str = ''  # Preview source content
-    toggle_focused: str = ''  # Toggle focused row selection
-    keyboard_reorder: str = ''  # Keyboard reorder (Shift+Up/Down)
-    filter: str = ''  # Filter source list
-    grouping_change: str = ''  # Change grouping mode
-    browse_directory: str = ''  # Browse directory
-    add_external: str = ''  # Add external .db source
-    remove_external: str = ''  # Remove external .db source
-    tab_switch: str = ''  # Switch source tabs
-```
-
-### preview_panel (`preview_panel.ipynb`)
-
-> Collapsible preview panel for displaying selected content
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.selection.components.preview_panel import *
-```
-
-#### Functions
-
-``` python
-def _render_preview_panel(
-    preview_record_id: Optional[str] = None,  # Job ID being previewed
-    preview_text: Optional[str] = None,  # Text content to preview
-    is_open: bool = False,  # Whether the collapse should be open
-) -> Any:  # Preview panel component (collapsible, full-width)
-    "Render the collapsible preview panel for displaying selected content."
-```
-
-### queue (`queue.ipynb`)
-
-> Selection queue route handlers for Phase 1
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.selection.routes.queue import (
-    init_queue_router
-)
-```
-
-#### Functions
-
-``` python
-def _handle_selection_add(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    source_service: SourceService,  # The source service for queries
-    request,  # FastHTML request object
-    sess,  # FastHTML session object
-    record_id: str,  # Job ID to add
-    provider_id: str,  # Plugin name for the source
-    urls: SelectionUrls,  # URL bundle for rendering
-):  # Queue component with OOB stats, optionally with OOB source list
-    "Add a source to the selection queue."
-```
-
-``` python
-def _handle_selection_remove(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    source_service: SourceService,  # The source service for queries
-    request,  # FastHTML request object
-    sess,  # FastHTML session object
-    record_id: str,  # Job ID to remove
-    urls: SelectionUrls,  # URL bundle for rendering
-):  # Queue component with OOB stats, optionally with OOB source list
-    "Remove a source from the selection queue."
-```
-
-``` python
-async def _handle_selection_reorder(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    source_service: SourceService,  # The source service for queries
-    request,  # FastHTML request object
-    sess,  # FastHTML session object
-    urls: SelectionUrls,  # URL bundle for rendering
-):  # Updated queue component
-    "Reorder items in the selection queue based on SortableJS result."
-```
-
-``` python
-def _handle_selection_clear(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    source_service: SourceService,  # The source service for queries
-    request,  # FastHTML request object
-    sess,  # FastHTML session object
-    urls: SelectionUrls,  # URL bundle for rendering
-):  # Queue component with OOB stats, optionally with OOB source list
-    "Clear all items from the selection queue."
-```
-
-``` python
-def _handle_selection_select_all(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    source_service: SourceService,  # The source service for queries
-    request,  # FastHTML request object
-    sess,  # FastHTML session object
-    group_key: str,  # Group key to select all transcriptions for
-    grouping_mode: str,  # Current grouping mode: "media_path" or "batch_id"
-    urls: SelectionUrls,  # URL bundle for rendering
-):  # Queue component with OOB stats, optionally with OOB source list
-    "Select all transcriptions for a given group."
-```
-
-``` python
-def _handle_selection_preview(
-    source_service: SourceService,  # The source service for queries
-    request,  # FastHTML request object
-    record_id: str,  # Job ID to preview
-    provider_id: str,  # Plugin name for the source
-):  # Full preview panel component (collapsible, open with content)
-    "Get preview panel for a selected source."
-```
-
-``` python
-def init_queue_router(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    source_service: SourceService,  # The source service for queries
-    prefix: str,  # Route prefix (e.g., "/workflow/selection/queue")
-    urls: SelectionUrls,  # URL bundle for rendering (populated after all routers created)
-) -> Tuple[APIRouter, Dict[str, Callable]]:  # (router, route_dict)
-    "Initialize queue management routes."
-```
-
 ### segment_card (`segment_card.ipynb`)
 
 > Segment card component with view and split modes
@@ -3006,490 +2349,6 @@ class SegmentationService:
             source_blocks: List[SourceBlock]  # Ordered list of source blocks
         ) -> List[TextSegment]:  # Combined list of TextSegments with proper traceability
         "Split multiple source blocks into segments with proper source tracking."
-```
-
-### selection_queue (`selection_queue.ipynb`)
-
-> Selection queue component with drag-drop reordering
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.selection.components.selection_queue import *
-```
-
-#### Functions
-
-``` python
-def _render_queue_item(
-    source: Dict[str, str],  # Source dict with record_id and provider_id
-    index: int,  # Position in queue (1-based)
-    remove_url: str,  # URL for removing from queue
-) -> Any:  # Queue item element
-    "Render a single item in the selection queue."
-```
-
-``` python
-def _render_selection_queue(
-    selected_sources: List[Dict[str, str]],  # List of selected sources in order
-    remove_url: str,  # URL for removing from queue
-    reorder_url: str,  # URL for reordering queue
-    clear_url: str,  # URL for clearing all
-) -> Any:  # Queue panel component
-    "Render the selection queue panel with drag-drop reordering."
-```
-
-### source (`source.ipynb`)
-
-> Source service for federated transcription queries via DuckDB
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.selection.services.source import (
-    VALID_DB_EXTENSIONS,
-    TranscriptionDBProvider,
-    SourceService,
-    validate_and_toggle_external_db
-)
-```
-
-#### Functions
-
-``` python
-def validate_and_toggle_external_db(
-    source_service: SourceService,  # Source service for duplicate detection
-    path: str,  # Path to the .db file
-    external_paths: List[str],  # Current external database paths
-    valid_extensions: List[str] = None,  # Valid file extensions (default: VALID_DB_EXTENSIONS)
-) -> Tuple[List[str], Optional[str]]:  # (updated_paths, error_message or None)
-    "Validate and toggle an external database path in the external paths list."
-```
-
-#### Classes
-
-``` python
-class TranscriptionDBProvider:
-    def __init__(
-        self,
-        db_path: str,  # Path to SQLite database file
-        name: str,  # Display name for this provider
-        provider_id: Optional[str] = None  # Unique ID (defaults to db_path)
-    )
-    "SourceProvider for transcription SQLite databases."
-    
-    def __init__(
-            self,
-            db_path: str,  # Path to SQLite database file
-            name: str,  # Display name for this provider
-            provider_id: Optional[str] = None  # Unique ID (defaults to db_path)
-        )
-        "Initialize provider for a transcription database."
-    
-    def provider_id(self) -> str:  # Unique identifier
-            """Unique identifier for this provider instance."""
-            return self._id
-        
-        @property
-        def provider_name(self) -> str:  # Display name
-        "Unique identifier for this provider instance."
-    
-    def provider_name(self) -> str:  # Display name
-            """Human-readable name for display."""
-            return self._name
-        
-        @property
-        def provider_type(self) -> str:  # Provider category
-        "Human-readable name for display."
-    
-    def provider_type(self) -> str:  # Provider category
-            """Provider type category."""
-            return "transcription_db"
-        
-        @property
-        def db_path(self) -> Path:  # Database file path
-        "Provider type category."
-    
-    def db_path(self) -> Path:  # Database file path
-            """Path to the underlying database file."""
-            return self._db_path
-        
-        def is_available(self) -> bool:  # Whether database exists and is accessible
-        "Path to the underlying database file."
-    
-    def is_available(self) -> bool:  # Whether database exists and is accessible
-            """Check if the database file exists and is accessible."""
-            return self._db_path.exists() and self._db_path.suffix == '.db'
-        
-        def validate_schema(self) -> Tuple[bool, str]:  # (is_valid, error_message)
-        "Check if the database file exists and is accessible."
-    
-    def validate_schema(self) -> Tuple[bool, str]:  # (is_valid, error_message)
-            """Check if database has valid transcription schema."""
-            if not self.is_available()
-        "Check if database has valid transcription schema."
-    
-    def query_records(
-            self,
-            limit: int = 100  # Maximum records to return
-        ) -> List[SourceRecord]:  # List of source records
-        "Query transcription records from the database."
-    
-    def get_source_block(
-            self,
-            record_id: str  # Job ID to fetch
-        ) -> Optional[SourceBlock]:  # SourceBlock or None if not found
-        "Fetch a specific transcription as a SourceBlock."
-    
-    def from_plugin(
-            cls,
-            meta: PluginMeta  # Plugin metadata with manifest containing db_path
-        ) -> Optional["TranscriptionDBProvider"]:  # Provider or None if no valid db_path
-        "Create provider from plugin metadata."
-    
-    def from_external_path(
-            cls,
-            path: str  # Path to external database file
-        ) -> Optional["TranscriptionDBProvider"]:  # Provider or None if path invalid
-        "Create provider from an external database path."
-```
-
-``` python
-class SourceService:
-    def __init__(
-        self,
-        plugin_manager: PluginManager,  # Plugin manager for discovering plugin sources
-        source_categories: List[str] = None,  # Plugin categories to query (default: ['transcription'])
-        external_paths: List[str] = None  # External database paths
-    )
-    "Service for federated access to content sources via providers."
-    
-    def __init__(
-            self,
-            plugin_manager: PluginManager,  # Plugin manager for discovering plugin sources
-            source_categories: List[str] = None,  # Plugin categories to query (default: ['transcription'])
-            external_paths: List[str] = None  # External database paths
-        )
-        "Initialize the source service."
-    
-    def add_provider(
-            self,
-            provider: SourceProvider  # Provider instance to add
-        ) -> bool:  # True if added, False if ID already exists
-        "Add a source provider."
-    
-    def remove_provider(
-            self,
-            provider_id: str  # ID of provider to remove
-        ) -> bool:  # True if removed, False if not found
-        "Remove a source provider by ID."
-    
-    def get_provider(
-            self,
-            provider_id: str  # ID of provider to get
-        ) -> Optional[SourceProvider]:  # Provider or None if not found
-        "Get a provider by ID."
-    
-    def get_providers(self) -> List[SourceProvider]:  # List of all providers
-            """Get all registered providers."""
-            return list(self._providers.values())
-        
-        def get_provider_by_name(
-            self,
-            name: str  # Provider name to search for
-        ) -> Optional[SourceProvider]:  # Provider or None if not found
-        "Get all registered providers."
-    
-    def get_provider_by_name(
-            self,
-            name: str  # Provider name to search for
-        ) -> Optional[SourceProvider]:  # Provider or None if not found
-        "Find a provider by its display name."
-    
-    def has_provider_for_path(
-            self,
-            path: str  # Path to check
-        ) -> Tuple[bool, Optional[str]]:  # (has_duplicate, existing_provider_name)
-        "Check if any provider uses the same resolved database path."
-    
-    def add_plugin_providers(self) -> int:  # Number of providers added
-            """Discover and add providers from loaded plugins."""
-            added = 0
-            for category in self._categories
-        "Discover and add providers from loaded plugins."
-    
-    def set_external_paths(
-            self,
-            paths: List[str]  # List of external database paths to set
-        ) -> None
-        "Set external database paths (replaces existing external providers)."
-    
-    def add_external_path(
-            self,
-            path: str  # External database path to add
-        ) -> bool:  # True if added, False if already exists or invalid
-        "Add an external database as a provider."
-    
-    def remove_external_path(
-            self,
-            path: str  # External database path to remove
-        ) -> bool:  # True if removed, False if not found
-        "Remove an external database provider."
-    
-    def get_external_paths(self) -> List[str]:  # List of external database paths
-            """Get list of external database paths."""
-            paths = []
-            for pid, provider in self._providers.items()
-        "Get list of external database paths."
-    
-    def get_available_sources(self) -> List[Dict[str, Any]]:  # List of source info dicts
-            """Get list of available sources (for UI display)."""
-            # First ensure plugin providers are loaded
-            self.add_plugin_providers()
-            
-            sources = []
-            for provider in self._providers.values()
-        "Get list of available sources (for UI display)."
-    
-    def query_transcriptions(
-            self,
-            provider_name: Optional[str] = None,  # Filter by provider name (None for all)
-            limit: int = 100  # Maximum number of results per provider
-        ) -> List[Dict[str, Any]]:  # List of transcription records
-        "Query records from all providers (or a specific one)."
-    
-    def get_transcription_by_id(
-            self,
-            record_id: str,  # Record ID to fetch
-            provider_id: str  # Provider ID that owns this record
-        ) -> Optional[SourceBlock]:  # SourceBlock or None if not found
-        "Get a specific transcription as a SourceBlock."
-    
-    def get_source_blocks(
-            self,
-            selections: List[Dict[str, str]]  # List of {record_id, provider_id} dicts
-        ) -> List[SourceBlock]:  # Ordered list of SourceBlocks
-        "Fetch multiple records as SourceBlocks in order."
-```
-
-#### Variables
-
-``` python
-VALID_DB_EXTENSIONS = [3 items]
-```
-
-### source_browser (`source_browser.ipynb`)
-
-> Source browser components for displaying and filtering transcription
-> sources
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.selection.components.source_browser import *
-```
-
-#### Functions
-
-``` python
-def _render_grouping_selector(
-    grouping_mode: str,  # Current grouping mode: "media_path" or "batch_id"
-    grouping_change_url: str,  # URL for changing grouping mode
-) -> Any:  # Grouping selector component
-    "Render the dropdown for selecting grouping mode."
-```
-
-``` python
-def _render_source_row(
-    record: Dict[str, Any],  # Transcription record
-    is_selected: bool,  # Whether this source is selected
-    add_url: str,  # URL for adding to queue
-    remove_url: str,  # URL for removing from queue
-    preview_url: str,  # URL for previewing content
-    is_first: bool = False,  # Whether this is the first row (gets initial focus)
-) -> Any:  # Table row element
-    "Render a single source row in the browser table."
-```
-
-``` python
-def _render_group_header(
-    group_key: str,  # The group key (media_path or batch_id value)
-    record_count: int,  # Number of records in this group
-    select_all_url: str,  # URL for selecting all in group
-    grouping_mode: str = "media_path",  # Current grouping mode
-) -> Any:  # Table row for group header
-    "Render a group header row."
-```
-
-``` python
-def _render_audio_group_header(
-    media_path: str,  # Path to audio file
-    record_count: int,  # Number of records in this group
-    select_all_url: str,  # URL for selecting all in group
-) -> Any:  # Table row for group header
-    "Render a group header row for an audio file (legacy wrapper)."
-```
-
-``` python
-def _render_source_list(
-    transcriptions: List[Dict[str, Any]],  # Available transcription records
-    selected_sources: List[Dict[str, str]],  # Currently selected sources
-    add_url: str,  # URL for adding to queue
-    remove_url: str,  # URL for removing from queue
-    preview_url: str,  # URL for previewing content
-    select_all_url: str,  # URL for selecting all in a group
-    grouping_mode: str = "media_path",  # Grouping mode: "media_path" or "batch_id"
-    oob: bool = False,  # Whether to include hx-swap-oob for out-of-band swap
-) -> Any:  # Source list container with table
-    "Render the source list table with grouped rows."
-```
-
-``` python
-def _render_source_browser(
-    transcriptions: List[Dict[str, Any]],  # Available transcription records
-    sources: List[Dict[str, Any]],  # Available source plugins (unused, kept for API compat)
-    selected_sources: List[Dict[str, str]],  # Currently selected sources
-    add_url: str,  # URL for adding to queue
-    remove_url: str,  # URL for removing from queue
-    preview_url: str,  # URL for previewing content
-    select_all_url: str,  # URL for selecting all in a group
-    filter_url: str,  # URL for filtering sources
-    grouping_mode: str = "media_path",  # Current grouping mode
-    grouping_change_url: str = "",  # URL for changing grouping mode
-) -> Any:  # Source browser component
-    "Render the source browser panel with search filtering and grouped table."
-```
-
-### source_utils (`source_utils.ipynb`)
-
-> Source record operations for metadata extraction, grouping, and
-> validation
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.selection.services.source_utils import (
-    extract_batch_id,
-    extract_model_name,
-    group_transcriptions,
-    group_transcriptions_by_audio,
-    is_source_selected,
-    filter_transcriptions,
-    select_all_in_group,
-    toggle_source_selection,
-    reorder_item,
-    reorder_sources,
-    calculate_next_tab,
-    check_audio_exists,
-    validate_browse_path
-)
-```
-
-#### Functions
-
-``` python
-def extract_batch_id(
-    metadata: Any  # Metadata dict or JSON string
-) -> str:  # Batch ID or "No Batch ID"
-    "Extract batch_id from transcription metadata."
-```
-
-``` python
-def extract_model_name(
-    metadata: Any  # Metadata dict or JSON string
-) -> str:  # Formatted model name for display
-    "Extract and format model name from transcription metadata."
-```
-
-``` python
-def group_transcriptions(
-    transcriptions: List[Dict[str, Any]],  # List of transcription records
-    group_by: str = "media_path"  # Grouping mode: "media_path" or "batch_id"
-) -> Dict[str, List[Dict[str, Any]]]:  # Grouped transcriptions
-    "Group transcription records by the specified field."
-```
-
-``` python
-def group_transcriptions_by_audio(
-    transcriptions: List[Dict[str, Any]]  # List of transcription records
-) -> Dict[str, List[Dict[str, Any]]]:  # Grouped by media_path
-    "Group transcription records by their source audio file."
-```
-
-``` python
-def is_source_selected(
-    record_id: str,  # Job ID to check
-    selected_sources: List[Dict[str, str]]  # List of selected sources
-) -> bool:  # True if source is selected
-    "Check if a source is in the selected list."
-```
-
-``` python
-def filter_transcriptions(
-    transcriptions: List[Dict[str, Any]],  # List of transcription records to filter
-    search_text: str,  # Search term for case-insensitive substring matching
-) -> List[Dict[str, Any]]:  # Filtered transcription records
-    "Filter transcriptions by substring match across record_id, media_path, and text fields."
-```
-
-``` python
-def select_all_in_group(
-    transcriptions: List[Dict[str, Any]],  # All transcription records
-    group_key: str,  # Group key to match against
-    grouping_mode: str,  # Grouping mode: "media_path" or "batch_id"
-    selected_sources: List[Dict[str, str]],  # Current selections
-) -> List[Dict[str, str]]:  # Updated selections with new items appended
-    "Add all transcriptions matching a group key to the selection list, skipping duplicates."
-```
-
-``` python
-def toggle_source_selection(
-    record_id: str,  # Job ID to toggle
-    provider_id: str,  # Plugin name for the source
-    selected_sources: List[Dict[str, str]],  # Current selections
-) -> List[Dict[str, str]]:  # Updated selections
-    "Toggle a source in or out of the selection list."
-```
-
-``` python
-def reorder_item(
-    selected_sources: List[Dict[str, str]],  # Current selections
-    record_id: str,  # Record ID of item to move
-    provider_id: str,  # Provider ID of item to move
-    direction: str,  # Direction: "up" or "down"
-) -> List[Dict[str, str]]:  # Reordered selections
-    "Move an item up or down in the selection list by swapping with its neighbor."
-```
-
-``` python
-def reorder_sources(
-    selected_sources: List[Dict[str, str]],  # Current selections
-    new_order_ids: List[str],  # Job IDs in desired order
-) -> List[Dict[str, str]]:  # Reordered selections
-    "Reorder sources to match the given job ID order."
-```
-
-``` python
-def calculate_next_tab(
-    direction: str,  # Direction: "prev", "next", or a direct tab name
-    current_tab: str,  # Currently active tab name
-    tabs: List[str],  # Available tab names in order
-) -> str:  # New active tab name
-    "Calculate the next tab based on direction or direct selection."
-```
-
-``` python
-def check_audio_exists(
-    media_path: str  # Path to audio file
-) -> bool:  # True if file exists
-    "Check if the audio file exists at the given path."
-```
-
-``` python
-def validate_browse_path(
-    path: str  # Path to validate
-) -> str:  # Validated and resolved path, or home directory on error
-    "Validate a browse path for security. Returns home directory on invalid input."
 ```
 
 ### sources (`sources.ipynb`)
@@ -3869,160 +2728,6 @@ def render_review_step(
     "Render Phase 3: Review & Commit step."
 ```
 
-### step_renderer (`step_renderer.ipynb`)
-
-> Phase 1 step renderer: Source Selection & Ordering with two-column
-> layout and collapsible preview
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.selection.components.step_renderer import (
-    SD_FOCUSED_RECORD_ID_INPUT,
-    SD_FOCUSED_PROVIDER_ID_INPUT,
-    SD_TOGGLE_BTN,
-    SD_REMOVE_BTN,
-    SD_REORDER_UP_BTN,
-    SD_REORDER_DOWN_BTN,
-    SD_TAB_PREV_BTN,
-    SD_TAB_NEXT_BTN,
-    SD_PREVIEW_BTN,
-    render_selection_step
-)
-```
-
-#### Functions
-
-``` python
-def _create_selection_keyboard_manager() -> ZoneManager:  # Configured keyboard zone manager
-    "Create the keyboard zone manager for Phase 1 selection step."
-```
-
-``` python
-def _render_selection_keyboard_hints(
-    manager: ZoneManager,  # Keyboard zone manager with actions configured
-) -> Any:  # Collapsible keyboard hints component
-    "Render keyboard shortcut hints in a collapsible container."
-```
-
-``` python
-def _render_selection_stats(
-    selected_sources: List[Dict[str, str]],  # Selected sources
-    transcriptions: List[Dict[str, Any]],  # All transcriptions (for word count)
-    oob: bool = False,  # Whether to render as OOB swap
-) -> Any:  # Stats component
-    "Render the selection statistics (word count and source count)."
-```
-
-``` python
-def _render_selection_footer(
-    selected_sources: List[Dict[str, str]],  # Selected sources
-    transcriptions: List[Dict[str, Any]],  # All transcriptions (for word count)
-) -> Any:  # Footer component
-    "Render the footer with statistics and continue button."
-```
-
-``` python
-def _render_tab_headers(
-    active_tab: str,  # Currently active tab ('db' or 'files')
-    tab_switch_url: str = "",  # URL for switching tabs via HTMX
-    oob: bool = False,  # Whether to render as OOB swap
-) -> Any:  # Tab headers container
-    "Render the tab header radio inputs."
-```
-
-``` python
-def _render_source_tabs(
-    active_tab: str,  # Currently active tab ('db' or 'files')
-    active_content: Any,  # Content for the currently active tab
-    tab_switch_url: str = "",  # URL for switching tabs via HTMX
-) -> Any:  # Tabs header + separate content container
-    "Render source type tabs with a single shared content container."
-```
-
-``` python
-def _get_step_renderer_provider() -> LocalFileSystemProvider:
-    """Get or create the local files provider for step renderer."""
-    global _step_renderer_provider
-    if _step_renderer_provider is None
-    "Get or create the local files provider for step renderer."
-```
-
-``` python
-def _get_step_renderer_config():
-    """Get or create the local files config for step renderer."""
-    global _step_renderer_config
-    if _step_renderer_config is None
-    "Get or create the local files config for step renderer."
-```
-
-``` python
-def render_selection_step(
-    sources: List[Dict[str, Any]],  # Available source plugins
-    transcriptions: List[Dict[str, Any]],  # Available transcription records
-    selected_sources: List[Dict[str, str]],  # Ordered selection
-    grouping_mode: str,  # Grouping mode: "media_path" or "batch_id"
-    external_db_paths: List[str],  # External database paths
-    file_browser_state: Dict[str, Any],  # Serialized BrowserState from file-browser library
-    active_tab: str,  # Active tab: "db" or "files"
-    urls: SelectionUrls,  # URL bundle for selection routes
-) -> Any:  # FastHTML component
-    "Render Phase 1: Source Selection & Ordering step with two-column layout."
-```
-
-#### Variables
-
-``` python
-SD_FOCUSED_RECORD_ID_INPUT = 'sd-focused-record-id'
-SD_FOCUSED_PROVIDER_ID_INPUT = 'sd-focused-provider-id'
-SD_TOGGLE_BTN = 'sd-toggle-btn'
-SD_REMOVE_BTN = 'sd-remove-btn'
-SD_REORDER_UP_BTN = 'sd-reorder-up-btn'
-SD_REORDER_DOWN_BTN = 'sd-reorder-down-btn'
-SD_TAB_PREV_BTN = 'sd-tab-prev-btn'
-SD_TAB_NEXT_BTN = 'sd-tab-next-btn'
-SD_PREVIEW_BTN = 'sd-preview-btn'
-_step_renderer_provider: Optional[LocalFileSystemProvider] = None
-```
-
-### tabs (`tabs.ipynb`)
-
-> Tab switching route handlers
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.selection.routes.tabs import (
-    init_tabs_router
-)
-```
-
-#### Functions
-
-``` python
-def _handle_tab_switch(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    source_service: SourceService,  # The source service for queries
-    request,  # FastHTML request object
-    sess,  # FastHTML session object
-    direction: str,  # Direction: "prev", "next", "db", or "files"
-    urls: SelectionUrls,  # URL bundle for rendering
-):  # Tuple of inner content and OOB tab headers
-    "Switch between Plugin DB and Local Files tabs."
-```
-
-``` python
-def init_tabs_router(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    source_service: SourceService,  # The source service for queries
-    prefix: str,  # Route prefix (e.g., "/workflow/selection/tabs")
-    urls: SelectionUrls,  # URL bundle for rendering
-) -> Tuple[APIRouter, Dict[str, Callable]]:  # (router, route_dict)
-    "Initialize tab switching routes."
-```
-
 ### text_utils (`text_utils.ipynb`)
 
 > Text processing utilities for word counting, splitting, and position
@@ -4128,43 +2833,6 @@ def calculate_segment_stats(
     segments: List["TextSegment"]  # List of segments to analyze
 ) -> Dict[str, Any]:  # Statistics dictionary with total_words, total_segments
     "Calculate aggregate statistics for a list of segments."
-```
-
-### utils (`utils.ipynb`)
-
-> Display formatting and word counting utilities for the selection step
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.selection.utils import (
-    count_words,
-    format_date,
-    format_audio_filename
-)
-```
-
-#### Functions
-
-``` python
-def count_words(
-    text: str  # Text to count words in
-) -> int:  # Word count
-    "Count the number of whitespace-delimited words in text."
-```
-
-``` python
-def format_date(
-    created_at: str  # ISO date string, Unix timestamp, or similar
-) -> str:  # Formatted date for display
-    "Format a date string for human-readable display (e.g., 'Jan 20, 2026')."
-```
-
-``` python
-def format_audio_filename(
-    audio_path: str  # Full path to audio file
-) -> str:  # Shortened filename for display
-    "Extract and format the filename from a path."
 ```
 
 ### vad_card (`vad_card.ipynb`)

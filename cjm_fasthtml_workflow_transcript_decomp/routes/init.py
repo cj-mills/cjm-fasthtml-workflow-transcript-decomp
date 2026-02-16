@@ -12,7 +12,7 @@ from fasthtml.common import APIRouter
 
 # Import subpackage router assemblies
 from .core.init import init_core_routers
-from ..selection.routes.init import init_selection_routers
+from cjm_transcript_source_select.routes.init import init_selection_routers
 from ..decomposition.routes.init import init_segmentation_routers
 from ..alignment.routes.init import init_alignment_routers
 

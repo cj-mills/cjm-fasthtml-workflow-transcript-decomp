@@ -29,7 +29,7 @@ from cjm_fasthtml_workflow_transcript_decomp.alignment.routes.core import (
 )
 
 # Source service for fetching media_path
-from ...selection.services.source import SourceService
+from cjm_transcript_source_select.services.source import SourceService
 
 # Debug flag for alignment data flow tracing (set False in production)
 DEBUG_ALIGNMENT = True

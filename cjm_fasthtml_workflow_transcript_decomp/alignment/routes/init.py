@@ -17,7 +17,7 @@ from ..services.alignment import AlignmentService
 from .core import WorkflowStateStore
 from .card_stack import init_card_stack_router
 from .handlers import init_workflow_router
-from ...selection.services.source import SourceService
+from cjm_transcript_source_select.services.source import SourceService
 
 # %% ../../../nbs/alignment/routes/init.ipynb #e5f6a7b8
 def init_alignment_routers(

@@ -49,7 +49,7 @@ from cjm_fasthtml_workflow_transcript_decomp.alignment.routes.handlers import (
     AlignInitResult, _handle_align_init,
 )
 from ..alignment.services.alignment import AlignmentService
-from ..selection.services.source import SourceService
+from cjm_transcript_source_select.services.source import SourceService
 
 # %% ../../nbs/combined/handlers.ipynb #e5f6a7b8
 def _find_session_id(args, kwargs):
