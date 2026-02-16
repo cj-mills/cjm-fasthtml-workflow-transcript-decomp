@@ -46,8 +46,8 @@ def _build_nav_response(
         urls=urls.card_stack,
         render_card=create_vad_card_renderer(),
         progress_label="VAD Chunk",
+        form_input_name="chunk_index",
     )
-
 
 # %% ../../../nbs/alignment/routes/card_stack.ipynb #align-cs-navigate
 def _handle_align_navigate(
@@ -74,6 +74,7 @@ def _handle_align_navigate(
         urls=urls.card_stack,
         render_card=renderer,
         progress_label="VAD Chunk",
+        form_input_name="chunk_index",
     )
 
     _update_alignment_state(state_store, workflow_id, session_id, focused_chunk_index=state.focused_index)

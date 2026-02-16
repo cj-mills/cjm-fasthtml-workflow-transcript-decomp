@@ -27,10 +27,11 @@ def create_align_kb_parts(
 ) -> Tuple[FocusZone, tuple, tuple]:  # (zone, actions, modes)
     """Create alignment-specific keyboard building blocks."""
     # Card stack zone from library
+    # Note: No data_attributes needed — onAlignFocusChange callback manually updates the
+    # card stack hidden input and reads start/end times directly from card DOM elements
     card_zone = create_card_stack_focus_zone(
         ids=ids,
         on_focus_change="onAlignFocusChange",
-        data_attributes=("chunk-index", "start-time", "end-time"),
     )
 
     # Card stack navigation actions from library (arrows, page jump, first/last, width)
