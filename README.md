@@ -18,12 +18,8 @@ pip install cjm_fasthtml_workflow_transcript_decomp
     │   ├── html_ids.ipynb         # HTML ID constants for Phase 2 Shell: Dual-Column Layout shared chrome
     │   ├── keyboard_config.ipynb  # Shared keyboard navigation configuration for the combined Phase 2 step
     │   └── step_combined.ipynb    # Phase 2 combined step renderer: dual-column layout for Segment & Align
-    ├── core/ (4)
-    │   ├── services/ (2)
-    │   │   ├── formatting.ipynb  # Display formatting utilities for dates, times, and filenames
-    │   │   └── text_utils.ipynb  # Text processing utilities for word counting, splitting, and position mapping
-    │   ├── config.ipynb    # Configuration dataclass for structure decomposition workflow
-    │   └── html_ids.ipynb  # Core HTML ID constants for workflow-level components
+    ├── core/ (1)
+    │   └── config.ipynb  # Configuration dataclass for structure decomposition workflow
     ├── review/ (4)
     │   ├── components/ (1)
     │   │   └── step_renderer.ipynb  # Placeholder step renderer for Phase 3: Review & Commit
@@ -42,7 +38,7 @@ pip install cjm_fasthtml_workflow_transcript_decomp
     └── workflow/ (1)
         └── workflow.ipynb  # Main workflow class for structure decomposition
 
-Total: 20 notebooks across 5 directories
+Total: 17 notebooks across 5 directories
 
 ## Module Dependencies
 
@@ -54,9 +50,6 @@ graph LR
     combined_keyboard_config[combined.keyboard_config<br/>keyboard_config]
     combined_step_combined[combined.step_combined<br/>step_combined]
     core_config[core.config<br/>config]
-    core_html_ids[core.html_ids<br/>html_ids]
-    core_services_formatting[core.services.formatting<br/>formatting]
-    core_services_text_utils[core.services.text_utils<br/>text_utils]
     review_components_step_renderer[review.components.step_renderer<br/>step_renderer]
     review_html_ids[review.html_ids<br/>html_ids]
     review_models[review.models<br/>models]
@@ -69,34 +62,34 @@ graph LR
     routes_init[routes.init<br/>init]
     workflow_workflow[workflow.workflow<br/>workflow]
 
-    combined_handlers --> combined_keyboard_config
     combined_handlers --> combined_html_ids
+    combined_handlers --> combined_keyboard_config
     combined_handlers --> combined_step_combined
     combined_keyboard_config --> combined_html_ids
-    combined_step_combined --> combined_keyboard_config
     combined_step_combined --> combined_helpers
     combined_step_combined --> combined_html_ids
+    combined_step_combined --> combined_keyboard_config
     review_components_step_renderer --> review_html_ids
     review_services_graph --> review_models
     routes_core_audio --> workflow_workflow
-    routes_core_chrome --> combined_keyboard_config
-    routes_core_chrome --> combined_html_ids
-    routes_core_chrome --> combined_step_combined
     routes_core_chrome --> workflow_workflow
+    routes_core_chrome --> combined_html_ids
+    routes_core_chrome --> combined_keyboard_config
+    routes_core_chrome --> combined_step_combined
     routes_core_init --> routes_core_status
-    routes_core_init --> routes_core_audio
-    routes_core_init --> routes_core_sources
     routes_core_init --> routes_core_chrome
     routes_core_init --> workflow_workflow
+    routes_core_init --> routes_core_audio
+    routes_core_init --> routes_core_sources
     routes_core_sources --> workflow_workflow
     routes_core_status --> workflow_workflow
     routes_init --> combined_handlers
-    routes_init --> workflow_workflow
     routes_init --> routes_core_init
-    workflow_workflow --> combined_step_combined
+    routes_init --> workflow_workflow
     workflow_workflow --> review_services_graph
-    workflow_workflow --> core_config
+    workflow_workflow --> combined_step_combined
     workflow_workflow --> review_components_step_renderer
+    workflow_workflow --> core_config
 ```
 
 *28 cross-module dependencies detected*
@@ -237,51 +230,6 @@ class StructureDecompWorkflowConfig:
 
 ``` python
 DEFAULT_WORKFLOW_CONFIG_DIR
-```
-
-### formatting (`formatting.ipynb`)
-
-> Display formatting utilities for dates, times, and filenames
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.core.services.formatting import (
-    format_date,
-    format_time,
-    format_time_precise,
-    format_audio_filename
-)
-```
-
-#### Functions
-
-``` python
-def format_date(
-    created_at: str  # ISO date string, Unix timestamp, or similar
-) -> str:  # Formatted date for display
-    "Format a date string for human-readable display (e.g., 'Jan 20, 2026')."
-```
-
-``` python
-def format_time(
-    seconds: Optional[float]  # Time in seconds
-) -> str:  # Formatted time string (MM:SS)
-    "Format seconds as MM:SS for display."
-```
-
-``` python
-def format_time_precise(
-    seconds: Optional[float]  # Time in seconds
-) -> str:  # Formatted time string (m:ss.s)
-    "Format seconds as m:ss.s for sub-second display."
-```
-
-``` python
-def format_audio_filename(
-    audio_path: str  # Full path to audio file
-) -> str:  # Shortened filename for display
-    "Extract and format the filename from a path."
 ```
 
 ### graph (`graph.ipynb`)
@@ -531,39 +479,6 @@ from cjm_fasthtml_workflow_transcript_decomp.combined.html_ids import (
 ``` python
 class CombinedHtmlIds:
     "HTML ID constants for Phase 2 Shell: Dual-Column Layout shared chrome."
-    
-    def as_selector(
-            id_str:str  # The HTML ID to convert
-        ) -> str:  # CSS selector with # prefix
-        "Convert an ID to a CSS selector format."
-```
-
-### html_ids (`html_ids.ipynb`)
-
-> Core HTML ID constants for workflow-level components
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.core.html_ids import (
-    CoreHtmlIds
-)
-```
-
-#### Classes
-
-``` python
-class CoreHtmlIds:
-    """
-    HTML ID constants for workflow-level components.
-    
-    Page-specific IDs are in their respective packages:
-    - selection.html_ids.SelectionHtmlIds
-    - decomposition.html_ids.DecompositionHtmlIds
-    - alignment.html_ids.AlignmentHtmlIds
-    - combined.html_ids.CombinedHtmlIds
-    - review.html_ids.ReviewHtmlIds
-    """
     
     def as_selector(
             id_str:str  # The HTML ID to convert
@@ -975,53 +890,6 @@ def render_review_step(
     ctx:InteractionContext  # Interaction context with state and data
 ) -> Any:  # FastHTML component
     "Render Phase 3: Review & Commit step."
-```
-
-### text_utils (`text_utils.ipynb`)
-
-> Text processing utilities for word counting, splitting, and position
-> mapping
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.core.services.text_utils import (
-    count_words,
-    get_word_list,
-    word_index_to_char_position,
-    calculate_segment_stats
-)
-```
-
-#### Functions
-
-``` python
-def count_words(
-    text: str  # Text to count words in
-) -> int:  # Word count
-    "Count the number of whitespace-delimited words in text."
-```
-
-``` python
-def get_word_list(
-    text: str  # Text to split into words
-) -> List[str]:  # List of words
-    "Split text into a list of whitespace-delimited words."
-```
-
-``` python
-def word_index_to_char_position(
-    text: str,  # Full text
-    word_index: int  # Word index (0-based, split happens before this word)
-) -> int:  # Character position for split
-    "Convert a word index to the character position where a split should occur."
-```
-
-``` python
-def calculate_segment_stats(
-    segments: List[TextSegment]  # List of segments to analyze
-) -> Dict[str, Any]:  # Statistics dictionary with total_words, total_segments
-    "Calculate aggregate statistics for a list of segments."
 ```
 
 ### workflow (`workflow.ipynb`)
