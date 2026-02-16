@@ -14,7 +14,7 @@ from fasthtml.common import APIRouter
 from .core.init import init_core_routers
 from cjm_transcript_source_select.routes.init import init_selection_routers
 from cjm_transcript_segmentation.routes.init import init_segmentation_routers
-from ..alignment.routes.init import init_alignment_routers
+from cjm_transcript_vad_align.routes.init import init_alignment_routers
 
 # Import wrapped handlers for cross-domain coordination
 from cjm_fasthtml_workflow_transcript_decomp.combined.handlers import (

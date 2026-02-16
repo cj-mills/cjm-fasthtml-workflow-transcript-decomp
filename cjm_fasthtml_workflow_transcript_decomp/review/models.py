@@ -14,7 +14,7 @@ from cjm_source_provider.models import SourceBlock
 
 # Cross-package imports: primary owners are in page-specific packages
 from cjm_transcript_segmentation.models import TextSegment
-from ..alignment.models import VADChunk
+from cjm_transcript_vad_align.models import VADChunk
 
 # %% ../../nbs/review/models.ipynb #review-models-state
 class ReviewStepState(TypedDict, total=False):

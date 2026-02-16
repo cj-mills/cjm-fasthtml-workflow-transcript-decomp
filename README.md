@@ -12,24 +12,6 @@ pip install cjm_fasthtml_workflow_transcript_decomp
 ## Project Structure
 
     nbs/
-    ├── alignment/ (14)
-    │   ├── components/ (6)
-    │   │   ├── callbacks.ipynb          # Focus change callback and audio playback JavaScript for the alignment card stack
-    │   │   ├── card_stack_config.ipynb  # Card stack configuration, HTML IDs, and button IDs for the VAD alignment card stack
-    │   │   ├── helpers.ipynb            # State getters for the alignment step from InteractionContext
-    │   │   ├── keyboard_config.ipynb    # Alignment-specific keyboard building blocks for assembly into a shared ZoneManager
-    │   │   ├── step_renderer.ipynb      # Composable render functions for the alignment card stack column
-    │   │   └── vad_card.ipynb           # VAD chunk card renderer for the alignment card stack
-    │   ├── routes/ (4)
-    │   │   ├── card_stack.ipynb  # Card stack operations for the alignment column: navigation, viewport update, width save
-    │   │   ├── core.ipynb        # Alignment state context, getters, and updaters for route handlers
-    │   │   ├── handlers.ipynb    # Workflow-specific alignment handlers: init
-    │   │   └── init.ipynb        # Router assembly for Phase 2 alignment routes
-    │   ├── services/ (1)
-    │   │   └── alignment.ipynb  # Alignment service for temporal coordination via Silero VAD plugin
-    │   ├── html_ids.ipynb  # HTML ID constants for Phase 2 Right Column: VAD Alignment
-    │   ├── models.ipynb    # Data models and URL bundles for the alignment package
-    │   └── utils.ipynb     # Time formatting utilities for VAD alignment display
     ├── combined/ (5)
     │   ├── handlers.ipynb         # Handler wrappers for cross-domain coordination (alignment status updates)
     │   ├── helpers.ipynb          # State extraction helpers for cross-domain coordination in Phase 2 combined step
@@ -60,26 +42,12 @@ pip install cjm_fasthtml_workflow_transcript_decomp
     └── workflow/ (1)
         └── workflow.ipynb  # Main workflow class for structure decomposition
 
-Total: 34 notebooks across 6 directories
+Total: 20 notebooks across 5 directories
 
 ## Module Dependencies
 
 ``` mermaid
 graph LR
-    alignment_components_callbacks[alignment.components.callbacks<br/>callbacks]
-    alignment_components_card_stack_config[alignment.components.card_stack_config<br/>card_stack_config]
-    alignment_components_helpers[alignment.components.helpers<br/>helpers]
-    alignment_components_keyboard_config[alignment.components.keyboard_config<br/>keyboard_config]
-    alignment_components_step_renderer[alignment.components.step_renderer<br/>step_renderer]
-    alignment_components_vad_card[alignment.components.vad_card<br/>vad_card]
-    alignment_html_ids[alignment.html_ids<br/>html_ids]
-    alignment_models[alignment.models<br/>models]
-    alignment_routes_card_stack[alignment.routes.card_stack<br/>card_stack]
-    alignment_routes_core[alignment.routes.core<br/>core]
-    alignment_routes_handlers[alignment.routes.handlers<br/>handlers]
-    alignment_routes_init[alignment.routes.init<br/>init]
-    alignment_services_alignment[alignment.services.alignment<br/>alignment]
-    alignment_utils[alignment.utils<br/>utils]
     combined_handlers[combined.handlers<br/>handlers]
     combined_helpers[combined.helpers<br/>helpers]
     combined_html_ids[combined.html_ids<br/>html_ids]
@@ -101,81 +69,37 @@ graph LR
     routes_init[routes.init<br/>init]
     workflow_workflow[workflow.workflow<br/>workflow]
 
-    alignment_components_helpers --> alignment_models
-    alignment_components_step_renderer --> alignment_html_ids
-    alignment_components_step_renderer --> alignment_components_card_stack_config
-    alignment_components_step_renderer --> alignment_components_vad_card
-    alignment_components_step_renderer --> alignment_components_callbacks
-    alignment_components_step_renderer --> alignment_models
-    alignment_components_vad_card --> alignment_html_ids
-    alignment_components_vad_card --> alignment_utils
-    alignment_components_vad_card --> alignment_models
-    alignment_routes_card_stack --> alignment_routes_core
-    alignment_routes_card_stack --> alignment_components_card_stack_config
-    alignment_routes_card_stack --> alignment_components_vad_card
-    alignment_routes_card_stack --> alignment_models
-    alignment_routes_core --> alignment_models
-    alignment_routes_handlers --> alignment_html_ids
-    alignment_routes_handlers --> alignment_routes_core
-    alignment_routes_handlers --> alignment_components_step_renderer
-    alignment_routes_handlers --> alignment_services_alignment
-    alignment_routes_handlers --> alignment_models
-    alignment_routes_init --> alignment_services_alignment
-    alignment_routes_init --> alignment_models
-    alignment_routes_init --> alignment_routes_card_stack
-    alignment_routes_init --> alignment_routes_core
-    alignment_routes_init --> alignment_routes_handlers
-    alignment_services_alignment --> alignment_models
-    combined_handlers --> alignment_routes_core
-    combined_handlers --> combined_html_ids
     combined_handlers --> combined_keyboard_config
-    combined_handlers --> alignment_services_alignment
+    combined_handlers --> combined_html_ids
     combined_handlers --> combined_step_combined
-    combined_handlers --> alignment_routes_handlers
-    combined_handlers --> alignment_models
-    combined_helpers --> alignment_models
-    combined_keyboard_config --> alignment_components_card_stack_config
     combined_keyboard_config --> combined_html_ids
-    combined_keyboard_config --> alignment_components_keyboard_config
-    combined_keyboard_config --> alignment_models
-    combined_step_combined --> combined_html_ids
-    combined_step_combined --> alignment_components_step_renderer
     combined_step_combined --> combined_keyboard_config
     combined_step_combined --> combined_helpers
-    combined_step_combined --> alignment_components_card_stack_config
-    combined_step_combined --> alignment_models
+    combined_step_combined --> combined_html_ids
     review_components_step_renderer --> review_html_ids
-    review_models --> alignment_models
-    review_services_graph --> alignment_models
     review_services_graph --> review_models
     routes_core_audio --> workflow_workflow
-    routes_core_chrome --> alignment_components_step_renderer
-    routes_core_chrome --> combined_html_ids
-    routes_core_chrome --> alignment_components_card_stack_config
     routes_core_chrome --> combined_keyboard_config
-    routes_core_chrome --> workflow_workflow
+    routes_core_chrome --> combined_html_ids
     routes_core_chrome --> combined_step_combined
-    routes_core_chrome --> alignment_models
-    routes_core_init --> workflow_workflow
+    routes_core_chrome --> workflow_workflow
     routes_core_init --> routes_core_status
-    routes_core_init --> routes_core_chrome
-    routes_core_init --> routes_core_sources
     routes_core_init --> routes_core_audio
+    routes_core_init --> routes_core_sources
+    routes_core_init --> routes_core_chrome
+    routes_core_init --> workflow_workflow
     routes_core_sources --> workflow_workflow
     routes_core_status --> workflow_workflow
     routes_init --> combined_handlers
     routes_init --> workflow_workflow
-    routes_init --> alignment_routes_init
     routes_init --> routes_core_init
-    workflow_workflow --> review_services_graph
-    workflow_workflow --> review_components_step_renderer
     workflow_workflow --> combined_step_combined
-    workflow_workflow --> alignment_services_alignment
-    workflow_workflow --> alignment_models
+    workflow_workflow --> review_services_graph
     workflow_workflow --> core_config
+    workflow_workflow --> review_components_step_renderer
 ```
 
-*72 cross-module dependencies detected*
+*28 cross-module dependencies detected*
 
 ## CLI Reference
 
@@ -184,76 +108,6 @@ No CLI commands found in this project.
 ## Module Overview
 
 Detailed documentation for each module in the project:
-
-### alignment (`alignment.ipynb`)
-
-> Alignment service for temporal coordination via Silero VAD plugin
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.alignment.services.alignment import (
-    AlignmentService,
-    check_alignment_ready
-)
-```
-
-#### Functions
-
-``` python
-def check_alignment_ready(
-    segment_count: int,  # Number of text segments
-    chunk_count: int,  # Number of VAD chunks
-) -> bool:  # True if counts match and alignment can proceed
-    "Check if segment and VAD chunk counts match for 1:1 alignment."
-```
-
-#### Classes
-
-``` python
-class AlignmentService:
-    def __init__(
-        self,
-        plugin_manager: PluginManager,  # Plugin manager for accessing VAD plugin
-        plugin_name: str = "cjm-media-plugin-silero-vad"  # Name of the VAD plugin
-    )
-    "Service for temporal alignment via Silero VAD plugin."
-    
-    def __init__(
-            self,
-            plugin_manager: PluginManager,  # Plugin manager for accessing VAD plugin
-            plugin_name: str = "cjm-media-plugin-silero-vad"  # Name of the VAD plugin
-        )
-        "Initialize the alignment service."
-    
-    def is_available(self) -> bool:  # True if plugin is loaded and ready
-            """Check if the VAD plugin is available."""
-            return self._manager.get_plugin(self._plugin_name) is not None
-        
-        def ensure_loaded(
-            self,
-            config: Optional[Dict[str, Any]] = None  # Optional plugin configuration
-        ) -> bool:  # True if successfully loaded
-        "Check if the VAD plugin is available."
-    
-    def ensure_loaded(
-            self,
-            config: Optional[Dict[str, Any]] = None  # Optional plugin configuration
-        ) -> bool:  # True if successfully loaded
-        "Ensure the VAD plugin is loaded."
-    
-    async def analyze_audio_async(
-            self,
-            media_path: str  # Path to audio/video file
-        ) -> tuple[List[VADChunk], float]:  # (VAD chunks, total duration)
-        "Analyze audio file and return VAD chunks."
-    
-    def analyze_audio(
-            self,
-            media_path: str  # Path to audio/video file
-        ) -> tuple[List[VADChunk], float]:  # (VAD chunks, total duration)
-        "Analyze audio file synchronously."
-```
 
 ### audio (`audio.ipynb`)
 
@@ -290,133 +144,6 @@ def init_audio_router(
 
 ``` python
 DEBUG_AUDIO = False
-```
-
-### callbacks (`callbacks.ipynb`)
-
-> Focus change callback and audio playback JavaScript for the alignment
-> card stack
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.alignment.components.callbacks import (
-    generate_align_callbacks_script
-)
-```
-
-#### Functions
-
-``` python
-def _generate_align_focus_change_script(
-    focus_input_id:str,  # ID of hidden input for focused chunk index
-    audio_player_id:str,  # ID of the hidden audio element (for src URL extraction)
-    card_stack_id:str,  # ID of the alignment card stack container
-) -> str:  # JavaScript for focus change with audio playback and playing indicator
-    "Generate JS for VAD chunk focus change handling with Web Audio API playback."
-```
-
-``` python
-def generate_align_callbacks_script(
-    ids:CardStackHtmlIds,  # Card stack HTML IDs
-    button_ids:CardStackButtonIds,  # Card stack button IDs
-    config:CardStackConfig,  # Card stack configuration
-    urls:CardStackUrls,  # Card stack URL bundle
-    container_id:str,  # ID of the alignment container (parent of card stack)
-    focus_input_id:str,  # ID of hidden input for focused chunk index
-    audio_player_id:str,  # ID of the hidden audio element
-) -> any:  # Script element with all JavaScript callbacks
-    "Generate JavaScript for alignment card stack with audio audition."
-```
-
-### card_stack (`card_stack.ipynb`)
-
-> Card stack operations for the alignment column: navigation, viewport
-> update, width save
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.alignment.routes.card_stack import (
-    init_card_stack_router
-)
-```
-
-#### Functions
-
-``` python
-def _build_nav_response(
-    chunk_dicts:List[Dict[str, Any]],  # Serialized VAD chunks
-    state:CardStackState,  # Current card stack state
-    urls:AlignmentUrls,  # URL bundle
-) -> Tuple:  # OOB response elements (slots + progress + focus)
-    "Build OOB response for navigation changes."
-```
-
-``` python
-def _handle_align_navigate(
-    state_store:WorkflowStateStore,  # The workflow state store
-    workflow_id:str,  # The workflow identifier
-    sess:Any,  # FastHTML session object
-    direction:str,  # Navigation direction: up/down/first/last/page_up/page_down
-    urls:AlignmentUrls,  # URL bundle
-) -> Tuple:  # OOB response elements (slots + progress + focus)
-    "Navigate the alignment card stack."
-```
-
-``` python
-async def _handle_align_update_viewport(
-    state_store:WorkflowStateStore,  # The workflow state store
-    workflow_id:str,  # The workflow identifier
-    request:Any,  # FastHTML request object
-    sess:Any,  # FastHTML session object
-    visible_count:int,  # New visible card count
-    urls:AlignmentUrls,  # URL bundle
-) -> Tuple:  # OOB section elements for viewport update
-    "Update viewport with new card count via OOB section swaps."
-```
-
-``` python
-def _handle_align_save_width(
-    state_store:WorkflowStateStore,  # The workflow state store
-    workflow_id:str,  # The workflow identifier
-    sess:Any,  # FastHTML session object
-    card_width:int,  # Card stack width in rem to save
-) -> None:  # No response body (swap=none on client)
-    "Save card stack width to server state with config bounds validation."
-```
-
-``` python
-def init_card_stack_router(
-    state_store:WorkflowStateStore,  # The workflow state store
-    workflow_id:str,  # The workflow identifier
-    prefix:str,  # Route prefix (e.g., "/workflow/align/card_stack")
-    urls:AlignmentUrls,  # URL bundle (populated after routes defined)
-) -> Tuple[APIRouter, Dict[str, Callable]]:  # (router, route_dict)
-    "Initialize card stack routes for alignment."
-```
-
-### card_stack_config (`card_stack_config.ipynb`)
-
-> Card stack configuration, HTML IDs, and button IDs for the VAD
-> alignment card stack
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.alignment.components.card_stack_config import (
-    ALIGN_CS_CONFIG,
-    ALIGN_CS_IDS,
-    ALIGN_CS_BTN_IDS
-)
-```
-
-#### Variables
-
-``` python
-ALIGN_CS_CONFIG
-ALIGN_CS_IDS
-ALIGN_CS_BTN_IDS
 ```
 
 ### chrome (`chrome.ipynb`)
@@ -510,94 +237,6 @@ class StructureDecompWorkflowConfig:
 
 ``` python
 DEFAULT_WORKFLOW_CONFIG_DIR
-```
-
-### core (`core.ipynb`)
-
-> Alignment state context, getters, and updaters for route handlers
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.alignment.routes.core import (
-    WorkflowStateStore,
-    DEBUG_ALIGN_STATE,
-    AlignContext
-)
-```
-
-#### Functions
-
-``` python
-def _get_alignment_state(
-    state_store:WorkflowStateStore,  # The workflow state store
-    workflow_id:str,  # The workflow identifier
-    session_id:str,  # Session identifier
-) -> AlignmentStepState:  # Typed alignment step state
-    "Get the alignment step state from the workflow state store."
-```
-
-``` python
-def _get_selection_state(
-    state_store:WorkflowStateStore,  # The workflow state store
-    workflow_id:str,  # The workflow identifier
-    session_id:str,  # Session identifier
-) -> Dict[str, Any]:  # Selection step state dictionary
-    "Get the selection step state (Phase 1) from the workflow state store."
-```
-
-``` python
-def _load_alignment_context(
-    state_store:WorkflowStateStore,  # The workflow state store
-    workflow_id:str,  # The workflow identifier
-    session_id:str,  # Session identifier
-) -> AlignContext:  # Loaded context with all common alignment state
-    "Load commonly-needed alignment state values in a single call."
-```
-
-``` python
-def _update_alignment_state(
-    state_store:WorkflowStateStore,  # The workflow state store
-    workflow_id:str,  # The workflow identifier
-    session_id:str,  # Session identifier
-    vad_chunks=None,  # Updated VAD chunks (serialized)
-    focused_chunk_index=None,  # Updated focused chunk index
-    is_initialized=None,  # Initialization flag
-    visible_count=None,  # Visible card count
-    is_auto_mode=None,  # Auto-adjust mode flag
-    card_width=None,  # Card stack width in rem
-    media_path=None,  # Original audio file path
-    audio_duration=None,  # Audio duration
-) -> None
-    "Update the alignment step state in the workflow state store."
-```
-
-``` python
-def _to_vad_chunks(
-    chunk_dicts:List[Dict[str, Any]]  # Serialized VAD chunk dictionaries
-) -> List[VADChunk]:  # List of VADChunk objects
-    "Convert chunk dictionaries to VADChunk objects."
-```
-
-``` python
-def _build_card_stack_state(
-    ctx:AlignContext,  # Loaded alignment context
-    active_mode:str=None,  # Current interaction mode name (unused for alignment)
-) -> CardStackState:  # Card stack state for library functions
-    "Build a CardStackState from alignment context for library functions."
-```
-
-#### Classes
-
-``` python
-class AlignContext(NamedTuple):
-    "Common alignment state values loaded by handlers."
-```
-
-#### Variables
-
-``` python
-DEBUG_ALIGN_STATE = False
 ```
 
 ### formatting (`formatting.ipynb`)
@@ -716,78 +355,6 @@ Requires 1:1 alignment: len(text_segments) == len(vad_chunks)."
 
 ### handlers (`handlers.ipynb`)
 
-> Workflow-specific alignment handlers: init
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.alignment.routes.handlers import (
-    DEBUG_ALIGNMENT,
-    AlignInitResult,
-    init_workflow_router
-)
-```
-
-#### Functions
-
-``` python
-async def _handle_align_init(
-    state_store:WorkflowStateStore,  # The workflow state store
-    workflow_id:str,  # The workflow identifier
-    source_service:SourceService,  # Service for fetching source blocks
-    alignment_service:AlignmentService,  # Service for VAD analysis
-    request,  # FastHTML request object
-    sess,  # FastHTML session object
-    urls:AlignmentUrls,  # URL bundle
-    visible_count:int=DEFAULT_VISIBLE_COUNT,  # Initial visible card count
-    card_width:int=DEFAULT_CARD_WIDTH,  # Initial card width in rem
-) -> AlignInitResult:  # Pure domain result for wrapper to use
-    """
-    Initialize alignment from audio file via VAD plugin.
-    
-    Returns pure domain data. The combined layer wrapper adds cross-domain
-    coordination (shared chrome, alignment status).
-    """
-```
-
-``` python
-def init_workflow_router(
-    state_store:WorkflowStateStore,  # The workflow state store
-    workflow_id:str,  # The workflow identifier
-    source_service:SourceService,  # Service for fetching source blocks
-    alignment_service:AlignmentService,  # Service for VAD analysis
-    prefix:str,  # Route prefix (e.g., "/workflow/align/workflow")
-    urls:AlignmentUrls,  # URL bundle (populated after routes defined)
-    handler_init:Callable=None,  # Optional wrapped init handler
-) -> Tuple[APIRouter, Dict[str, Callable]]:  # (router, route_dict)
-    """
-    Initialize workflow routes for alignment.
-    
-    Accepts optional handler override for wrapping with cross-domain
-    coordination (e.g., shared chrome, alignment status OOB updates).
-    """
-```
-
-#### Classes
-
-``` python
-class AlignInitResult(NamedTuple):
-    """
-    Result from pure alignment init handler.
-    
-    Contains domain-specific data for the combined layer wrapper to use
-    when building cross-domain OOB elements (shared chrome, alignment status).
-    """
-```
-
-#### Variables
-
-``` python
-DEBUG_ALIGNMENT = True
-```
-
-### handlers (`handlers.ipynb`)
-
 > Handler wrappers for cross-domain coordination (alignment status
 > updates)
 
@@ -881,91 +448,6 @@ def create_align_init_chrome_wrapper() -> Callable:  # Wrapped handler that adds
 
 ### helpers (`helpers.ipynb`)
 
-> State getters for the alignment step from InteractionContext
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.alignment.components.helpers import *
-```
-
-#### Functions
-
-``` python
-def _get_alignment_state(
-    ctx:InteractionContext  # Interaction context with state
-) -> AlignmentStepState:  # Typed alignment step state
-    "Get the full alignment step state from context."
-```
-
-``` python
-def _get_vad_chunks(
-    ctx:InteractionContext  # Interaction context with state
-) -> List[VADChunk]:  # List of VADChunk objects
-    "Get the list of VAD chunks from step state as VADChunk objects."
-```
-
-``` python
-def _is_alignment_initialized(
-    ctx:InteractionContext  # Interaction context with state
-) -> bool:  # True if VAD data has been fetched
-    "Check if alignment has been initialized."
-```
-
-``` python
-def _get_focused_chunk_index(
-    ctx:InteractionContext,  # Interaction context with state
-    default:int=0,  # Default focused chunk index
-) -> int:  # Currently focused VAD chunk index
-    "Get the currently focused VAD chunk index."
-```
-
-``` python
-def _get_alignment_visible_count(
-    ctx:InteractionContext,  # Interaction context with state
-    default:int=5,  # Default visible card count (compact cards)
-) -> int:  # Number of visible cards in viewport
-    "Get the stored visible card count."
-```
-
-``` python
-def _get_alignment_is_auto_mode(
-    ctx:InteractionContext,  # Interaction context with state
-) -> bool:  # Whether card count is in auto-adjust mode
-    "Get whether the card count is in auto-adjust mode."
-```
-
-``` python
-def _get_alignment_card_width(
-    ctx:InteractionContext,  # Interaction context with state
-    default:int=40,  # Default card width in rem (narrower for alignment)
-) -> int:  # Card stack width in rem
-    "Get the stored card stack width."
-```
-
-``` python
-def _get_alignment_history(
-    ctx:InteractionContext  # Interaction context with state
-) -> list:  # Undo history stack
-    "Get the undo history stack."
-```
-
-``` python
-def _get_media_path(
-    ctx:InteractionContext  # Interaction context with state
-) -> Optional[str]:  # Path to original audio file or None
-    "Get the original audio file path."
-```
-
-``` python
-def _get_audio_duration(
-    ctx:InteractionContext  # Interaction context with state
-) -> Optional[float]:  # Audio duration in seconds or None
-    "Get the total audio duration."
-```
-
-### helpers (`helpers.ipynb`)
-
 > State extraction helpers for cross-domain coordination in Phase 2
 > combined step
 
@@ -1030,35 +512,6 @@ SEG_DEFAULT_VISIBLE_COUNT = 3
 SEG_DEFAULT_CARD_WIDTH = 80
 ALIGN_DEFAULT_VISIBLE_COUNT = 5
 ALIGN_DEFAULT_CARD_WIDTH = 40
-```
-
-### html_ids (`html_ids.ipynb`)
-
-> HTML ID constants for Phase 2 Right Column: VAD Alignment
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.alignment.html_ids import (
-    AlignmentHtmlIds
-)
-```
-
-#### Classes
-
-``` python
-class AlignmentHtmlIds:
-    "HTML ID constants for Phase 2 Right Column: VAD Alignment."
-    
-    def as_selector(
-            id_str:str  # The HTML ID to convert
-        ) -> str:  # CSS selector with # prefix
-        "Convert an ID to a CSS selector format."
-    
-    def vad_chunk(
-            index:int  # VAD chunk index
-        ) -> str:  # HTML ID for the VAD chunk element
-        "Generate HTML ID for a VAD chunk element."
 ```
 
 ### html_ids (`html_ids.ipynb`)
@@ -1144,33 +597,6 @@ class ReviewHtmlIds:
 
 ### init (`init.ipynb`)
 
-> Router assembly for Phase 2 alignment routes
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.alignment.routes.init import (
-    init_alignment_routers
-)
-```
-
-#### Functions
-
-``` python
-def init_alignment_routers(
-    state_store:WorkflowStateStore,  # The workflow state store
-    workflow_id:str,  # The workflow identifier
-    source_service:SourceService,  # Service for fetching source blocks
-    alignment_service:AlignmentService,  # Service for VAD analysis
-    prefix:str,  # Base prefix for alignment routes (e.g., "/workflow/align")
-    audio_src_url:str,  # URL for audio_src route (from core router)
-    wrapped_init:Callable=None,  # Optional wrapped init handler
-) -> Tuple[List[APIRouter], AlignmentUrls, Dict[str, Callable]]:  # (routers, urls, merged_routes)
-    "Initialize and return all alignment routers with URL bundle."
-```
-
-### init (`init.ipynb`)
-
 > Router assembly for core workflow routes
 
 #### Import
@@ -1210,30 +636,6 @@ def init_routers(
     workflow: "StructureDecompWorkflow",  # The workflow instance
 ) -> List[APIRouter]:  # List of configured routers
     "Initialize and return all workflow routers."
-```
-
-### keyboard_config (`keyboard_config.ipynb`)
-
-> Alignment-specific keyboard building blocks for assembly into a shared
-> ZoneManager
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.alignment.components.keyboard_config import (
-    create_align_kb_parts
-)
-```
-
-#### Functions
-
-``` python
-def create_align_kb_parts(
-    ids:CardStackHtmlIds,  # Card stack HTML IDs
-    button_ids:CardStackButtonIds,  # Card stack button IDs for navigation
-    config:CardStackConfig,  # Card stack configuration
-) -> Tuple[FocusZone, tuple, tuple]:  # (zone, actions, modes)
-    "Create alignment-specific keyboard building blocks."
 ```
 
 ### keyboard_config (`keyboard_config.ipynb`)
@@ -1285,71 +687,6 @@ def generate_zone_change_js(
 DEBUG_KB_SYSTEM = True
 ZONE_CHANGE_CALLBACK = 'onCombinedZoneChange'
 SWITCH_CHROME_BTN_ID = 'sd-switch-chrome-btn'
-```
-
-### models (`models.ipynb`)
-
-> Data models and URL bundles for the alignment package
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.alignment.models import (
-    AlignmentStepState,
-    VADChunk,
-    AlignmentUrls
-)
-```
-
-#### Classes
-
-``` python
-class AlignmentStepState(TypedDict):
-    "State for Phase 2 (right column): Temporal Alignment."
-```
-
-``` python
-@dataclass
-class VADChunk:
-    "A voice activity detection time range."
-    
-    index: int  # Chunk index in sequence
-    start_time: float  # Start time in seconds
-    end_time: float  # End time in seconds
-    
-    def duration(self) -> float:  # Duration in seconds
-            """Calculate chunk duration."""
-            return self.end_time - self.start_time
-        
-        def to_dict(self) -> Dict[str, Any]:  # Dictionary representation
-        "Calculate chunk duration."
-    
-    def to_dict(self) -> Dict[str, Any]:  # Dictionary representation
-            """Convert to dictionary for JSON serialization."""
-            return asdict(self)
-        
-        @classmethod
-        def from_dict(
-            cls,
-            data: Dict[str, Any]  # Dictionary representation
-        ) -> "VADChunk":  # Reconstructed VADChunk
-        "Convert to dictionary for JSON serialization."
-    
-    def from_dict(
-            cls,
-            data: Dict[str, Any]  # Dictionary representation
-        ) -> "VADChunk":  # Reconstructed VADChunk
-        "Create from dictionary."
-```
-
-``` python
-@dataclass
-class AlignmentUrls:
-    "URL bundle for Phase 2 alignment route handlers and renderers."
-    
-    card_stack: CardStackUrls = field(...)
-    init: str = ''  # Initialize alignment (fetch VAD data)
-    audio_src: str = ''  # Audio file serving URL base
 ```
 
 ### models (`models.ipynb`)
@@ -1621,76 +958,6 @@ _ALIGNMENT_COLUMN_CLS
 
 ### step_renderer (`step_renderer.ipynb`)
 
-> Composable render functions for the alignment card stack column
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.alignment.components.step_renderer import (
-    DEBUG_ALIGN_RENDER,
-    render_align_toolbar,
-    render_align_stats,
-    render_align_column_body,
-    render_align_footer_content,
-    render_align_mini_stats_text
-)
-```
-
-#### Functions
-
-``` python
-def render_align_toolbar(
-    visible_count:int=DEFAULT_VISIBLE_COUNT,  # Current visible card count
-    is_auto_mode:bool=False,  # Whether card count is in auto-adjust mode
-    oob:bool=False,  # Whether to render as OOB swap
-) -> Any:  # Toolbar component
-    "Render the alignment toolbar with card count selector."
-```
-
-``` python
-def render_align_stats(
-    chunks:List[VADChunk],  # Current VAD chunks
-    oob:bool=False,  # Whether to render as OOB swap
-) -> Any:  # Statistics component
-    "Render alignment statistics."
-```
-
-``` python
-def render_align_column_body(
-    chunks:List[VADChunk],  # VAD chunks to display
-    focused_index:int,  # Currently focused chunk index
-    visible_count:int,  # Number of visible cards in viewport
-    card_width:int,  # Card stack width in rem
-    urls:AlignmentUrls,  # URL bundle for alignment routes
-    kb_system:Any=None,  # Rendered keyboard system (None when KB managed externally)
-    media_path:Optional[str]=None,  # Path to audio file for playback
-) -> Any:  # Div with id=COLUMN_CONTENT
-    "Render the alignment column content area with card stack viewport."
-```
-
-``` python
-def render_align_footer_content(
-    chunks:List[VADChunk],  # Current VAD chunks
-    focused_index:int,  # Currently focused chunk index
-) -> Any:  # Footer content with progress indicator and stats
-    "Render footer content with progress indicator and alignment statistics."
-```
-
-``` python
-def render_align_mini_stats_text(
-    chunks:List[VADChunk],  # Current VAD chunks
-) -> str:  # Compact stats string for column header badge
-    "Generate compact stats string for the alignment column header badge."
-```
-
-#### Variables
-
-``` python
-DEBUG_ALIGN_RENDER = False
-```
-
-### step_renderer (`step_renderer.ipynb`)
-
 > Placeholder step renderer for Phase 3: Review & Commit
 
 #### Import
@@ -1755,60 +1022,6 @@ def calculate_segment_stats(
     segments: List[TextSegment]  # List of segments to analyze
 ) -> Dict[str, Any]:  # Statistics dictionary with total_words, total_segments
     "Calculate aggregate statistics for a list of segments."
-```
-
-### utils (`utils.ipynb`)
-
-> Time formatting utilities for VAD alignment display
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.alignment.utils import (
-    format_time_precise
-)
-```
-
-#### Functions
-
-``` python
-def format_time_precise(
-    seconds: Optional[float]  # Time in seconds
-) -> str:  # Formatted time string (m:ss.s)
-    "Format seconds as m:ss.s for sub-second display."
-```
-
-### vad_card (`vad_card.ipynb`)
-
-> VAD chunk card renderer for the alignment card stack
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.alignment.components.vad_card import (
-    render_vad_card,
-    create_vad_card_renderer
-)
-```
-
-#### Functions
-
-``` python
-def render_vad_card(
-    chunk:VADChunk,  # VAD chunk to render
-    card_role:CardRole,  # Role of this card in viewport ("focused" or "context")
-) -> Any:  # VAD chunk card component
-    "Render a single VAD chunk card with time range, duration, and playing indicator."
-```
-
-``` python
-def create_vad_card_renderer() -> Callable:  # Card renderer callback: (item, CardRenderContext) -> FT
-    """Create a card renderer callback for VAD chunk cards."""
-    def _render(
-        item:Any,  # VADChunk instance
-        context:CardRenderContext,  # Render context from card stack library
-    ) -> Any:  # Rendered VAD chunk card component
-    "Create a card renderer callback for VAD chunk cards."
 ```
 
 ### workflow (`workflow.ipynb`)

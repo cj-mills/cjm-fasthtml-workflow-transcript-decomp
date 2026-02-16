@@ -44,7 +44,7 @@ from cjm_fasthtml_card_stack.core.constants import DEFAULT_VISIBLE_COUNT, DEFAUL
 from .html_ids import CombinedHtmlIds
 from cjm_transcript_segmentation.html_ids import SegmentationHtmlIds
 from cjm_transcript_segmentation.models import TextSegment, SegmentationUrls
-from ..alignment.models import VADChunk, AlignmentUrls
+from cjm_transcript_vad_align.models import VADChunk, AlignmentUrls
 
 # State extraction helpers (combined-level)
 from cjm_fasthtml_workflow_transcript_decomp.combined.helpers import (
@@ -58,10 +58,10 @@ from cjm_transcript_segmentation.components.step_renderer import (
 )
 
 # Alignment composable renderers
-from cjm_fasthtml_workflow_transcript_decomp.alignment.components.step_renderer import (
+from cjm_transcript_vad_align.components.step_renderer import (
     render_align_column_body, render_align_mini_stats_text,
 )
-from cjm_fasthtml_workflow_transcript_decomp.alignment.components.card_stack_config import (
+from cjm_transcript_vad_align.components.card_stack_config import (
     ALIGN_CS_IDS,
 )
 

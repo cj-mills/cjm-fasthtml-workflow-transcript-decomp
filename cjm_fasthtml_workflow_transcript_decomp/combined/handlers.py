@@ -41,14 +41,14 @@ from cjm_transcript_segmentation.components.step_renderer import (
 from cjm_transcript_segmentation.components.card_stack_config import (
     SEG_CS_CONFIG, SEG_CS_IDS,
 )
-from ..alignment.models import AlignmentUrls, VADChunk
-from cjm_fasthtml_workflow_transcript_decomp.alignment.routes.core import (
+from cjm_transcript_vad_align.models import AlignmentUrls, VADChunk
+from cjm_transcript_vad_align.routes.core import (
     WorkflowStateStore as AlignWorkflowStateStore,
 )
-from cjm_fasthtml_workflow_transcript_decomp.alignment.routes.handlers import (
+from cjm_transcript_vad_align.routes.handlers import (
     AlignInitResult, _handle_align_init,
 )
-from ..alignment.services.alignment import AlignmentService
+from cjm_transcript_vad_align.services.alignment import AlignmentService
 from cjm_transcript_source_select.services.source import SourceService
 
 # %% ../../nbs/combined/handlers.ipynb #e5f6a7b8

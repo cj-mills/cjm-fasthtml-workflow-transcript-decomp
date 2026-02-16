@@ -17,7 +17,7 @@ from cjm_graph_domains.domains.relations import StructureRelations
 
 from ..models import WorkingDocument
 from cjm_transcript_segmentation.models import TextSegment
-from ...alignment.models import VADChunk
+from cjm_transcript_vad_align.models import VADChunk
 
 # %% ../../../nbs/review/services/graph.ipynb #3be5680e
 class GraphService:

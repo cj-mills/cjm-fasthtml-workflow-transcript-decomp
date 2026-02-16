@@ -44,16 +44,16 @@ from cjm_transcript_segmentation.components.card_stack_config import (
 )
 
 # Alignment-specific keyboard config (building blocks)
-from cjm_fasthtml_workflow_transcript_decomp.alignment.components.keyboard_config import (
+from cjm_transcript_vad_align.components.keyboard_config import (
     create_align_kb_parts,
 )
-from cjm_fasthtml_workflow_transcript_decomp.alignment.components.card_stack_config import (
+from cjm_transcript_vad_align.components.card_stack_config import (
     ALIGN_CS_CONFIG, ALIGN_CS_IDS, ALIGN_CS_BTN_IDS,
 )
 
 # URL bundles
 from cjm_transcript_segmentation.models import SegmentationUrls
-from ..alignment.models import AlignmentUrls
+from cjm_transcript_vad_align.models import AlignmentUrls
 
 # Debug flag for keyboard system tracing (set False in production)
 DEBUG_KB_SYSTEM = True

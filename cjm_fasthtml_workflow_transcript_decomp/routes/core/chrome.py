@@ -17,7 +17,7 @@ from cjm_fasthtml_interactions.core.state_store import get_session_id
 
 from ...combined.html_ids import CombinedHtmlIds
 from cjm_transcript_segmentation.models import TextSegment, SegmentationUrls
-from ...alignment.models import VADChunk, AlignmentUrls
+from cjm_transcript_vad_align.models import VADChunk, AlignmentUrls
 from ...workflow.workflow import StructureDecompWorkflow
 
 # Segmentation renderers
@@ -30,10 +30,10 @@ from cjm_transcript_segmentation.components.card_stack_config import (
 )
 
 # Alignment renderers
-from cjm_fasthtml_workflow_transcript_decomp.alignment.components.step_renderer import (
+from cjm_transcript_vad_align.components.step_renderer import (
     render_align_toolbar, render_align_footer_content,
 )
-from cjm_fasthtml_workflow_transcript_decomp.alignment.components.card_stack_config import (
+from cjm_transcript_vad_align.components.card_stack_config import (
     ALIGN_CS_CONFIG, ALIGN_CS_IDS,
 )
 
