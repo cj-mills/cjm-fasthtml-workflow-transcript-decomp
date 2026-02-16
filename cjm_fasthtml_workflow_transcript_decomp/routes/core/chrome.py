@@ -16,16 +16,16 @@ from cjm_fasthtml_card_stack.core.constants import DEFAULT_VISIBLE_COUNT, DEFAUL
 from cjm_fasthtml_interactions.core.state_store import get_session_id
 
 from ...combined.html_ids import CombinedHtmlIds
-from ...decomposition.models import TextSegment, SegmentationUrls
+from cjm_transcript_segmentation.models import TextSegment, SegmentationUrls
 from ...alignment.models import VADChunk, AlignmentUrls
 from ...workflow.workflow import StructureDecompWorkflow
 
 # Segmentation renderers
-from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.step_renderer import (
+from cjm_transcript_segmentation.components.step_renderer import (
     render_toolbar as render_seg_toolbar,
     render_seg_footer_content,
 )
-from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.card_stack_config import (
+from cjm_transcript_segmentation.components.card_stack_config import (
     SEG_CS_CONFIG, SEG_CS_IDS,
 )
 

@@ -8,7 +8,7 @@ __all__ = ['count_words', 'get_word_list', 'word_index_to_char_position', 'calcu
 # %% ../../../nbs/core/services/text_utils.ipynb #tu-imports
 from typing import List, Dict, Any
 
-from ...decomposition.models import TextSegment
+from cjm_transcript_segmentation.models import TextSegment
 
 # %% ../../../nbs/core/services/text_utils.ipynb #tu-count-words
 def count_words(

@@ -13,7 +13,7 @@ from typing import Any, Dict, List, Optional
 from cjm_fasthtml_interactions.core.context import InteractionContext
 from cjm_fasthtml_card_stack.core.constants import DEFAULT_VISIBLE_COUNT, DEFAULT_CARD_WIDTH
 
-from ..decomposition.models import TextSegment
+from cjm_transcript_segmentation.models import TextSegment
 from ..alignment.models import VADChunk
 
 # %% ../../nbs/combined/helpers.ipynb #e5f6a7b8

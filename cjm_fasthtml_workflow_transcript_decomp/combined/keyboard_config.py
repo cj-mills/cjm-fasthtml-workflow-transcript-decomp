@@ -33,12 +33,12 @@ from cjm_fasthtml_card_stack.keyboard.actions import build_card_stack_url_map
 from .html_ids import CombinedHtmlIds
 
 # Segmentation-specific keyboard config (building blocks)
-from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.keyboard_config import (
+from cjm_transcript_segmentation.components.keyboard_config import (
     SD_SEG_ENTER_SPLIT_BTN, SD_SEG_EXIT_SPLIT_BTN,
     SD_SEG_SPLIT_BTN, SD_SEG_MERGE_BTN, SD_SEG_UNDO_BTN,
     create_seg_kb_parts,
 )
-from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.card_stack_config import (
+from cjm_transcript_segmentation.components.card_stack_config import (
     SEG_CS_CONFIG, SEG_CS_IDS, SEG_CS_BTN_IDS,
     SEG_TS_IDS,
 )
@@ -52,7 +52,7 @@ from cjm_fasthtml_workflow_transcript_decomp.alignment.components.card_stack_con
 )
 
 # URL bundles
-from ..decomposition.models import SegmentationUrls
+from cjm_transcript_segmentation.models import SegmentationUrls
 from ..alignment.models import AlignmentUrls
 
 # Debug flag for keyboard system tracing (set False in production)

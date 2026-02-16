@@ -29,16 +29,16 @@ from cjm_fasthtml_workflow_transcript_decomp.combined.keyboard_config import (
     build_combined_kb_system, render_keyboard_hints_collapsible,
     generate_zone_change_js, SWITCH_CHROME_BTN_ID,
 )
-from ..decomposition.models import TextSegment, SegmentationUrls
-from ..decomposition.routes.core import WorkflowStateStore
-from cjm_fasthtml_workflow_transcript_decomp.decomposition.routes.handlers import (
+from cjm_transcript_segmentation.models import TextSegment, SegmentationUrls
+from cjm_transcript_segmentation.routes.core import WorkflowStateStore
+from cjm_transcript_segmentation.routes.handlers import (
     SegInitResult, _handle_seg_init, _handle_seg_split, _handle_seg_merge,
     _handle_seg_undo, _handle_seg_reset, _handle_seg_ai_split,
 )
-from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.step_renderer import (
+from cjm_transcript_segmentation.components.step_renderer import (
     render_toolbar, render_seg_footer_content,
 )
-from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.card_stack_config import (
+from cjm_transcript_segmentation.components.card_stack_config import (
     SEG_CS_CONFIG, SEG_CS_IDS,
 )
 from ..alignment.models import AlignmentUrls, VADChunk

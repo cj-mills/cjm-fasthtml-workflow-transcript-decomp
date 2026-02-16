@@ -42,24 +42,6 @@ pip install cjm_fasthtml_workflow_transcript_decomp
     │   │   └── text_utils.ipynb  # Text processing utilities for word counting, splitting, and position mapping
     │   ├── config.ipynb    # Configuration dataclass for structure decomposition workflow
     │   └── html_ids.ipynb  # Core HTML ID constants for workflow-level components
-    ├── decomposition/ (14)
-    │   ├── components/ (6)
-    │   │   ├── callbacks.ipynb          # JavaScript callback generators for Phase 2 segmentation keyboard interaction
-    │   │   ├── card_stack_config.ipynb  # Card stack configuration constants for the Phase 2 segmentation UI
-    │   │   ├── helpers.ipynb            # Shared helper functions for the segmentation module
-    │   │   ├── keyboard_config.ipynb    # Segmentation-specific keyboard actions, modes, and zone configuration
-    │   │   ├── segment_card.ipynb       # Segment card component with view and split modes
-    │   │   └── step_renderer.ipynb      # Composable renderers for the Phase 2 segmentation column and shared chrome
-    │   ├── routes/ (4)
-    │   │   ├── card_stack.ipynb  # Card stack UI operations — navigation, viewport, mode switching, and response builders
-    │   │   ├── core.ipynb        # Segmentation step state management helpers
-    │   │   ├── handlers.ipynb    # Segmentation workflow handlers — init, split, merge, undo, reset, AI split
-    │   │   └── init.ipynb        # Router assembly for Phase 2 segmentation routes
-    │   ├── services/ (1)
-    │   │   └── segmentation.ipynb  # Segmentation service for text decomposition via NLTK plugin
-    │   ├── html_ids.ipynb  # HTML ID constants for Phase 2 Left Column: Text Segmentation
-    │   ├── models.ipynb    # Data models and URL bundles for Phase 2 Left Column: Text Segmentation
-    │   └── utils.ipynb     # Text processing utilities for segmentation: word counting, position mapping, and statistics
     ├── review/ (4)
     │   ├── components/ (1)
     │   │   └── step_renderer.ipynb  # Placeholder step renderer for Phase 3: Review & Commit
@@ -78,7 +60,7 @@ pip install cjm_fasthtml_workflow_transcript_decomp
     └── workflow/ (1)
         └── workflow.ipynb  # Main workflow class for structure decomposition
 
-Total: 48 notebooks across 7 directories
+Total: 34 notebooks across 6 directories
 
 ## Module Dependencies
 
@@ -107,20 +89,6 @@ graph LR
     core_html_ids[core.html_ids<br/>html_ids]
     core_services_formatting[core.services.formatting<br/>formatting]
     core_services_text_utils[core.services.text_utils<br/>text_utils]
-    decomposition_components_callbacks[decomposition.components.callbacks<br/>callbacks]
-    decomposition_components_card_stack_config[decomposition.components.card_stack_config<br/>card_stack_config]
-    decomposition_components_helpers[decomposition.components.helpers<br/>helpers]
-    decomposition_components_keyboard_config[decomposition.components.keyboard_config<br/>keyboard_config]
-    decomposition_components_segment_card[decomposition.components.segment_card<br/>segment_card]
-    decomposition_components_step_renderer[decomposition.components.step_renderer<br/>step_renderer]
-    decomposition_html_ids[decomposition.html_ids<br/>html_ids]
-    decomposition_models[decomposition.models<br/>models]
-    decomposition_routes_card_stack[decomposition.routes.card_stack<br/>card_stack]
-    decomposition_routes_core[decomposition.routes.core<br/>core]
-    decomposition_routes_handlers[decomposition.routes.handlers<br/>handlers]
-    decomposition_routes_init[decomposition.routes.init<br/>init]
-    decomposition_services_segmentation[decomposition.services.segmentation<br/>segmentation]
-    decomposition_utils[decomposition.utils<br/>utils]
     review_components_step_renderer[review.components.step_renderer<br/>step_renderer]
     review_html_ids[review.html_ids<br/>html_ids]
     review_models[review.models<br/>models]
@@ -134,132 +102,80 @@ graph LR
     workflow_workflow[workflow.workflow<br/>workflow]
 
     alignment_components_helpers --> alignment_models
-    alignment_components_step_renderer --> alignment_models
+    alignment_components_step_renderer --> alignment_html_ids
     alignment_components_step_renderer --> alignment_components_card_stack_config
     alignment_components_step_renderer --> alignment_components_vad_card
-    alignment_components_step_renderer --> alignment_html_ids
     alignment_components_step_renderer --> alignment_components_callbacks
-    alignment_components_vad_card --> alignment_utils
+    alignment_components_step_renderer --> alignment_models
     alignment_components_vad_card --> alignment_html_ids
+    alignment_components_vad_card --> alignment_utils
     alignment_components_vad_card --> alignment_models
     alignment_routes_card_stack --> alignment_routes_core
-    alignment_routes_card_stack --> alignment_models
     alignment_routes_card_stack --> alignment_components_card_stack_config
     alignment_routes_card_stack --> alignment_components_vad_card
+    alignment_routes_card_stack --> alignment_models
     alignment_routes_core --> alignment_models
-    alignment_routes_handlers --> alignment_models
-    alignment_routes_handlers --> alignment_components_step_renderer
-    alignment_routes_handlers --> alignment_routes_core
-    alignment_routes_handlers --> alignment_services_alignment
     alignment_routes_handlers --> alignment_html_ids
-    alignment_routes_init --> alignment_routes_core
-    alignment_routes_init --> alignment_routes_card_stack
-    alignment_routes_init --> alignment_models
-    alignment_routes_init --> alignment_routes_handlers
+    alignment_routes_handlers --> alignment_routes_core
+    alignment_routes_handlers --> alignment_components_step_renderer
+    alignment_routes_handlers --> alignment_services_alignment
+    alignment_routes_handlers --> alignment_models
     alignment_routes_init --> alignment_services_alignment
+    alignment_routes_init --> alignment_models
+    alignment_routes_init --> alignment_routes_card_stack
+    alignment_routes_init --> alignment_routes_core
+    alignment_routes_init --> alignment_routes_handlers
     alignment_services_alignment --> alignment_models
-    combined_handlers --> combined_keyboard_config
-    combined_handlers --> decomposition_routes_handlers
-    combined_handlers --> alignment_models
-    combined_handlers --> combined_step_combined
-    combined_handlers --> alignment_routes_handlers
-    combined_handlers --> decomposition_components_step_renderer
-    combined_handlers --> decomposition_routes_core
-    combined_handlers --> decomposition_components_card_stack_config
-    combined_handlers --> alignment_services_alignment
-    combined_handlers --> decomposition_models
     combined_handlers --> alignment_routes_core
     combined_handlers --> combined_html_ids
+    combined_handlers --> combined_keyboard_config
+    combined_handlers --> alignment_services_alignment
+    combined_handlers --> combined_step_combined
+    combined_handlers --> alignment_routes_handlers
+    combined_handlers --> alignment_models
     combined_helpers --> alignment_models
-    combined_helpers --> decomposition_models
-    combined_keyboard_config --> alignment_models
     combined_keyboard_config --> alignment_components_card_stack_config
-    combined_keyboard_config --> decomposition_components_card_stack_config
-    combined_keyboard_config --> alignment_components_keyboard_config
-    combined_keyboard_config --> decomposition_components_keyboard_config
-    combined_keyboard_config --> decomposition_models
     combined_keyboard_config --> combined_html_ids
-    combined_step_combined --> combined_keyboard_config
-    combined_step_combined --> alignment_models
-    combined_step_combined --> alignment_components_card_stack_config
-    combined_step_combined --> decomposition_components_step_renderer
-    combined_step_combined --> alignment_components_step_renderer
-    combined_step_combined --> decomposition_components_card_stack_config
-    combined_step_combined --> decomposition_html_ids
-    combined_step_combined --> decomposition_models
-    combined_step_combined --> combined_helpers
+    combined_keyboard_config --> alignment_components_keyboard_config
+    combined_keyboard_config --> alignment_models
     combined_step_combined --> combined_html_ids
-    core_services_text_utils --> decomposition_models
-    decomposition_components_helpers --> decomposition_models
-    decomposition_components_keyboard_config --> decomposition_components_card_stack_config
-    decomposition_components_segment_card --> decomposition_components_card_stack_config
-    decomposition_components_segment_card --> decomposition_html_ids
-    decomposition_components_segment_card --> decomposition_models
-    decomposition_components_step_renderer --> decomposition_components_card_stack_config
-    decomposition_components_step_renderer --> decomposition_html_ids
-    decomposition_components_step_renderer --> decomposition_utils
-    decomposition_components_step_renderer --> decomposition_components_segment_card
-    decomposition_components_step_renderer --> decomposition_models
-    decomposition_components_step_renderer --> decomposition_components_callbacks
-    decomposition_routes_card_stack --> decomposition_routes_core
-    decomposition_routes_card_stack --> decomposition_components_card_stack_config
-    decomposition_routes_card_stack --> decomposition_components_segment_card
-    decomposition_routes_card_stack --> decomposition_models
-    decomposition_routes_core --> decomposition_models
-    decomposition_routes_handlers --> decomposition_routes_card_stack
-    decomposition_routes_handlers --> decomposition_routes_core
-    decomposition_routes_handlers --> decomposition_components_step_renderer
-    decomposition_routes_handlers --> decomposition_services_segmentation
-    decomposition_routes_handlers --> decomposition_components_card_stack_config
-    decomposition_routes_handlers --> decomposition_utils
-    decomposition_routes_handlers --> decomposition_models
-    decomposition_routes_init --> decomposition_routes_core
-    decomposition_routes_init --> decomposition_routes_handlers
-    decomposition_routes_init --> decomposition_routes_card_stack
-    decomposition_routes_init --> decomposition_services_segmentation
-    decomposition_routes_init --> decomposition_models
-    decomposition_services_segmentation --> decomposition_models
-    decomposition_utils --> decomposition_models
+    combined_step_combined --> alignment_components_step_renderer
+    combined_step_combined --> combined_keyboard_config
+    combined_step_combined --> combined_helpers
+    combined_step_combined --> alignment_components_card_stack_config
+    combined_step_combined --> alignment_models
     review_components_step_renderer --> review_html_ids
     review_models --> alignment_models
-    review_models --> decomposition_models
-    review_services_graph --> decomposition_models
     review_services_graph --> alignment_models
     review_services_graph --> review_models
     routes_core_audio --> workflow_workflow
-    routes_core_chrome --> alignment_models
-    routes_core_chrome --> alignment_components_card_stack_config
-    routes_core_chrome --> decomposition_components_step_renderer
     routes_core_chrome --> alignment_components_step_renderer
-    routes_core_chrome --> combined_keyboard_config
-    routes_core_chrome --> combined_step_combined
-    routes_core_chrome --> decomposition_components_card_stack_config
-    routes_core_chrome --> workflow_workflow
-    routes_core_chrome --> decomposition_models
     routes_core_chrome --> combined_html_ids
-    routes_core_init --> routes_core_status
-    routes_core_init --> routes_core_sources
-    routes_core_init --> routes_core_chrome
-    routes_core_init --> routes_core_audio
+    routes_core_chrome --> alignment_components_card_stack_config
+    routes_core_chrome --> combined_keyboard_config
+    routes_core_chrome --> workflow_workflow
+    routes_core_chrome --> combined_step_combined
+    routes_core_chrome --> alignment_models
     routes_core_init --> workflow_workflow
+    routes_core_init --> routes_core_status
+    routes_core_init --> routes_core_chrome
+    routes_core_init --> routes_core_sources
+    routes_core_init --> routes_core_audio
     routes_core_sources --> workflow_workflow
     routes_core_status --> workflow_workflow
     routes_init --> combined_handlers
+    routes_init --> workflow_workflow
     routes_init --> alignment_routes_init
     routes_init --> routes_core_init
-    routes_init --> decomposition_routes_init
-    routes_init --> workflow_workflow
+    workflow_workflow --> review_services_graph
+    workflow_workflow --> review_components_step_renderer
+    workflow_workflow --> combined_step_combined
+    workflow_workflow --> alignment_services_alignment
     workflow_workflow --> alignment_models
     workflow_workflow --> core_config
-    workflow_workflow --> alignment_services_alignment
-    workflow_workflow --> review_services_graph
-    workflow_workflow --> decomposition_services_segmentation
-    workflow_workflow --> decomposition_models
-    workflow_workflow --> combined_step_combined
-    workflow_workflow --> review_components_step_renderer
 ```
 
-*124 cross-module dependencies detected*
+*72 cross-module dependencies detected*
 
 ## CLI Reference
 
@@ -413,45 +329,6 @@ def generate_align_callbacks_script(
     "Generate JavaScript for alignment card stack with audio audition."
 ```
 
-### callbacks (`callbacks.ipynb`)
-
-> JavaScript callback generators for Phase 2 segmentation keyboard
-> interaction
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.callbacks import (
-    generate_seg_callbacks_script
-)
-```
-
-#### Functions
-
-``` python
-def _generate_focus_change_script(
-    focus_input_id: str,  # ID of hidden input for focused segment index
-) -> str:  # JavaScript code for focus change callback
-    "Generate JavaScript for card focus change handling."
-```
-
-``` python
-def generate_seg_callbacks_script(
-    ids:CardStackHtmlIds,  # Card stack HTML IDs
-    button_ids:CardStackButtonIds,  # Card stack button IDs
-    config:CardStackConfig,  # Card stack configuration
-    urls:CardStackUrls,  # Card stack URL bundle
-    container_id:str,  # ID of the segmentation container (parent of card stack)
-    focus_input_id:str,  # ID of hidden input for focused segment index
-) -> any:  # Script element with all JavaScript callbacks
-    """
-    Generate JavaScript for segmentation keyboard interaction.
-    
-    Delegates card-stack-generic JS to the library and injects the
-    focus change callback via extra_scripts.
-    """
-```
-
 ### card_stack (`card_stack.ipynb`)
 
 > Card stack operations for the alignment column: navigation, viewport
@@ -519,126 +396,6 @@ def init_card_stack_router(
     "Initialize card stack routes for alignment."
 ```
 
-### card_stack (`card_stack.ipynb`)
-
-> Card stack UI operations — navigation, viewport, mode switching, and
-> response builders
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.decomposition.routes.card_stack import (
-    init_card_stack_router
-)
-```
-
-#### Functions
-
-``` python
-def _make_renderer(
-    urls: SegmentationUrls,  # URL bundle
-    is_split_mode: bool = False,  # Whether split mode is active
-    caret_position: int = 0,  # Caret position for split mode
-) -> Any:  # Card renderer callback
-    "Create a segment card renderer with captured URLs and mode state."
-```
-
-``` python
-def _build_slots_oob(
-    segment_dicts: List[Dict[str, Any]],  # Serialized segments
-    state: CardStackState,  # Card stack viewport state
-    urls: SegmentationUrls,  # URL bundle
-    caret_position: int = 0,  # Caret position for split mode
-) -> List[Any]:  # OOB slot elements
-    "Build OOB slot updates for the viewport sections."
-```
-
-``` python
-def _build_nav_response(
-    segment_dicts: List[Dict[str, Any]],  # Serialized segments
-    state: CardStackState,  # Card stack viewport state
-    urls: SegmentationUrls,  # URL bundle
-    caret_position: int = 0,  # Caret position for split mode
-) -> Tuple:  # OOB elements (slots + progress + focus)
-    "Build OOB response for navigation and mode changes."
-```
-
-``` python
-def _handle_seg_navigate(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    sess,  # FastHTML session object
-    direction: str,  # Navigation direction: "up", "down", "first", "last", "page_up", "page_down"
-    urls: SegmentationUrls,  # URL bundle for segmentation routes
-):  # OOB slot updates with progress and focus
-    "Navigate to a different segment in the viewport using OOB slot swaps."
-```
-
-``` python
-def _handle_seg_enter_split_mode(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    request,  # FastHTML request object
-    sess,  # FastHTML session object
-    segment_index: int,  # Index of segment to enter split mode for
-    urls: SegmentationUrls,  # URL bundle for segmentation routes
-):  # OOB slot updates with split mode active for focused segment
-    "Enter split mode for a specific segment."
-```
-
-``` python
-def _handle_seg_exit_split_mode(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    request,  # FastHTML request object
-    sess,  # FastHTML session object
-    urls: SegmentationUrls,  # URL bundle for segmentation routes
-):  # OOB slot updates with split mode deactivated
-    "Exit split mode."
-```
-
-``` python
-async def _handle_seg_update_viewport(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    request,  # FastHTML request object
-    sess,  # FastHTML session object
-    visible_count: int,  # New number of visible cards
-    urls: SegmentationUrls,  # URL bundle for segmentation routes
-):  # Full viewport component (outerHTML swap)
-    """
-    Update the viewport with a new card count.
-    
-    Does a full viewport swap because the number of slots changes.
-    Saves the new visible_count and is_auto_mode to state.
-    """
-```
-
-``` python
-def _handle_seg_save_width(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    sess,  # FastHTML session object
-    card_width: int,  # Card stack width in rem
-) -> None:  # No response body (swap=none on client)
-    """
-    Save the card stack width to server state.
-    
-    Called via debounced HTMX POST from the width slider.
-    Returns nothing since the client uses hx-swap='none'.
-    """
-```
-
-``` python
-def init_card_stack_router(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    prefix: str,  # Route prefix (e.g., "/workflow/seg/card_stack")
-    urls: SegmentationUrls,  # URL bundle (populated after routes defined)
-) -> Tuple[APIRouter, Dict[str, Callable]]:  # (router, route_dict)
-    "Initialize card stack routes for segmentation."
-```
-
 ### card_stack_config (`card_stack_config.ipynb`)
 
 > Card stack configuration, HTML IDs, and button IDs for the VAD
@@ -660,32 +417,6 @@ from cjm_fasthtml_workflow_transcript_decomp.alignment.components.card_stack_con
 ALIGN_CS_CONFIG
 ALIGN_CS_IDS
 ALIGN_CS_BTN_IDS
-```
-
-### card_stack_config (`card_stack_config.ipynb`)
-
-> Card stack configuration constants for the Phase 2 segmentation UI
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.card_stack_config import (
-    SEG_CS_CONFIG,
-    SEG_CS_IDS,
-    SEG_CS_BTN_IDS,
-    SEG_TS_CONFIG,
-    SEG_TS_IDS
-)
-```
-
-#### Variables
-
-``` python
-SEG_CS_CONFIG
-SEG_CS_IDS
-SEG_CS_BTN_IDS
-SEG_TS_CONFIG
-SEG_TS_IDS
 ```
 
 ### chrome (`chrome.ipynb`)
@@ -867,117 +598,6 @@ class AlignContext(NamedTuple):
 
 ``` python
 DEBUG_ALIGN_STATE = False
-```
-
-### core (`core.ipynb`)
-
-> Segmentation step state management helpers
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.decomposition.routes.core import (
-    WorkflowStateStore,
-    DEBUG_SEG_STATE,
-    DEFAULT_MAX_HISTORY_DEPTH,
-    SegContext
-)
-```
-
-#### Functions
-
-``` python
-def _to_segments(
-    segment_dicts: List[Dict[str, Any]]  # Serialized segment dictionaries
-) -> List[TextSegment]:  # Deserialized TextSegment objects
-    "Convert segment dictionaries to TextSegment objects."
-```
-
-``` python
-def _get_seg_state(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    session_id: str  # Session identifier string
-) -> SegmentationStepState:  # Segmentation step state dictionary
-    "Get the segmentation step state from the workflow state store."
-```
-
-``` python
-def _get_selection_state(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    session_id: str  # Session identifier string
-) -> Dict[str, Any]:  # Selection step state dictionary
-    "Get the selection step state (Phase 1) from the workflow state store."
-```
-
-``` python
-def _build_card_stack_state(
-    ctx: SegContext,  # Loaded segmentation context
-    active_mode: str = None,  # Active interaction mode (e.g. "split")
-) -> CardStackState:  # Card stack state for library functions
-    "Build a CardStackState from segmentation context for library calls."
-```
-
-``` python
-def _load_seg_context(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    session_id: str  # Session identifier string
-) -> SegContext:  # Common segmentation state values
-    "Load commonly-needed segmentation state values in a single call."
-```
-
-``` python
-def _update_seg_state(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    session_id: str,  # Session identifier string
-    segments: List[Dict[str, Any]] = None,  # Updated segments (None = don't change)
-    initial_segments: List[Dict[str, Any]] = None,  # Initial segments for reset (None = don't change)
-    focused_index: int = None,  # Updated focused index (None = don't change)
-    is_initialized: bool = None,  # Initialization flag (None = don't change)
-    history: List[Dict[str, Any]] = None,  # Updated history (None = don't change)
-    visible_count: int = None,  # Visible card count (None = don't change)
-    is_auto_mode: bool = None,  # Auto-adjust mode flag (None = don't change)
-    card_width: int = None,  # Card stack width in rem (None = don't change)
-) -> None
-    "Update the segmentation step state in the workflow state store."
-```
-
-``` python
-def _push_history(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    session_id: str,  # Session identifier string
-    current_segments: List[Dict[str, Any]],  # Current segments to snapshot
-    focused_index: int,  # Current focused index to snapshot
-    max_history_depth: int = DEFAULT_MAX_HISTORY_DEPTH,  # Maximum history stack depth
-) -> int:  # New history depth after push
-    "Push current state to history stack before making changes."
-```
-
-``` python
-def _get_vad_chunk_count(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    session_id: str,  # Session identifier string
-) -> int:  # Number of VAD chunks in alignment state
-    "Get VAD chunk count from alignment state for status display."
-```
-
-#### Classes
-
-``` python
-class SegContext(NamedTuple):
-    "Common segmentation state values loaded by handlers."
-```
-
-#### Variables
-
-``` python
-DEBUG_SEG_STATE = False
-DEFAULT_MAX_HISTORY_DEPTH = 50
 ```
 
 ### formatting (`formatting.ipynb`)
@@ -1259,165 +879,6 @@ def create_align_init_chrome_wrapper() -> Callable:  # Wrapped handler that adds
     """
 ```
 
-### handlers (`handlers.ipynb`)
-
-> Segmentation workflow handlers — init, split, merge, undo, reset, AI
-> split
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.decomposition.routes.handlers import (
-    DEBUG_SEG_HANDLERS,
-    SegInitResult,
-    init_workflow_router
-)
-```
-
-#### Functions
-
-``` python
-def _build_mutation_response(
-    segment_dicts:List[Dict[str, Any]],  # Serialized segments
-    focused_index:int,  # Currently focused segment index
-    visible_count:int,  # Number of visible cards
-    history_depth:int,  # Current undo history depth
-    urls:SegmentationUrls,  # URL bundle
-    is_split_mode:bool=False,  # Whether split mode is active
-    is_auto_mode:bool=False,  # Whether card count is in auto-adjust mode
-) -> Tuple:  # OOB elements (slots + progress + focus + stats + toolbar)
-    """
-    Build the standard OOB response for mutation handlers.
-    
-    Returns domain-specific OOB elements. The combined layer wrapper
-    adds cross-domain elements (mini-stats badge, alignment status).
-    """
-```
-
-``` python
-async def _handle_seg_init(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    source_service: SourceService,  # Service for fetching source blocks
-    segmentation_service: SegmentationService,  # Service for NLTK sentence splitting
-    request,  # FastHTML request object
-    sess,  # FastHTML session object
-    urls: SegmentationUrls,  # URL bundle for segmentation routes
-    visible_count: int = DEFAULT_VISIBLE_COUNT,  # Number of visible cards
-    card_width: int = DEFAULT_CARD_WIDTH,  # Card stack width in rem
-) -> SegInitResult:  # Pure domain result for wrapper to use
-    """
-    Initialize segments from Phase 1 selected sources.
-    
-    Returns pure domain data. The combined layer wrapper adds cross-domain
-    coordination (KB system, shared chrome, alignment status).
-    """
-```
-
-``` python
-async def _handle_seg_split(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    request,  # FastHTML request object
-    sess,  # FastHTML session object
-    segment_index: int,  # Index of segment to split
-    urls: SegmentationUrls,  # URL bundle for segmentation routes
-    max_history_depth: int = DEFAULT_MAX_HISTORY_DEPTH,  # Maximum history stack depth
-):  # OOB slot updates with stats, progress, focus, and toolbar
-    "Split a segment at the specified word position."
-```
-
-``` python
-def _handle_seg_merge(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    request,  # FastHTML request object
-    sess,  # FastHTML session object
-    segment_index: int,  # Index of segment to merge (merges with previous)
-    urls: SegmentationUrls,  # URL bundle for segmentation routes
-    max_history_depth: int = DEFAULT_MAX_HISTORY_DEPTH,  # Maximum history stack depth
-):  # OOB slot updates with stats, progress, focus, and toolbar
-    "Merge a segment with the previous segment."
-```
-
-``` python
-def _handle_seg_undo(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    request,  # FastHTML request object
-    sess,  # FastHTML session object
-    urls: SegmentationUrls,  # URL bundle for segmentation routes
-):  # OOB slot updates with stats, progress, focus, and toolbar
-    "Undo the last operation by restoring previous state from history."
-```
-
-``` python
-def _handle_seg_reset(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    request,  # FastHTML request object
-    sess,  # FastHTML session object
-    urls: SegmentationUrls,  # URL bundle for segmentation routes
-    max_history_depth: int = DEFAULT_MAX_HISTORY_DEPTH,  # Maximum history stack depth
-):  # OOB slot updates with stats, progress, focus, and toolbar
-    "Reset segments to the initial NLTK split result."
-```
-
-``` python
-async def _handle_seg_ai_split(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    segmentation_service: SegmentationService,  # Service for NLTK sentence splitting
-    request,  # FastHTML request object
-    sess,  # FastHTML session object
-    urls: SegmentationUrls,  # URL bundle for segmentation routes
-    max_history_depth: int = DEFAULT_MAX_HISTORY_DEPTH,  # Maximum history stack depth
-):  # OOB slot updates with stats, progress, focus, and toolbar
-    "Re-run AI (NLTK) sentence splitting on all current text."
-```
-
-``` python
-def init_workflow_router(
-    state_store: WorkflowStateStore,  # The workflow state store
-    workflow_id: str,  # The workflow identifier
-    source_service: SourceService,  # Service for fetching source blocks
-    segmentation_service: SegmentationService,  # Service for NLTK sentence splitting
-    prefix: str,  # Route prefix (e.g., "/workflow/seg/workflow")
-    urls: SegmentationUrls,  # URL bundle (populated after routes defined)
-    max_history_depth: int = DEFAULT_MAX_HISTORY_DEPTH,  # Maximum history stack depth
-    handler_init: Callable = None,  # Optional wrapped init handler
-    handler_split: Callable = None,  # Optional wrapped split handler
-    handler_merge: Callable = None,  # Optional wrapped merge handler
-    handler_undo: Callable = None,  # Optional wrapped undo handler
-    handler_reset: Callable = None,  # Optional wrapped reset handler
-    handler_ai_split: Callable = None,  # Optional wrapped ai_split handler
-) -> Tuple[APIRouter, Dict[str, Callable]]:  # (router, route_dict)
-    """
-    Initialize workflow routes for segmentation.
-    
-    Accepts optional handler overrides for wrapping with cross-domain
-    coordination (e.g., KB system, shared chrome, alignment status).
-    """
-```
-
-#### Classes
-
-``` python
-class SegInitResult(NamedTuple):
-    """
-    Result from pure segmentation init handler.
-    
-    Contains domain-specific data for the combined layer wrapper to use
-    when building cross-domain OOB elements (KB system, shared chrome).
-    """
-```
-
-#### Variables
-
-``` python
-DEBUG_SEG_HANDLERS = True
-```
-
 ### helpers (`helpers.ipynb`)
 
 > State getters for the alignment step from InteractionContext
@@ -1571,76 +1032,6 @@ ALIGN_DEFAULT_VISIBLE_COUNT = 5
 ALIGN_DEFAULT_CARD_WIDTH = 40
 ```
 
-### helpers (`helpers.ipynb`)
-
-> Shared helper functions for the segmentation module
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.helpers import *
-```
-
-#### Functions
-
-``` python
-def _get_segmentation_state(
-    ctx: InteractionContext  # Interaction context with state
-) -> SegmentationStepState:  # Typed segmentation step state
-    "Get the full segmentation step state from context."
-```
-
-``` python
-def _get_segments(
-    ctx: InteractionContext  # Interaction context with state
-) -> List[TextSegment]:  # List of TextSegment objects
-    "Get the list of segments from step state as TextSegment objects."
-```
-
-``` python
-def _is_initialized(
-    ctx: InteractionContext  # Interaction context with state
-) -> bool:  # True if segments have been initialized
-    "Check if segments have been initialized."
-```
-
-``` python
-def _get_visible_count(
-    ctx: InteractionContext,  # Interaction context with state
-    default: int = 3,  # Default visible card count
-) -> int:  # Number of visible cards in viewport
-    "Get the stored visible card count."
-```
-
-``` python
-def _get_card_width(
-    ctx: InteractionContext,  # Interaction context with state
-    default: int = 80,  # Default card width in rem
-) -> int:  # Card stack width in rem
-    "Get the stored card stack width."
-```
-
-``` python
-def _get_is_auto_mode(
-    ctx: InteractionContext,  # Interaction context with state
-) -> bool:  # Whether card count is in auto-adjust mode
-    "Get whether the card count is in auto-adjust mode."
-```
-
-``` python
-def _get_history(
-    ctx: InteractionContext  # Interaction context with state
-) -> List[List[Dict[str, Any]]]:  # Stack of segment snapshots
-    "Get the undo history stack."
-```
-
-``` python
-def _get_focused_index(
-    ctx: InteractionContext  # Interaction context with state
-) -> int:  # Currently focused segment index
-    "Get the currently focused segment index."
-```
-
 ### html_ids (`html_ids.ipynb`)
 
 > HTML ID constants for Phase 2 Right Column: VAD Alignment
@@ -1729,35 +1120,6 @@ class CoreHtmlIds:
 
 ### html_ids (`html_ids.ipynb`)
 
-> HTML ID constants for Phase 2 Left Column: Text Segmentation
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.decomposition.html_ids import (
-    SegmentationHtmlIds
-)
-```
-
-#### Classes
-
-``` python
-class SegmentationHtmlIds:
-    "HTML ID constants for Phase 2 Left Column: Text Segmentation."
-    
-    def as_selector(
-            id_str:str  # The HTML ID to convert
-        ) -> str:  # CSS selector with # prefix
-        "Convert an ID to a CSS selector format."
-    
-    def segment_card(
-            index:int  # Segment index in the decomposition
-        ) -> str:  # HTML ID for the segment card
-        "Generate HTML ID for a segment card."
-```
-
-### html_ids (`html_ids.ipynb`)
-
 > HTML ID constants for Phase 3: Review & Commit
 
 #### Import
@@ -1805,40 +1167,6 @@ def init_alignment_routers(
     wrapped_init:Callable=None,  # Optional wrapped init handler
 ) -> Tuple[List[APIRouter], AlignmentUrls, Dict[str, Callable]]:  # (routers, urls, merged_routes)
     "Initialize and return all alignment routers with URL bundle."
-```
-
-### init (`init.ipynb`)
-
-> Router assembly for Phase 2 segmentation routes
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.decomposition.routes.init import (
-    WrappedHandlers,
-    init_segmentation_routers
-)
-```
-
-#### Functions
-
-``` python
-def init_segmentation_routers(
-    state_store:WorkflowStateStore,  # The workflow state store
-    workflow_id:str,  # The workflow identifier
-    source_service:SourceService,  # Service for fetching source blocks
-    segmentation_service:SegmentationService,  # Service for NLTK sentence splitting
-    prefix:str,  # Base prefix for segmentation routes (e.g., "/workflow/seg")
-    max_history_depth:int=DEFAULT_MAX_HISTORY_DEPTH,  # Maximum history stack depth
-    wrapped_handlers:WrappedHandlers=None,  # Dict with 'init', 'split', 'merge', 'undo', 'reset', 'ai_split' keys
-) -> Tuple[List[APIRouter], SegmentationUrls, Dict[str, Callable]]:  # (routers, urls, merged_routes)
-    """
-    Initialize and return all segmentation routers with URL bundle.
-    
-    The wrapped_handlers dict should contain handlers that already have
-    cross-domain concerns (KB system, alignment status) handled by the
-    combined layer's wrapper factories.
-    """
 ```
 
 ### init (`init.ipynb`)
@@ -1959,49 +1287,6 @@ ZONE_CHANGE_CALLBACK = 'onCombinedZoneChange'
 SWITCH_CHROME_BTN_ID = 'sd-switch-chrome-btn'
 ```
 
-### keyboard_config (`keyboard_config.ipynb`)
-
-> Segmentation-specific keyboard actions, modes, and zone configuration
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.keyboard_config import (
-    SD_SEG_ENTER_SPLIT_BTN,
-    SD_SEG_EXIT_SPLIT_BTN,
-    SD_SEG_SPLIT_BTN,
-    SD_SEG_MERGE_BTN,
-    SD_SEG_UNDO_BTN,
-    create_seg_kb_parts
-)
-```
-
-#### Functions
-
-``` python
-def create_seg_kb_parts(
-    ids:CardStackHtmlIds,  # Card stack HTML IDs
-    button_ids:CardStackButtonIds,  # Card stack button IDs for navigation
-    config:CardStackConfig,  # Card stack configuration
-) -> Tuple[FocusZone, tuple, tuple]:  # (zone, actions, modes)
-    """
-    Create segmentation-specific keyboard building blocks.
-    
-    Returns a zone, actions tuple, and modes tuple for assembly into a shared
-    ZoneManager by the combined-level keyboard config.
-    """
-```
-
-#### Variables
-
-``` python
-SD_SEG_ENTER_SPLIT_BTN = 'sd-seg-enter-split-btn'
-SD_SEG_EXIT_SPLIT_BTN = 'sd-seg-exit-split-btn'
-SD_SEG_SPLIT_BTN = 'sd-seg-split-btn'
-SD_SEG_MERGE_BTN = 'sd-seg-merge-btn'
-SD_SEG_UNDO_BTN = 'sd-seg-undo-btn'
-```
-
 ### models (`models.ipynb`)
 
 > Data models and URL bundles for the alignment package
@@ -2069,73 +1354,6 @@ class AlignmentUrls:
 
 ### models (`models.ipynb`)
 
-> Data models and URL bundles for Phase 2 Left Column: Text Segmentation
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.decomposition.models import (
-    TextSegment,
-    SegmentationStepState,
-    SegmentationUrls
-)
-```
-
-#### Classes
-
-``` python
-@dataclass
-class TextSegment:
-    "A text segment during workflow processing before graph commit."
-    
-    index: int  # Sequence position (0-indexed)
-    text: str  # Segment text content
-    source_id: Optional[str]  # ID of source block
-    source_provider_id: Optional[str]  # Source provider identifier
-    start_char: Optional[int]  # Start character index in source
-    end_char: Optional[int]  # End character index in source
-    
-    def to_dict(self) -> Dict[str, Any]:  # Dictionary representation
-            """Convert to dictionary for JSON serialization."""
-            return asdict(self)
-        
-        @classmethod
-        def from_dict(
-            cls,
-            data: Dict[str, Any]  # Dictionary representation
-        ) -> "TextSegment":  # Reconstructed TextSegment
-        "Convert to dictionary for JSON serialization."
-    
-    def from_dict(
-            cls,
-            data: Dict[str, Any]  # Dictionary representation
-        ) -> "TextSegment":  # Reconstructed TextSegment
-        "Create from dictionary, filtering out legacy/unknown fields."
-```
-
-``` python
-class SegmentationStepState(TypedDict):
-    "State for Phase 2 (left column): Text Segmentation."
-```
-
-``` python
-@dataclass
-class SegmentationUrls:
-    "URL bundle for Phase 2 segmentation route handlers and renderers."
-    
-    card_stack: CardStackUrls = field(...)
-    split: str = ''  # Execute split at word position
-    merge: str = ''  # Merge segment with previous
-    enter_split: str = ''  # Enter split mode for focused segment
-    exit_split: str = ''  # Exit split mode
-    reset: str = ''  # Reset to initial segments
-    ai_split: str = ''  # AI (NLTK) re-split
-    undo: str = ''  # Undo last operation
-    init: str = ''  # Initialize segments from Phase 1
-```
-
-### models (`models.ipynb`)
-
 > Review step state and working document model for Phase 3: Review &
 > Commit
 
@@ -2180,175 +1398,6 @@ class WorkingDocument:
             data: Dict[str, Any]  # Dictionary representation
         ) -> "WorkingDocument":  # Reconstructed WorkingDocument
         "Create from dictionary."
-```
-
-### segment_card (`segment_card.ipynb`)
-
-> Segment card component with view and split modes
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.segment_card import (
-    render_segment_card,
-    create_segment_card_renderer
-)
-```
-
-#### Functions
-
-``` python
-def _render_card_metadata(
-    segment:TextSegment,  # Segment to render metadata for
-) -> Any:  # Metadata component
-    "Render the left metadata column of a segment card."
-```
-
-``` python
-def _render_view_mode_content(
-    segment: TextSegment,  # Segment to render
-    card_role: CardRole,  # Role of this card in viewport
-    enter_split_url: str,  # URL to enter split mode
-) -> Any:  # View mode content component
-    "Render the text content in view mode."
-```
-
-``` python
-def _render_split_mode_content(
-    segment:TextSegment,  # Segment to render
-    caret_position:int,  # Current caret position (token index)
-    split_url:str,  # URL to execute split
-    exit_split_url:str,  # URL to exit split mode
-) -> Any:  # Split mode content component
-    "Render the interactive token display in split mode."
-```
-
-``` python
-def _render_card_actions(
-    "Render hover-visible action buttons."
-```
-
-``` python
-def render_segment_card(
-    "Render a segment card with view or split mode content."
-```
-
-``` python
-def create_segment_card_renderer(
-    split_url: str = "",  # URL to execute split
-    merge_url: str = "",  # URL to merge with previous
-    enter_split_url: str = "",  # URL to enter split mode
-    exit_split_url: str = "",  # URL to exit split mode
-    is_split_mode: bool = False,  # Whether split mode is active
-    caret_position: int = 0,  # Caret position for split mode (word index)
-) -> Callable:  # Card renderer callback: (item, CardRenderContext) -> FT
-    "Create a card renderer callback for segment cards."
-```
-
-### segmentation (`segmentation.ipynb`)
-
-> Segmentation service for text decomposition via NLTK plugin
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.decomposition.services.segmentation import (
-    SegmentationService,
-    split_segment_at_position,
-    merge_text_segments,
-    reindex_segments,
-    reconstruct_source_blocks
-)
-```
-
-#### Functions
-
-``` python
-def split_segment_at_position(
-    segment: TextSegment,  # Segment to split
-    char_position: int  # Character position to split at (relative to segment text)
-) -> tuple[TextSegment, TextSegment]:  # Two new segments
-    "Split a segment into two at the given character position."
-```
-
-``` python
-def merge_text_segments(
-    first: TextSegment,  # First segment (earlier in sequence)
-    second: TextSegment,  # Second segment (later in sequence)
-    separator: str = " "  # Text separator between segments
-) -> TextSegment:  # Merged segment
-    "Merge two adjacent segments into one."
-```
-
-``` python
-def reindex_segments(
-    segments: List[TextSegment]  # List of segments to reindex
-) -> List[TextSegment]:  # Segments with corrected indices
-    "Reindex segments to have sequential indices starting from 0."
-```
-
-``` python
-def reconstruct_source_blocks(
-    segment_dicts: List[Dict[str, Any]],  # Serialized working segments
-) -> List[SourceBlock]:  # Reconstructed source blocks with combined text
-    "Reconstruct source blocks by grouping segments by source_id and combining text."
-```
-
-#### Classes
-
-``` python
-class SegmentationService:
-    def __init__(
-        self,
-        plugin_manager: PluginManager,  # Plugin manager for accessing text plugin
-        plugin_name: str = "cjm-text-plugin-nltk"  # Name of the text processing plugin
-    )
-    "Service for text segmentation via NLTK plugin."
-    
-    def __init__(
-            self,
-            plugin_manager: PluginManager,  # Plugin manager for accessing text plugin
-            plugin_name: str = "cjm-text-plugin-nltk"  # Name of the text processing plugin
-        )
-        "Initialize the segmentation service."
-    
-    def is_available(self) -> bool:  # True if plugin is loaded and ready
-            """Check if the text processing plugin is available."""
-            return self._manager.get_plugin(self._plugin_name) is not None
-        
-        def ensure_loaded(
-            self,
-            config: Optional[Dict[str, Any]] = None  # Optional plugin configuration
-        ) -> bool:  # True if successfully loaded
-        "Check if the text processing plugin is available."
-    
-    def ensure_loaded(
-            self,
-            config: Optional[Dict[str, Any]] = None  # Optional plugin configuration
-        ) -> bool:  # True if successfully loaded
-        "Ensure the text processing plugin is loaded."
-    
-    async def split_sentences_async(
-            self,
-            text: str,  # Text to split into sentences
-            source_id: Optional[str] = None,  # Source block ID for traceability
-            source_provider_id: Optional[str] = None  # Source provider identifier for traceability
-        ) -> List[TextSegment]:  # List of TextSegment objects
-        "Split text into sentences asynchronously."
-    
-    def split_sentences(
-            self,
-            text: str,  # Text to split into sentences
-            source_id: Optional[str] = None,  # Source block ID for traceability
-            source_provider_id: Optional[str] = None  # Source provider identifier for traceability
-        ) -> List[TextSegment]:  # List of TextSegment objects
-        "Split text into sentences synchronously."
-    
-    async def split_combined_sources_async(
-            self,
-            source_blocks: List[SourceBlock]  # Ordered list of source blocks
-        ) -> List[TextSegment]:  # Combined list of TextSegments with proper traceability
-        "Split multiple source blocks into segments with proper source tracking."
 ```
 
 ### sources (`sources.ipynb`)
@@ -2642,73 +1691,6 @@ DEBUG_ALIGN_RENDER = False
 
 ### step_renderer (`step_renderer.ipynb`)
 
-> Composable renderers for the Phase 2 segmentation column and shared
-> chrome
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.step_renderer import (
-    render_toolbar,
-    render_seg_stats,
-    render_seg_column_body,
-    render_seg_footer_content,
-    render_seg_mini_stats_text
-)
-```
-
-#### Functions
-
-``` python
-def render_toolbar(
-    reset_url: str,  # URL for reset action
-    ai_split_url: str,  # URL for AI split action
-    undo_url: str,  # URL for undo action
-    can_undo: bool,  # Whether undo is available
-    visible_count: int = DEFAULT_VISIBLE_COUNT,  # Current visible card count
-    is_auto_mode: bool = False,  # Whether card count is in auto-adjust mode
-    oob: bool = False,  # Whether to render as OOB swap
-) -> Any:  # Toolbar component
-    "Render the segmentation toolbar with action buttons and card count selector."
-```
-
-``` python
-def render_seg_stats(
-    segments: List[TextSegment],  # Current segments
-    oob: bool = False,  # Whether to render as OOB swap
-) -> Any:  # Statistics component
-    "Render segmentation statistics."
-```
-
-``` python
-def render_seg_column_body(
-    segments:List[TextSegment],  # Segments to display
-    focused_index:int,  # Currently focused segment index
-    visible_count:int,  # Number of visible cards in viewport
-    card_width:int,  # Card stack width in rem
-    urls:SegmentationUrls,  # URL bundle for all segmentation routes
-    kb_system:Optional[Any]=None,  # Rendered keyboard system (None when KB managed externally)
-) -> Any:  # Div with id=COLUMN_CONTENT containing viewport + infrastructure
-    "Render the segmentation column content area with card stack viewport."
-```
-
-``` python
-def render_seg_footer_content(
-    segments:List[TextSegment],  # Current segments
-    focused_index:int,  # Currently focused segment index
-) -> Any:  # Footer content with progress indicator and stats
-    "Render footer content with progress indicator and segment statistics."
-```
-
-``` python
-def render_seg_mini_stats_text(
-    segments:List[TextSegment],  # Current segments
-) -> str:  # Compact stats string for column header badge
-    "Generate compact stats string for the segmentation column header badge."
-```
-
-### step_renderer (`step_renderer.ipynb`)
-
 > Placeholder step renderer for Phase 3: Review & Commit
 
 #### Import
@@ -2794,45 +1776,6 @@ def format_time_precise(
     seconds: Optional[float]  # Time in seconds
 ) -> str:  # Formatted time string (m:ss.s)
     "Format seconds as m:ss.s for sub-second display."
-```
-
-### utils (`utils.ipynb`)
-
-> Text processing utilities for segmentation: word counting, position
-> mapping, and statistics
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.decomposition.utils import (
-    count_words,
-    word_index_to_char_position,
-    calculate_segment_stats
-)
-```
-
-#### Functions
-
-``` python
-def count_words(
-    text: str  # Text to count words in
-) -> int:  # Word count
-    "Count the number of whitespace-delimited words in text."
-```
-
-``` python
-def word_index_to_char_position(
-    text: str,  # Full text
-    word_index: int  # Word index (0-based, split happens before this word)
-) -> int:  # Character position for split
-    "Convert a word index to the character position where a split should occur."
-```
-
-``` python
-def calculate_segment_stats(
-    segments: List["TextSegment"]  # List of segments to analyze
-) -> Dict[str, Any]:  # Statistics dictionary with total_words, total_segments
-    "Calculate aggregate statistics for a list of segments."
 ```
 
 ### vad_card (`vad_card.ipynb`)

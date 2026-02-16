@@ -42,8 +42,8 @@ from cjm_fasthtml_card_stack.core.constants import DEFAULT_VISIBLE_COUNT, DEFAUL
 # Local imports
 # HTML IDs (page-specific)
 from .html_ids import CombinedHtmlIds
-from ..decomposition.html_ids import SegmentationHtmlIds
-from ..decomposition.models import TextSegment, SegmentationUrls
+from cjm_transcript_segmentation.html_ids import SegmentationHtmlIds
+from cjm_transcript_segmentation.models import TextSegment, SegmentationUrls
 from ..alignment.models import VADChunk, AlignmentUrls
 
 # State extraction helpers (combined-level)
@@ -52,7 +52,7 @@ from cjm_fasthtml_workflow_transcript_decomp.combined.helpers import (
 )
 
 # Decomposition composable renderers
-from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.step_renderer import (
+from cjm_transcript_segmentation.components.step_renderer import (
     render_seg_column_body, render_toolbar, render_seg_stats,
     render_seg_footer_content, render_seg_mini_stats_text,
 )
@@ -71,7 +71,7 @@ from cjm_fasthtml_workflow_transcript_decomp.combined.keyboard_config import (
     render_keyboard_hints_collapsible, generate_zone_change_js,
     SWITCH_CHROME_BTN_ID,
 )
-from cjm_fasthtml_workflow_transcript_decomp.decomposition.components.card_stack_config import (
+from cjm_transcript_segmentation.components.card_stack_config import (
     SEG_CS_CONFIG, SEG_CS_IDS,
 )
 
