@@ -15,6 +15,7 @@ from .core.init import init_core_routers
 from cjm_transcript_source_select.routes.init import init_selection_routers
 from cjm_transcript_segmentation.routes.init import init_segmentation_routers
 from cjm_transcript_vad_align.routes.init import init_alignment_routers
+from cjm_transcript_review.routes.init import init_review_routers
 
 # Import wrapped handlers for cross-domain coordination
 from cjm_fasthtml_workflow_transcript_decomp.combined.handlers import (
@@ -85,11 +86,22 @@ def init_routers(
         max_history_depth=workflow.config.max_history_depth,
         wrapped_handlers=seg_wrapped,
     )
+    
+    # Review routers use dependency injection
+    review_routers, review_urls, review_routes = init_review_routers(
+        state_store=workflow.state_store,
+        workflow_id=workflow.config.workflow_id,
+        prefix=f"{base_prefix}/review",
+        audio_src_url=core_routes["audio_src"].to(),
+        graph_service=workflow.graph_service,
+        alert_container_id="commit-alert-container",
+    )
 
     # Store URL bundles on workflow for renderer access
     workflow._selection_urls = selection_urls
     workflow._seg_urls = seg_urls
     workflow._align_urls = align_urls
+    workflow._review_urls = review_urls
     workflow._switch_chrome_url = core_routes["switch_chrome"].to()
 
     # Store route dicts on workflow
@@ -97,5 +109,6 @@ def init_routers(
     workflow._selection_routes = selection_routes
     workflow._segmentation_routes = seg_routes
     workflow._alignment_routes = align_routes
+    workflow._review_routes = review_routes
 
-    return core_routers + selection_routers + seg_routers + align_routers
+    return core_routers + selection_routers + seg_routers + align_routers + review_routers

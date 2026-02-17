@@ -24,18 +24,20 @@ from cjm_workflow_state.state_store import SQLiteWorkflowStateStore
 
 from ..core.config import StructureDecompWorkflowConfig
 from cjm_transcript_source_select.models import SelectionUrls
-from cjm_transcript_segmentation.models import SegmentationUrls
-from cjm_transcript_vad_align.models import AlignmentUrls
+from cjm_transcript_segmentation.models import SegmentationUrls, TextSegment
+from cjm_transcript_vad_align.models import AlignmentUrls, VADChunk
 from cjm_fasthtml_card_stack.core.models import CardStackUrls
 from cjm_transcript_source_select.services.source import SourceService
 from cjm_transcript_segmentation.services.segmentation import SegmentationService
 from cjm_transcript_vad_align.services.alignment import AlignmentService
-from ..review.services.graph import GraphService
+from cjm_transcript_review.services.graph import GraphService
+from cjm_transcript_review.models import ReviewUrls
+from cjm_transcript_review.components.review_card import AssembledSegment
 
 # Step renderers
 from cjm_transcript_source_select.components.step_renderer import render_selection_step
 from ..combined.step_combined import render_combined_step
-from ..review.components.step_renderer import render_review_step
+from cjm_transcript_review.components.step_renderer import render_review_step
 
 # %% ../../nbs/workflow/workflow.ipynb #ngyugzueiw
 class _SessionStateStoreAdapter:
@@ -313,12 +315,51 @@ def _create_step_flow(
     # Completion handler
     async def on_complete(state: Dict[str, Any], request):
         """Handle workflow completion - commit to graph."""
-        # For placeholder, just return success message
-        # Real implementation will call graph_service.commit_document()
-        return Div(
-            P("Workflow completed! Document committed to context graph."),
-            id=workflow.config.container_id
-        )
+        step_states = state.get("step_states", {})
+        
+        # Extract segments from segmentation step
+        seg_state = step_states.get("segmentation", {})
+        segment_dicts = seg_state.get("segments", [])
+        segments = [TextSegment.from_dict(s) for s in segment_dicts]
+        
+        # Extract VAD chunks from alignment step
+        align_state = step_states.get("alignment", {})
+        chunk_dicts = align_state.get("vad_chunks", [])
+        vad_chunks = [VADChunk.from_dict(c) for c in chunk_dicts]
+        
+        # Get document title from review state (or default)
+        review_state = step_states.get("review", {})
+        document_title = review_state.get("document_title", "Untitled Document")
+        
+        # Check if graph service is available
+        if not workflow._graph_service.is_available():
+            return Div(
+                P("Graph plugin not loaded. Document was not committed."),
+                id=workflow.config.container_id
+            )
+        
+        # Commit to graph
+        try:
+            result = await workflow._graph_service.commit_document_async(
+                title=document_title,
+                text_segments=segments,
+                vad_chunks=vad_chunks,
+                media_type="audio",
+            )
+            segment_count = len(result.get("segment_ids", []))
+            
+            # Placeholder completion UI (Phase 4: Visualization will replace this)
+            return Div(
+                P(f"Committed {segment_count} segments to context graph."),
+                P("Phase 4: Graph Visualization coming soon.", 
+                  cls=combine_classes(text_dui.base_content.opacity(60), m.t(2))),
+                id=workflow.config.container_id
+            )
+        except Exception as e:
+            return Div(
+                P(f"Commit failed: {str(e)}"),
+                id=workflow.config.container_id
+            )
     
     # Create render wrapper for selection step with explicit parameters
     def render_selection_step_with_urls(ctx: InteractionContext):
@@ -358,6 +399,50 @@ def _create_step_flow(
             switch_chrome_url=getattr(workflow, '_switch_chrome_url', ''),
         )
     
+    # Create render wrapper for review step
+    def render_review_step_with_urls(ctx: InteractionContext):
+        """Render review step by assembling segments with VAD chunks."""
+        step_states = ctx.state.get("step_states", {})
+        
+        # Extract segments from segmentation step
+        seg_state = step_states.get("segmentation", {})
+        segment_dicts = seg_state.get("segments", [])
+        segments = [TextSegment.from_dict(s) for s in segment_dicts]
+        
+        # Extract VAD chunks from alignment step
+        align_state = step_states.get("alignment", {})
+        chunk_dicts = align_state.get("vad_chunks", [])
+        vad_chunks = [VADChunk.from_dict(c) for c in chunk_dicts]
+        media_path = align_state.get("media_path")
+        
+        # Assemble segments with their corresponding VAD chunks
+        assembled = [
+            AssembledSegment(segment=seg, vad_chunk=chunk)
+            for seg, chunk in zip(segments, vad_chunks)
+        ]
+        
+        # Extract review step state
+        review_state = step_states.get("review", {})
+        focused_index = review_state.get("focused_index", 0)
+        visible_count = review_state.get("visible_count", 5)
+        is_auto_mode = review_state.get("is_auto_mode", False)
+        card_width = review_state.get("card_width", 50)
+        playback_speed = review_state.get("playback_speed", 1.0)
+        auto_navigate = review_state.get("auto_navigate", False)
+        
+        # Keyboard system is managed internally by the library
+        return render_review_step(
+            assembled=assembled,
+            focused_index=focused_index,
+            visible_count=visible_count,
+            is_auto_mode=is_auto_mode,
+            card_width=card_width,
+            playback_speed=playback_speed,
+            auto_navigate=auto_navigate,
+            urls=getattr(workflow, '_review_urls', ReviewUrls()),
+            media_path=media_path,
+        )
+    
     return StepFlow(
         debug=True,
         flow_id=self.config.workflow_id,
@@ -389,7 +474,7 @@ def _create_step_flow(
             Step(
                 id="review",
                 title="Review",
-                render=render_review_step,
+                render=render_review_step_with_urls,
                 validate=validate_review,
                 data_loader=load_review_data,
                 data_keys=[],

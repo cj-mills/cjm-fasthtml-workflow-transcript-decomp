@@ -20,13 +20,6 @@ pip install cjm_fasthtml_workflow_transcript_decomp
     │   └── step_combined.ipynb    # Phase 2 combined step renderer: dual-column layout for Segment & Align
     ├── core/ (1)
     │   └── config.ipynb  # Configuration dataclass for structure decomposition workflow
-    ├── review/ (4)
-    │   ├── components/ (1)
-    │   │   └── step_renderer.ipynb  # Placeholder step renderer for Phase 3: Review & Commit
-    │   ├── services/ (1)
-    │   │   └── graph.ipynb  # Graph service for committing documents and segments to the context graph
-    │   ├── html_ids.ipynb  # HTML ID constants for Phase 3: Review & Commit
-    │   └── models.ipynb    # Review step state and working document model for Phase 3: Review & Commit
     ├── routes/ (6)
     │   ├── core/ (5)
     │   │   ├── audio.ipynb    # Audio file serving route handlers for alignment playback
@@ -38,7 +31,7 @@ pip install cjm_fasthtml_workflow_transcript_decomp
     └── workflow/ (1)
         └── workflow.ipynb  # Main workflow class for structure decomposition
 
-Total: 17 notebooks across 5 directories
+Total: 13 notebooks across 4 directories
 
 ## Module Dependencies
 
@@ -50,10 +43,6 @@ graph LR
     combined_keyboard_config[combined.keyboard_config<br/>keyboard_config]
     combined_step_combined[combined.step_combined<br/>step_combined]
     core_config[core.config<br/>config]
-    review_components_step_renderer[review.components.step_renderer<br/>step_renderer]
-    review_html_ids[review.html_ids<br/>html_ids]
-    review_models[review.models<br/>models]
-    review_services_graph[review.services.graph<br/>graph]
     routes_core_audio[routes.core.audio<br/>audio]
     routes_core_chrome[routes.core.chrome<br/>chrome]
     routes_core_init[routes.core.init<br/>init]
@@ -66,33 +55,29 @@ graph LR
     combined_handlers --> combined_keyboard_config
     combined_handlers --> combined_step_combined
     combined_keyboard_config --> combined_html_ids
-    combined_step_combined --> combined_helpers
     combined_step_combined --> combined_html_ids
     combined_step_combined --> combined_keyboard_config
-    review_components_step_renderer --> review_html_ids
-    review_services_graph --> review_models
+    combined_step_combined --> combined_helpers
     routes_core_audio --> workflow_workflow
-    routes_core_chrome --> workflow_workflow
     routes_core_chrome --> combined_html_ids
     routes_core_chrome --> combined_keyboard_config
+    routes_core_chrome --> workflow_workflow
     routes_core_chrome --> combined_step_combined
-    routes_core_init --> routes_core_status
-    routes_core_init --> routes_core_chrome
     routes_core_init --> workflow_workflow
-    routes_core_init --> routes_core_audio
     routes_core_init --> routes_core_sources
+    routes_core_init --> routes_core_chrome
+    routes_core_init --> routes_core_status
+    routes_core_init --> routes_core_audio
     routes_core_sources --> workflow_workflow
     routes_core_status --> workflow_workflow
     routes_init --> combined_handlers
-    routes_init --> routes_core_init
     routes_init --> workflow_workflow
-    workflow_workflow --> review_services_graph
+    routes_init --> routes_core_init
     workflow_workflow --> combined_step_combined
-    workflow_workflow --> review_components_step_renderer
     workflow_workflow --> core_config
 ```
 
-*28 cross-module dependencies detected*
+*24 cross-module dependencies detected*
 
 ## CLI Reference
 
@@ -230,75 +215,6 @@ class StructureDecompWorkflowConfig:
 
 ``` python
 DEFAULT_WORKFLOW_CONFIG_DIR
-```
-
-### graph (`graph.ipynb`)
-
-> Graph service for committing documents and segments to the context
-> graph
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.review.services.graph import (
-    GraphService
-)
-```
-
-#### Classes
-
-``` python
-class GraphService:
-    def __init__(
-        self,
-        plugin_manager:PluginManager,  # Plugin manager for accessing graph plugin
-        plugin_name:str="cjm-graph-plugin-sqlite",  # Name of the graph plugin
-    )
-    "Service for committing structure to context graph."
-    
-    def __init__(
-            self,
-            plugin_manager:PluginManager,  # Plugin manager for accessing graph plugin
-            plugin_name:str="cjm-graph-plugin-sqlite",  # Name of the graph plugin
-        )
-        "Initialize the graph service."
-    
-    def is_available(self) -> bool:  # True if plugin is loaded and ready
-            """Check if the graph plugin is available."""
-            return self._manager.get_plugin(self._plugin_name) is not None
-        
-        def ensure_loaded(
-            self,
-            config:Optional[Dict[str, Any]]=None,  # Optional plugin configuration
-        ) -> bool:  # True if successfully loaded
-        "Check if the graph plugin is available."
-    
-    def ensure_loaded(
-            self,
-            config:Optional[Dict[str, Any]]=None,  # Optional plugin configuration
-        ) -> bool:  # True if successfully loaded
-        "Ensure the graph plugin is loaded."
-    
-    async def commit_document_async(
-            self,
-            title:str,  # Document title
-            text_segments:List[TextSegment],  # Text segments from decomposition
-            vad_chunks:List[VADChunk],  # VAD chunks for timing (1:1 with segments)
-            media_type:str="audio",  # Source media type
-        ) -> Dict[str, Any]:  # Result with document_id and segment_ids
-        "Commit a document to the context graph.
-
-Assembles text segments with VAD timing at commit time.
-Requires 1:1 alignment: len(text_segments) == len(vad_chunks)."
-    
-    def commit_document(
-            self,
-            title:str,  # Document title
-            text_segments:List[TextSegment],  # Text segments from decomposition
-            vad_chunks:List[VADChunk],  # VAD chunks for timing
-            media_type:str="audio",  # Source media type
-        ) -> Dict[str, Any]:  # Result with document_id and segment_ids
-        "Commit a document to the context graph synchronously."
 ```
 
 ### handlers (`handlers.ipynb`)
@@ -486,30 +402,6 @@ class CombinedHtmlIds:
         "Convert an ID to a CSS selector format."
 ```
 
-### html_ids (`html_ids.ipynb`)
-
-> HTML ID constants for Phase 3: Review & Commit
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.review.html_ids import (
-    ReviewHtmlIds
-)
-```
-
-#### Classes
-
-``` python
-class ReviewHtmlIds:
-    "HTML ID constants for Phase 3: Review & Commit."
-    
-    def as_selector(
-            id_str:str  # The HTML ID to convert
-        ) -> str:  # CSS selector with # prefix
-        "Convert an ID to a CSS selector format."
-```
-
 ### init (`init.ipynb`)
 
 > Router assembly for core workflow routes
@@ -602,54 +494,6 @@ def generate_zone_change_js(
 DEBUG_KB_SYSTEM = True
 ZONE_CHANGE_CALLBACK = 'onCombinedZoneChange'
 SWITCH_CHROME_BTN_ID = 'sd-switch-chrome-btn'
-```
-
-### models (`models.ipynb`)
-
-> Review step state and working document model for Phase 3: Review &
-> Commit
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.review.models import (
-    ReviewStepState,
-    WorkingDocument
-)
-```
-
-#### Classes
-
-``` python
-class ReviewStepState(TypedDict):
-    "State for Phase 3: Review & Commit."
-```
-
-``` python
-@dataclass
-class WorkingDocument:
-    "Container for workflow state during structure decomposition."
-    
-    title: str = ''  # Document title
-    media_type: str = 'audio'  # Source media type ('audio', 'video', 'text')
-    media_path: Optional[str]  # Path to primary source media
-    source_blocks: List[SourceBlock] = field(...)  # Ordered source blocks
-    combined_text: str = ''  # Concatenated text from all sources
-    segments: List[TextSegment] = field(...)  # Decomposed segments
-    vad_chunks: List[VADChunk] = field(...)  # VAD time ranges
-    audio_duration: Optional[float]  # Total audio duration in seconds
-    
-    def to_dict(self) -> Dict[str, Any]:  # Dictionary representation
-            """Convert to dictionary for JSON serialization."""
-            return {
-                'title': self.title,
-        "Convert to dictionary for JSON serialization."
-    
-    def from_dict(
-            cls,
-            data: Dict[str, Any]  # Dictionary representation
-        ) -> "WorkingDocument":  # Reconstructed WorkingDocument
-        "Create from dictionary."
 ```
 
 ### sources (`sources.ipynb`)
@@ -869,27 +713,6 @@ DEBUG_COMBINED_RENDER = True
 _FOOTER_INNER_CLS
 _SEG_COLUMN_CLS
 _ALIGNMENT_COLUMN_CLS
-```
-
-### step_renderer (`step_renderer.ipynb`)
-
-> Placeholder step renderer for Phase 3: Review & Commit
-
-#### Import
-
-``` python
-from cjm_fasthtml_workflow_transcript_decomp.review.components.step_renderer import (
-    render_review_step
-)
-```
-
-#### Functions
-
-``` python
-def render_review_step(
-    ctx:InteractionContext  # Interaction context with state and data
-) -> Any:  # FastHTML component
-    "Render Phase 3: Review & Commit step."
 ```
 
 ### workflow (`workflow.ipynb`)
