@@ -33,6 +33,7 @@ from cjm_transcript_vad_align.services.alignment import AlignmentService
 from cjm_transcript_review.services.graph import GraphService
 from cjm_transcript_review.models import ReviewUrls
 from cjm_transcript_review.components.review_card import AssembledSegment
+from cjm_transcript_review.utils import generate_document_title
 
 # Step renderers
 from cjm_transcript_source_select.components.step_renderer import render_selection_step
@@ -322,14 +323,15 @@ def _create_step_flow(
         segment_dicts = seg_state.get("segments", [])
         segments = [TextSegment.from_dict(s) for s in segment_dicts]
         
-        # Extract VAD chunks from alignment step
+        # Extract VAD chunks and media path from alignment step
         align_state = step_states.get("alignment", {})
         chunk_dicts = align_state.get("vad_chunks", [])
         vad_chunks = [VADChunk.from_dict(c) for c in chunk_dicts]
+        media_path = align_state.get("media_path")
         
-        # Get document title from review state (or default)
+        # Get document title from review state, or generate from media path
         review_state = step_states.get("review", {})
-        document_title = review_state.get("document_title", "Untitled Document")
+        document_title = review_state.get("document_title") or generate_document_title(media_path)
         
         # Check if graph service is available
         if not workflow._graph_service.is_available():
