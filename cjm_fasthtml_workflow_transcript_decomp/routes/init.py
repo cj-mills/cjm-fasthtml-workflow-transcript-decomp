@@ -16,6 +16,7 @@ from cjm_transcript_source_select.routes.init import init_selection_routers
 from cjm_transcript_segmentation.routes.init import init_segmentation_routers
 from cjm_transcript_vad_align.routes.init import init_alignment_routers
 from cjm_transcript_review.routes.init import init_review_routers
+from cjm_transcript_verify.routes.init import init_verify_routers
 
 # Import wrapped handlers for cross-domain coordination
 from cjm_fasthtml_workflow_transcript_decomp.combined.handlers import (
@@ -96,12 +97,21 @@ def init_routers(
         graph_service=workflow.graph_service,
         alert_container_id="commit-alert-container",
     )
+    
+    # Verify routers use dependency injection
+    verify_routers, verify_urls, verify_routes = init_verify_routers(
+        state_store=workflow.state_store,
+        workflow_id=workflow.config.workflow_id,
+        prefix=f"{base_prefix}/verify",
+        verify_service=workflow.verify_service,
+    )
 
     # Store URL bundles on workflow for renderer access
     workflow._selection_urls = selection_urls
     workflow._seg_urls = seg_urls
     workflow._align_urls = align_urls
     workflow._review_urls = review_urls
+    workflow._verify_urls = verify_urls
     workflow._switch_chrome_url = core_routes["switch_chrome"].to()
 
     # Store route dicts on workflow
@@ -110,5 +120,6 @@ def init_routers(
     workflow._segmentation_routes = seg_routes
     workflow._alignment_routes = align_routes
     workflow._review_routes = review_routes
+    workflow._verify_routes = verify_routes
 
-    return core_routers + selection_routers + seg_routers + align_routers + review_routers
+    return core_routers + selection_routers + seg_routers + align_routers + review_routers + verify_routers

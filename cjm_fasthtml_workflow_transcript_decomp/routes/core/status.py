@@ -15,7 +15,7 @@ from cjm_fasthtml_interactions.core.state_store import get_session_id
 from ...workflow.workflow import StructureDecompWorkflow
 
 # %% ../../../nbs/routes/core/status.ipynb #e5f6a7b8
-def _handle_current_status(
+async def _handle_current_status(
     workflow: StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess  # FastHTML session object
@@ -36,13 +36,13 @@ def _handle_current_status(
     
     # If there's existing state, resume the workflow
     if current_step or workflow_state:
-        return workflow._stepflow_router.start(request, sess)
+        return await workflow._stepflow_router.start(request, sess)
     
     # Start fresh
-    return workflow._stepflow_router.start(request, sess)
+    return await workflow._stepflow_router.start(request, sess)
 
 # %% ../../../nbs/routes/core/status.ipynb #f6a7b8c9
-def _handle_reset(
+async def _handle_reset(
     workflow: StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess  # FastHTML session object
@@ -50,7 +50,7 @@ def _handle_reset(
     """Reset workflow and return to start."""
     session_id = get_session_id(sess)
     workflow.state_store.clear_state(workflow.config.workflow_id, session_id)
-    return workflow._stepflow_router.start(request, sess)
+    return await workflow._stepflow_router.start(request, sess)
 
 # %% ../../../nbs/routes/core/status.ipynb #h8c9d0e1
 def init_status_router(
@@ -61,14 +61,14 @@ def init_status_router(
     router = APIRouter(prefix=prefix)
 
     @router
-    def current_status(request, sess):
+    async def current_status(request, sess):
         """Get current workflow status."""
-        return _handle_current_status(workflow, request, sess)
+        return await _handle_current_status(workflow, request, sess)
 
     @router
-    def reset(request, sess):
+    async def reset(request, sess):
         """Reset workflow to beginning."""
-        return _handle_reset(workflow, request, sess)
+        return await _handle_reset(workflow, request, sess)
 
     routes = {
         "current_status": current_status,

@@ -56,23 +56,23 @@ graph LR
     combined_handlers --> combined_step_combined
     combined_keyboard_config --> combined_html_ids
     combined_step_combined --> combined_keyboard_config
-    combined_step_combined --> combined_html_ids
     combined_step_combined --> combined_helpers
+    combined_step_combined --> combined_html_ids
     routes_core_audio --> workflow_workflow
     routes_core_chrome --> combined_keyboard_config
     routes_core_chrome --> combined_html_ids
     routes_core_chrome --> combined_step_combined
     routes_core_chrome --> workflow_workflow
-    routes_core_init --> workflow_workflow
+    routes_core_init --> routes_core_status
     routes_core_init --> routes_core_chrome
     routes_core_init --> routes_core_sources
+    routes_core_init --> workflow_workflow
     routes_core_init --> routes_core_audio
-    routes_core_init --> routes_core_status
     routes_core_sources --> workflow_workflow
     routes_core_status --> workflow_workflow
-    routes_init --> routes_core_init
     routes_init --> combined_handlers
     routes_init --> workflow_workflow
+    routes_init --> routes_core_init
     workflow_workflow --> core_config
     workflow_workflow --> combined_step_combined
 ```
@@ -543,7 +543,7 @@ from cjm_fasthtml_workflow_transcript_decomp.routes.core.status import (
 #### Functions
 
 ``` python
-def _handle_current_status(
+async def _handle_current_status(
     workflow: StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess  # FastHTML session object
@@ -552,7 +552,7 @@ def _handle_current_status(
 ```
 
 ``` python
-def _handle_reset(
+async def _handle_reset(
     workflow: StructureDecompWorkflow,  # The workflow instance
     request,  # FastHTML request object
     sess  # FastHTML session object
@@ -895,8 +895,16 @@ class StructureDecompWorkflow:
             return self._graph_service
         
         @property
-        def state_store(self) -> SQLiteWorkflowStateStore:  # State store instance
+        def verify_service(self) -> VerifyService:  # Verify service instance
         "Access to graph service."
+    
+    def verify_service(self) -> VerifyService:  # Verify service instance
+            """Access to verify service."""
+            return self._verify_service
+        
+        @property
+        def state_store(self) -> SQLiteWorkflowStateStore:  # State store instance
+        "Access to verify service."
     
     def state_store(self) -> SQLiteWorkflowStateStore:  # State store instance
             """Access to state store."""

@@ -34,6 +34,9 @@ from cjm_transcript_review.services.graph import GraphService
 from cjm_transcript_review.models import ReviewUrls
 from cjm_transcript_review.components.review_card import AssembledSegment
 from cjm_transcript_review.utils import generate_document_title
+from cjm_transcript_verify.models import VerifyUrls
+from cjm_transcript_verify.services.verify import VerifyService
+from cjm_transcript_verify.components.step_renderer import render_verify_step
 
 # Step renderers
 from cjm_transcript_source_select.components.step_renderer import render_selection_step
@@ -141,6 +144,10 @@ class StructureDecompWorkflow:
             plugin_manager,
             plugin_name=self.config.graph_plugin
         )
+        self._verify_service = VerifyService(
+            plugin_manager,
+            plugin_name=self.config.graph_plugin
+        )
         
         # Create StepFlow
         self._step_flow = self._create_step_flow()
@@ -187,6 +194,11 @@ class StructureDecompWorkflow:
     def graph_service(self) -> GraphService:  # Graph service instance
         """Access to graph service."""
         return self._graph_service
+    
+    @property
+    def verify_service(self) -> VerifyService:  # Verify service instance
+        """Access to verify service."""
+        return self._verify_service
     
     @property
     def state_store(self) -> SQLiteWorkflowStateStore:  # State store instance
@@ -288,6 +300,10 @@ def _create_step_flow(
         """Load data for review step."""
         return {}
     
+    def load_verify_data(request) -> Dict[str, Any]:
+        """Load data for verify step."""
+        return {}
+    
     # Validation functions
     def validate_selection(state: Dict[str, Any]) -> bool:
         """Validate that sources have been selected."""
@@ -313,9 +329,13 @@ def _create_step_flow(
         """Validate review step."""
         return True
     
-    # Completion handler
-    async def on_complete(state: Dict[str, Any], request):
-        """Handle workflow completion - commit to graph."""
+    def validate_verify(state: Dict[str, Any]) -> bool:
+        """Validate verify step (always valid - just viewing results)."""
+        return True
+    
+    # on_leave handler for Review step - commits to graph before navigating to Verify
+    async def on_leave_review(state: Dict[str, Any], request, sess):
+        """Commit to graph when leaving Review step."""
         step_states = state.get("step_states", {})
         
         # Extract segments from segmentation step
@@ -336,7 +356,7 @@ def _create_step_flow(
         # Check if graph service is available
         if not workflow._graph_service.is_available():
             return Div(
-                P("Graph plugin not loaded. Document was not committed."),
+                P("Graph plugin not loaded. Cannot commit document."),
                 id=workflow.config.container_id
             )
         
@@ -348,20 +368,72 @@ def _create_step_flow(
                 vad_chunks=vad_chunks,
                 media_type="audio",
             )
-            segment_count = len(result.get("segment_ids", []))
+            document_id = result.get("document_id")
             
-            # Placeholder completion UI (Phase 4: Visualization will replace this)
-            return Div(
-                P(f"Committed {segment_count} segments to context graph."),
-                P("Phase 4: Graph Visualization coming soon.", 
-                  cls=combine_classes(text_dui.base_content.opacity(60), m.t(2))),
-                id=workflow.config.container_id
-            )
+            # Store document_id in review state for verify step to pick up
+            session_id = get_session_id(sess)
+            workflow_state = workflow._state_store.get_state(workflow.config.workflow_id, session_id)
+            step_states = workflow_state.get("step_states", {})
+            review_state = step_states.get("review", {})
+            review_state["document_id"] = document_id
+            review_state["media_path"] = media_path
+            step_states["review"] = review_state
+            workflow_state["step_states"] = step_states
+            workflow._state_store.update_state(workflow.config.workflow_id, session_id, workflow_state)
+            
+            # Return None to proceed to next step
+            return None
+            
         except Exception as e:
             return Div(
                 P(f"Commit failed: {str(e)}"),
                 id=workflow.config.container_id
             )
+    
+    # on_enter handler for Verify step - queries verification results
+    async def on_enter_verify(state: Dict[str, Any], request, sess):
+        """Query verification results when entering Verify step."""
+        step_states = state.get("step_states", {})
+        
+        # Get document_id from review state (set by on_leave_review)
+        review_state = step_states.get("review", {})
+        document_id = review_state.get("document_id")
+        
+        if not document_id:
+            # No document_id means we haven't committed yet - shouldn't happen normally
+            return None
+        
+        # Query verification results
+        verify_result = await workflow._verify_service.verify_document_async(document_id)
+        
+        if verify_result:
+            # Store verification result in verify state
+            session_id = get_session_id(sess)
+            workflow_state = workflow._state_store.get_state(workflow.config.workflow_id, session_id)
+            step_states = workflow_state.get("step_states", {})
+            verify_state = step_states.get("verify", {})
+            verify_state["verification_result"] = verify_result.to_dict()
+            verify_state["document_id"] = document_id
+            step_states["verify"] = verify_state
+            workflow_state["step_states"] = step_states
+            workflow._state_store.update_state(workflow.config.workflow_id, session_id, workflow_state)
+        
+        # Return None to proceed with rendering
+        return None
+    
+    # Completion handler - resets workflow to Phase 1
+    async def on_complete(state: Dict[str, Any], request):
+        """Handle workflow completion - reset to Phase 1."""
+        # The workflow will be reset by StepFlow via the reset route
+        # Return a simple completion message that triggers reset
+        return Div(
+            P("Workflow complete. Starting new workflow..."),
+            hx_get=workflow._stepflow_router.reset.to(),  # reset route
+            hx_trigger="load",
+            hx_target=f"#{workflow.config.container_id}",
+            hx_swap="outerHTML",
+            id=workflow.config.container_id
+        )
     
     # Create render wrapper for selection step with explicit parameters
     def render_selection_step_with_urls(ctx: InteractionContext):
@@ -445,6 +517,33 @@ def _create_step_flow(
             media_path=media_path,
         )
     
+    # Create render wrapper for verify step
+    def render_verify_step_with_urls(ctx: InteractionContext):
+        """Render verify step using pre-computed verification results from state."""
+        from cjm_transcript_verify.models import VerificationResult
+        
+        step_states = ctx.state.get("step_states", {})
+        
+        # Get verification result from verify state (computed in on_enter_verify)
+        verify_state = step_states.get("verify", {})
+        result_dict = verify_state.get("verification_result")
+        
+        if not result_dict:
+            return render_verify_step(
+                result=None,
+                urls=getattr(workflow, '_verify_urls', VerifyUrls()),
+                error="No verification data found. Please complete the review step first."
+            )
+        
+        # Reconstruct VerificationResult from dict
+        result = VerificationResult.from_dict(result_dict)
+        
+        return render_verify_step(
+            result=result,
+            urls=getattr(workflow, '_verify_urls', VerifyUrls()),
+            error=""
+        )
+    
     return StepFlow(
         debug=True,
         flow_id=self.config.workflow_id,
@@ -482,7 +581,20 @@ def _create_step_flow(
                 data_keys=[],
                 show_back=True,
                 show_cancel=True,
-                next_button_text="Commit to Graph"
+                next_button_text="Commit to Graph",
+                on_leave=on_leave_review
+            ),
+            Step(
+                id="verify",
+                title="Verify",
+                render=render_verify_step_with_urls,
+                validate=validate_verify,
+                data_loader=load_verify_data,
+                data_keys=[],
+                show_back=True,
+                show_cancel=False,
+                next_button_text="Start New Workflow",
+                on_enter=on_enter_verify
             )
         ],
         on_complete=on_complete,
