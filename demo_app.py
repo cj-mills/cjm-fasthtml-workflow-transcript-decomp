@@ -61,6 +61,11 @@ def main():
     from cjm_fasthtml_workflow_transcript_decomp.workflow.workflow import StructureDecompWorkflow
     from cjm_fasthtml_workflow_transcript_decomp.core.config import StructureDecompWorkflowConfig
 
+    # Import management components
+    from cjm_transcript_workflow_management.services.management import ManagementService
+    from cjm_transcript_workflow_management.routes.init import init_management_routers
+    from cjm_transcript_workflow_management.components.page_renderer import render_management_page
+
     print("  Library components imported successfully")
 
     # Create the FastHTML app
@@ -155,6 +160,14 @@ def main():
     # Store workflow in app.state for access from routes
     app.state.structure_workflow = structure_workflow
     app.state.plugin_manager = plugin_manager
+
+    # Create management service (shares the same plugin_manager / graph plugin)
+    mgmt_service = ManagementService(plugin_manager, "cjm-graph-plugin-sqlite")
+    mgmt_routers, mgmt_urls, mgmt_routes = init_management_routers(
+        service=mgmt_service,
+        prefix="/manage",
+    )
+    print(f"\n  Management service available: {mgmt_service.is_available()}")
 
     # Check plugin and source status
     sources = structure_workflow.source_service.get_available_sources()
@@ -272,12 +285,27 @@ def main():
             wrap_fn=lambda content: wrap_with_layout(content, navbar=navbar)
         )
 
+    @router
+    async def manage(request):
+        """Graph management page — list, inspect, delete, import/export documents."""
+
+        async def manage_content():
+            documents = await mgmt_service.list_documents_async()
+            return render_management_page(documents, mgmt_urls)
+
+        return handle_htmx_request(
+            request,
+            await manage_content(),
+            wrap_fn=lambda content: wrap_with_layout(content, navbar=navbar)
+        )
+
     # Create navbar (after routes are defined so we can reference them)
     navbar = create_navbar(
         title="Structure Decomp Demo",
         nav_items=[
             ("Home", index),
             ("Workflow", workflow),
+            ("Manage", manage),
         ],
         home_route=index,
         theme_selector=True
@@ -288,7 +316,8 @@ def main():
     register_routes(
         app,
         router,
-        *structure_workflow.get_routers()
+        *structure_workflow.get_routers(),
+        *mgmt_routers,
     )
 
     # Debug: Print registered routes
@@ -336,6 +365,7 @@ if __name__ == "__main__":
     print("\nAvailable routes:")
     print(f"  http://{display_host}:{port}/          - Homepage with status")
     print(f"  http://{display_host}:{port}/workflow  - Structure decomposition workflow")
+    print(f"  http://{display_host}:{port}/manage   - Graph management (list, inspect, delete, import/export)")
     print("\n" + "="*70 + "\n")
 
     # Open browser after a short delay
