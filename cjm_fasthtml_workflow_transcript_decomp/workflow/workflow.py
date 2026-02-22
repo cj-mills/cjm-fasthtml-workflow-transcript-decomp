@@ -276,64 +276,150 @@ def render_entry_point(
         load_url=current_status_url
     )
 
-# %% ../../nbs/workflow/workflow.ipynb #6306d3ee
-@patch
-def _create_step_flow(
-    self: StructureDecompWorkflow
-) -> StepFlow:  # Configured StepFlow instance
-    """Create and configure the StepFlow instance."""
-    workflow = self
-    
-    # Data loaders for each step
+# %% ../../nbs/workflow/workflow.ipynb #6yrzags26ff
+def _create_data_loaders(
+    workflow: StructureDecompWorkflow  # Workflow instance for service access
+):  # (load_sources, load_empty) callables
+    """Create data loader functions for StepFlow steps."""
     def load_sources(request) -> Dict[str, Any]:
         """Load available transcription sources."""
         sources = workflow._source_service.get_available_sources()
         transcriptions = workflow._source_service.query_transcriptions(limit=50)
         return {"sources": sources, "transcriptions": transcriptions}
     
-    def load_segmentation_data(request) -> Dict[str, Any]:
-        """Load data for segmentation step."""
-        # Data is loaded via init route, not data_loader
+    def load_empty(request) -> Dict[str, Any]:
+        """No-op loader for steps that load data via init routes."""
         return {}
     
-    def load_review_data(request) -> Dict[str, Any]:
-        """Load data for review step."""
-        return {}
-    
-    def load_verify_data(request) -> Dict[str, Any]:
-        """Load data for verify step."""
-        return {}
-    
-    # Validation functions
-    def validate_selection(state: Dict[str, Any]) -> bool:
-        """Validate that sources have been selected."""
-        step_states = state.get("step_states", {})
-        selection_state = step_states.get("selection", {})
-        selected_sources = selection_state.get("selected_sources", [])
-        return len(selected_sources) > 0
-    
-    def validate_segmentation(state: Dict[str, Any]) -> bool:
-        """Validate that segmentation and alignment are complete (1:1)."""
-        step_states = state.get("step_states", {})
+    return load_sources, load_empty
 
+def _validate_always_true(
+    state: Dict[str, Any]  # Workflow state dictionary
+) -> bool:  # Always True
+    """No-op validator for steps that are always valid."""
+    return True
+
+# %% ../../nbs/workflow/workflow.ipynb #znxj05gue7l
+def _validate_selection(
+    state: Dict[str, Any]  # Workflow state dictionary
+) -> bool:  # True if at least one source is selected
+    """Validate that sources have been selected."""
+    step_states = state.get("step_states", {})
+    selection_state = step_states.get("selection", {})
+    selected_sources = selection_state.get("selected_sources", [])
+    return len(selected_sources) > 0
+
+def _create_selection_renderer(
+    workflow: StructureDecompWorkflow  # Workflow instance for URL access
+):  # Render callable for StepFlow
+    """Create render function for the source selection step."""
+    def render(ctx: InteractionContext):
+        sources = ctx.get_data("sources", [])
+        transcriptions = ctx.get_data("transcriptions", [])
+        
+        step_state = ctx.state.get("step_states", {}).get("selection", {})
+        selected_sources = step_state.get("selected_sources", [])
+        grouping_mode = step_state.get("grouping_mode", "media_path")
+        external_db_paths = step_state.get("external_db_paths", [])
+        file_browser_state = step_state.get("file_browser_state", {})
+        active_tab = ctx.get("source_tab", "db")
+        
+        return render_selection_step(
+            sources=sources,
+            transcriptions=transcriptions,
+            selected_sources=selected_sources,
+            grouping_mode=grouping_mode,
+            external_db_paths=external_db_paths,
+            file_browser_state=file_browser_state,
+            active_tab=active_tab,
+            urls=getattr(workflow, '_selection_urls', SelectionUrls()),
+        )
+    return render
+
+# %% ../../nbs/workflow/workflow.ipynb #288u75ru16r
+def _validate_segmentation(
+    state: Dict[str, Any]  # Workflow state dictionary
+) -> bool:  # True if segments and VAD chunks are 1:1 aligned
+    """Validate that segmentation and alignment are complete."""
+    step_states = state.get("step_states", {})
+    seg_state = step_states.get("segmentation", {})
+    segments = seg_state.get("segments", [])
+    alignment_state = step_states.get("alignment", {})
+    vad_chunks = alignment_state.get("vad_chunks", [])
+    return len(segments) > 0 and len(vad_chunks) > 0 and len(segments) == len(vad_chunks)
+
+def _create_combined_renderer(
+    workflow: StructureDecompWorkflow  # Workflow instance for URL access
+):  # Render callable for StepFlow
+    """Create render function for the segmentation & alignment step."""
+    def render(ctx: InteractionContext):
+        return render_combined_step(
+            ctx=ctx,
+            seg_urls=getattr(workflow, '_seg_urls', SegmentationUrls()),
+            align_urls=getattr(workflow, '_align_urls', AlignmentUrls()),
+            switch_chrome_url=getattr(workflow, '_switch_chrome_url', ''),
+        )
+    return render
+
+# %% ../../nbs/workflow/workflow.ipynb #mni9sa15j2
+def _create_review_renderer(
+    workflow: StructureDecompWorkflow  # Workflow instance for URL and state access
+):  # Render callable for StepFlow
+    """Create render function for the review step."""
+    def render(ctx: InteractionContext):
+        step_states = ctx.state.get("step_states", {})
+        
+        # Extract segments from segmentation step
         seg_state = step_states.get("segmentation", {})
-        segments = seg_state.get("segments", [])
+        segment_dicts = seg_state.get("segments", [])
+        segments = [TextSegment.from_dict(s) for s in segment_dicts]
+        
+        # Extract VAD chunks from alignment step
+        align_state = step_states.get("alignment", {})
+        chunk_dicts = align_state.get("vad_chunks", [])
+        vad_chunks = [VADChunk.from_dict(c) for c in chunk_dicts]
+        media_paths = align_state.get("media_paths", [])
+        review_urls_obj = getattr(workflow, '_review_urls', ReviewUrls())
+        audio_src_url = review_urls_obj.audio_src
+        audio_urls = [f"{audio_src_url}?path={mp}" for mp in media_paths] if audio_src_url and media_paths else []
+        
+        # Assemble segments with their corresponding VAD chunks
+        assembled = [
+            AssembledSegment(segment=seg, vad_chunk=chunk)
+            for seg, chunk in zip(segments, vad_chunks)
+        ]
+        
+        # Extract review step state
+        review_state = step_states.get("review", {})
+        focused_index = review_state.get("focused_index", 0)
+        visible_count = review_state.get("visible_count", 5)
+        is_auto_mode = review_state.get("is_auto_mode", False)
+        card_width = review_state.get("card_width", 50)
+        playback_speed = review_state.get("playback_speed", 1.0)
+        auto_navigate = review_state.get("auto_navigate", False)
+        
+        # Get document title from state, or auto-generate from media path
+        media_path = align_state.get("media_path")
+        document_title = review_state.get("document_title") or generate_document_title(media_path)
+        
+        return render_review_step(
+            assembled=assembled,
+            focused_index=focused_index,
+            visible_count=visible_count,
+            is_auto_mode=is_auto_mode,
+            card_width=card_width,
+            playback_speed=playback_speed,
+            auto_navigate=auto_navigate,
+            document_title=document_title,
+            urls=review_urls_obj,
+            audio_urls=audio_urls,
+        )
+    return render
 
-        alignment_state = step_states.get("alignment", {})
-        vad_chunks = alignment_state.get("vad_chunks", [])
-
-        # Must have segments, VAD chunks, and counts must match (1:1 alignment)
-        return len(segments) > 0 and len(vad_chunks) > 0 and len(segments) == len(vad_chunks)
-    
-    def validate_review(state: Dict[str, Any]) -> bool:
-        """Validate review step."""
-        return True
-    
-    def validate_verify(state: Dict[str, Any]) -> bool:
-        """Validate verify step (always valid - just viewing results)."""
-        return True
-    
-    # on_leave handler for Review step - commits to graph before navigating to Verify
+def _create_review_hook(
+    workflow: StructureDecompWorkflow  # Workflow instance for service and state access
+):  # on_leave callable
+    """Create on_leave hook for the review step (commits to graph)."""
     async def on_leave_review(state: Dict[str, Any], request, sess):
         """Commit to graph when leaving Review step."""
         step_states = state.get("step_states", {})
@@ -381,7 +467,6 @@ def _create_step_flow(
             workflow_state["step_states"] = step_states
             workflow._state_store.update_state(workflow.config.workflow_id, session_id, workflow_state)
             
-            # Return None to proceed to next step
             return None
             
         except Exception as e:
@@ -390,149 +475,17 @@ def _create_step_flow(
                 id=workflow.config.container_id
             )
     
-    # on_enter handler for Verify step - queries verification results
-    async def on_enter_verify(state: Dict[str, Any], request, sess):
-        """Query verification results when entering Verify step."""
-        step_states = state.get("step_states", {})
-        
-        # Get document_id from review state (set by on_leave_review)
-        review_state = step_states.get("review", {})
-        document_id = review_state.get("document_id")
-        
-        if not document_id:
-            # No document_id means we haven't committed yet - shouldn't happen normally
-            return None
-        
-        # Query verification results
-        verify_result = await workflow._verify_service.verify_document_async(document_id)
-        
-        if verify_result:
-            # Store verification result in verify state
-            session_id = get_session_id(sess)
-            workflow_state = workflow._state_store.get_state(workflow.config.workflow_id, session_id)
-            step_states = workflow_state.get("step_states", {})
-            verify_state = step_states.get("verify", {})
-            verify_state["verification_result"] = verify_result.to_dict()
-            verify_state["document_id"] = document_id
-            step_states["verify"] = verify_state
-            workflow_state["step_states"] = step_states
-            workflow._state_store.update_state(workflow.config.workflow_id, session_id, workflow_state)
-        
-        # Return None to proceed with rendering
-        return None
-    
-    # Completion handler - resets workflow to Phase 1
-    async def on_complete(state: Dict[str, Any], request):
-        """Handle workflow completion - reset to Phase 1."""
-        # The workflow will be reset by StepFlow via the reset route
-        # Return a simple completion message that triggers reset
-        return Div(
-            P("Workflow complete. Starting new workflow..."),
-            hx_get=workflow._stepflow_router.reset.to(),  # reset route
-            hx_trigger="load",
-            hx_target=f"#{workflow.config.container_id}",
-            hx_swap="outerHTML",
-            id=workflow.config.container_id
-        )
-    
-    # Create render wrapper for selection step with explicit parameters
-    def render_selection_step_with_urls(ctx: InteractionContext):
-        """Render selection step extracting state and passing explicit parameters."""
-        # Extract data from context (populated by data_loader)
-        sources = ctx.get_data("sources", [])
-        transcriptions = ctx.get_data("transcriptions", [])
-        
-        # Extract step state
-        step_state = ctx.state.get("step_states", {}).get("selection", {})
-        selected_sources = step_state.get("selected_sources", [])
-        grouping_mode = step_state.get("grouping_mode", "media_path")
-        external_db_paths = step_state.get("external_db_paths", [])
-        file_browser_state = step_state.get("file_browser_state", {})
-        
-        # Active tab from workflow state (not step state)
-        active_tab = ctx.get("source_tab", "db")
-        
-        return render_selection_step(
-            sources=sources,
-            transcriptions=transcriptions,
-            selected_sources=selected_sources,
-            grouping_mode=grouping_mode,
-            external_db_paths=external_db_paths,
-            file_browser_state=file_browser_state,
-            active_tab=active_tab,
-            urls=getattr(workflow, '_selection_urls', SelectionUrls()),
-        )
-    
-    # Create render wrapper for combined step that injects URL bundles
-    def render_combined_step_with_urls(ctx: InteractionContext):
-        """Render combined segment & align step with URL bundles from workflow."""
-        return render_combined_step(
-            ctx=ctx,
-            seg_urls=getattr(workflow, '_seg_urls', SegmentationUrls()),
-            align_urls=getattr(workflow, '_align_urls', AlignmentUrls()),
-            switch_chrome_url=getattr(workflow, '_switch_chrome_url', ''),
-        )
-    
-    # Create render wrapper for review step
-    def render_review_step_with_urls(ctx: InteractionContext):
-        """Render review step by assembling segments with VAD chunks."""
-        step_states = ctx.state.get("step_states", {})
-        
-        # Extract segments from segmentation step
-        seg_state = step_states.get("segmentation", {})
-        segment_dicts = seg_state.get("segments", [])
-        segments = [TextSegment.from_dict(s) for s in segment_dicts]
-        
-        # Extract VAD chunks from alignment step
-        align_state = step_states.get("alignment", {})
-        chunk_dicts = align_state.get("vad_chunks", [])
-        vad_chunks = [VADChunk.from_dict(c) for c in chunk_dicts]
-        media_paths = align_state.get("media_paths", [])
-        review_urls_obj = getattr(workflow, '_review_urls', ReviewUrls())
-        audio_src_url = review_urls_obj.audio_src
-        audio_urls = [f"{audio_src_url}?path={mp}" for mp in media_paths] if audio_src_url and media_paths else []
-        
-        # Assemble segments with their corresponding VAD chunks
-        assembled = [
-            AssembledSegment(segment=seg, vad_chunk=chunk)
-            for seg, chunk in zip(segments, vad_chunks)
-        ]
-        
-        # Extract review step state
-        review_state = step_states.get("review", {})
-        focused_index = review_state.get("focused_index", 0)
-        visible_count = review_state.get("visible_count", 5)
-        is_auto_mode = review_state.get("is_auto_mode", False)
-        card_width = review_state.get("card_width", 50)
-        playback_speed = review_state.get("playback_speed", 1.0)
-        auto_navigate = review_state.get("auto_navigate", False)
-        
-        # Get document title from state, or auto-generate from media path
-        media_path = align_state.get("media_path")
-        document_title = review_state.get("document_title") or generate_document_title(media_path)
-        
-        # Keyboard system is managed internally by the library
-        return render_review_step(
-            assembled=assembled,
-            focused_index=focused_index,
-            visible_count=visible_count,
-            is_auto_mode=is_auto_mode,
-            card_width=card_width,
-            playback_speed=playback_speed,
-            auto_navigate=auto_navigate,
-            document_title=document_title,
-            urls=getattr(workflow, '_review_urls', ReviewUrls()),
-            audio_urls=audio_urls,
-        )
-    
-    # Create render wrapper for verify step
-    def render_verify_step_with_urls(ctx: InteractionContext):
-        """Render verify step using pre-computed verification results from state."""
+    return on_leave_review
+
+# %% ../../nbs/workflow/workflow.ipynb #izra3d9c7h
+def _create_verify_renderer(
+    workflow: StructureDecompWorkflow  # Workflow instance for URL access
+):  # Render callable for StepFlow
+    """Create render function for the verify step."""
+    def render(ctx: InteractionContext):
         from cjm_transcript_verify.models import VerificationResult
         
         step_states = ctx.state.get("step_states", {})
-        
-        # Get verification result from verify state (computed in on_enter_verify)
         verify_state = step_states.get("verify", {})
         result_dict = verify_state.get("verification_result")
         
@@ -543,7 +496,6 @@ def _create_step_flow(
                 error="No verification data found. Please complete the review step first."
             )
         
-        # Reconstruct VerificationResult from dict
         result = VerificationResult.from_dict(result_dict)
         
         return render_verify_step(
@@ -551,6 +503,60 @@ def _create_step_flow(
             urls=getattr(workflow, '_verify_urls', VerifyUrls()),
             error=""
         )
+    return render
+
+def _create_verify_hooks(
+    workflow: StructureDecompWorkflow  # Workflow instance for service and state access
+):  # (on_enter_verify, on_complete) callables
+    """Create lifecycle hooks for the verify step."""
+    async def on_enter_verify(state: Dict[str, Any], request, sess):
+        """Query verification results when entering Verify step."""
+        step_states = state.get("step_states", {})
+        review_state = step_states.get("review", {})
+        document_id = review_state.get("document_id")
+        
+        if not document_id:
+            return None
+        
+        verify_result = await workflow._verify_service.verify_document_async(document_id)
+        
+        if verify_result:
+            session_id = get_session_id(sess)
+            workflow_state = workflow._state_store.get_state(workflow.config.workflow_id, session_id)
+            step_states = workflow_state.get("step_states", {})
+            verify_state = step_states.get("verify", {})
+            verify_state["verification_result"] = verify_result.to_dict()
+            verify_state["document_id"] = document_id
+            step_states["verify"] = verify_state
+            workflow_state["step_states"] = step_states
+            workflow._state_store.update_state(workflow.config.workflow_id, session_id, workflow_state)
+        
+        return None
+    
+    async def on_complete(state: Dict[str, Any], request):
+        """Handle workflow completion — reset to Phase 1."""
+        return Div(
+            P("Workflow complete. Starting new workflow..."),
+            hx_get=workflow._stepflow_router.reset.to(),
+            hx_trigger="load",
+            hx_target=f"#{workflow.config.container_id}",
+            hx_swap="outerHTML",
+            id=workflow.config.container_id
+        )
+    
+    return on_enter_verify, on_complete
+
+# %% ../../nbs/workflow/workflow.ipynb #6306d3ee
+@patch
+def _create_step_flow(
+    self: StructureDecompWorkflow
+) -> StepFlow:  # Configured StepFlow instance
+    """Create and configure the StepFlow instance."""
+    workflow = self
+    
+    load_sources, load_empty = _create_data_loaders(workflow)
+    on_leave_review = _create_review_hook(workflow)
+    on_enter_verify, on_complete = _create_verify_hooks(workflow)
     
     return StepFlow(
         debug=True,
@@ -561,8 +567,8 @@ def _create_step_flow(
             Step(
                 id="selection",
                 title="Select Sources",
-                render=render_selection_step_with_urls,
-                validate=validate_selection,
+                render=_create_selection_renderer(workflow),
+                validate=_validate_selection,
                 data_loader=load_sources,
                 data_keys=["selected_sources"],
                 show_back=False,
@@ -572,9 +578,9 @@ def _create_step_flow(
             Step(
                 id="segmentation",
                 title="Segment & Align",
-                render=render_combined_step_with_urls,
-                validate=validate_segmentation,
-                data_loader=load_segmentation_data,
+                render=_create_combined_renderer(workflow),
+                validate=_validate_segmentation,
+                data_loader=load_empty,
                 data_keys=["segments"],
                 show_back=True,
                 show_cancel=True,
@@ -583,9 +589,9 @@ def _create_step_flow(
             Step(
                 id="review",
                 title="Review",
-                render=render_review_step_with_urls,
-                validate=validate_review,
-                data_loader=load_review_data,
+                render=_create_review_renderer(workflow),
+                validate=_validate_always_true,
+                data_loader=load_empty,
                 data_keys=[],
                 show_back=True,
                 show_cancel=True,
@@ -595,9 +601,9 @@ def _create_step_flow(
             Step(
                 id="verify",
                 title="Verify",
-                render=render_verify_step_with_urls,
-                validate=validate_verify,
-                data_loader=load_verify_data,
+                render=_create_verify_renderer(workflow),
+                validate=_validate_always_true,
+                data_loader=load_empty,
                 data_keys=[],
                 show_back=True,
                 show_cancel=False,

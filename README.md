@@ -51,23 +51,23 @@ graph LR
     routes_init[routes.init<br/>init]
     workflow_workflow[workflow.workflow<br/>workflow]
 
-    combined_handlers --> combined_keyboard_config
     combined_handlers --> combined_step_combined
     combined_handlers --> combined_html_ids
+    combined_handlers --> combined_keyboard_config
     combined_keyboard_config --> combined_html_ids
+    combined_step_combined --> combined_html_ids
     combined_step_combined --> combined_keyboard_config
     combined_step_combined --> combined_helpers
-    combined_step_combined --> combined_html_ids
     routes_core_audio --> workflow_workflow
-    routes_core_chrome --> combined_html_ids
-    routes_core_chrome --> workflow_workflow
-    routes_core_chrome --> combined_keyboard_config
     routes_core_chrome --> combined_step_combined
+    routes_core_chrome --> combined_html_ids
+    routes_core_chrome --> combined_keyboard_config
+    routes_core_chrome --> workflow_workflow
     routes_core_init --> routes_core_status
     routes_core_init --> routes_core_sources
-    routes_core_init --> workflow_workflow
     routes_core_init --> routes_core_audio
     routes_core_init --> routes_core_chrome
+    routes_core_init --> workflow_workflow
     routes_core_sources --> workflow_workflow
     routes_core_status --> workflow_workflow
     routes_init --> combined_handlers
@@ -763,6 +763,76 @@ def render_entry_point(
     sess  # FastHTML session object
 ):  # FastHTML component
     "Render the workflow entry point for embedding."
+```
+
+``` python
+def _create_data_loaders(
+    workflow: StructureDecompWorkflow  # Workflow instance for service access
+):  # (load_sources, load_empty) callables
+    "Create data loader functions for StepFlow steps."
+```
+
+``` python
+def _validate_always_true(
+    state: Dict[str, Any]  # Workflow state dictionary
+) -> bool:  # Always True
+    "No-op validator for steps that are always valid."
+```
+
+``` python
+def _validate_selection(
+    state: Dict[str, Any]  # Workflow state dictionary
+) -> bool:  # True if at least one source is selected
+    "Validate that sources have been selected."
+```
+
+``` python
+def _create_selection_renderer(
+    workflow: StructureDecompWorkflow  # Workflow instance for URL access
+):  # Render callable for StepFlow
+    "Create render function for the source selection step."
+```
+
+``` python
+def _validate_segmentation(
+    state: Dict[str, Any]  # Workflow state dictionary
+) -> bool:  # True if segments and VAD chunks are 1:1 aligned
+    "Validate that segmentation and alignment are complete."
+```
+
+``` python
+def _create_combined_renderer(
+    workflow: StructureDecompWorkflow  # Workflow instance for URL access
+):  # Render callable for StepFlow
+    "Create render function for the segmentation & alignment step."
+```
+
+``` python
+def _create_review_renderer(
+    workflow: StructureDecompWorkflow  # Workflow instance for URL and state access
+):  # Render callable for StepFlow
+    "Create render function for the review step."
+```
+
+``` python
+def _create_review_hook(
+    workflow: StructureDecompWorkflow  # Workflow instance for service and state access
+):  # on_leave callable
+    "Create on_leave hook for the review step (commits to graph)."
+```
+
+``` python
+def _create_verify_renderer(
+    workflow: StructureDecompWorkflow  # Workflow instance for URL access
+):  # Render callable for StepFlow
+    "Create render function for the verify step."
+```
+
+``` python
+def _create_verify_hooks(
+    workflow: StructureDecompWorkflow  # Workflow instance for service and state access
+):  # (on_enter_verify, on_complete) callables
+    "Create lifecycle hooks for the verify step."
 ```
 
 ``` python
