@@ -507,6 +507,10 @@ def _create_step_flow(
         playback_speed = review_state.get("playback_speed", 1.0)
         auto_navigate = review_state.get("auto_navigate", False)
         
+        # Get document title from state, or auto-generate from media path
+        media_path = align_state.get("media_path")
+        document_title = review_state.get("document_title") or generate_document_title(media_path)
+        
         # Keyboard system is managed internally by the library
         return render_review_step(
             assembled=assembled,
@@ -516,6 +520,7 @@ def _create_step_flow(
             card_width=card_width,
             playback_speed=playback_speed,
             auto_navigate=auto_navigate,
+            document_title=document_title,
             urls=getattr(workflow, '_review_urls', ReviewUrls()),
             audio_urls=audio_urls,
         )
@@ -604,7 +609,6 @@ def _create_step_flow(
         show_progress=self.config.show_progress,
         wrap_in_form=True
     )
-
 
 # %% ../../nbs/workflow/workflow.ipynb #a27c7fd5
 @patch
