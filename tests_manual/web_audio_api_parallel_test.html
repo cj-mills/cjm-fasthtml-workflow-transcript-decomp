@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Audio API Parallel Decode Test</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: system-ui, -apple-system, sans-serif; padding: 24px; background: #f8f9fa; color: #1a1a1a; }
+        h1 { margin-bottom: 8px; }
+        .subtitle { color: #666; margin-bottom: 32px; }
+        h2 { margin-bottom: 8px; }
+        h2 + p { color: #555; font-size: 14px; margin-bottom: 16px; }
+
+        .test-section { margin-bottom: 40px; padding: 20px; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; }
+        .controls { display: flex; gap: 12px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+        .controls input[type="file"] { flex: 1; min-width: 200px; }
+        .controls label { font-size: 14px; display: flex; align-items: center; gap: 6px; }
+        .controls input[type="number"] { width: 70px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .controls button { padding: 8px 16px; border: 1px solid #ccc; border-radius: 6px; background: #fff; cursor: pointer; font-size: 14px; }
+        .controls button:hover { background: #e9ecef; }
+        .controls button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .controls button.primary { background: #2563eb; color: #fff; border-color: #2563eb; }
+        .controls button.primary:hover { background: #1d4ed8; }
+
+        .status { padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; font-size: 14px; display: none; }
+        .status.loading { display: block; background: #fef3c7; border: 1px solid #f59e0b; }
+        .status.success { display: block; background: #d1fae5; border: 1px solid #10b981; }
+        .status.error { display: block; background: #fee2e2; border: 1px solid #ef4444; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #e5e7eb; font-size: 13px; }
+        th { background: #f1f5f9; font-weight: 600; color: #475569; }
+        tr:last-child td { border-bottom: none; }
+        .mono { font-family: ui-monospace, monospace; }
+        tfoot th, tfoot td { background: #f8fafc; font-weight: 600; border-top: 2px solid #cbd5e1; }
+
+        .summary { margin-top: 16px; padding: 12px 16px; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 6px; font-size: 14px; }
+        .summary strong { color: #0369a1; }
+    </style>
+</head>
+<body>
+    <h1>Web Audio API Parallel Decode Test</h1>
+    <p class="subtitle">Compare sequential vs parallel audio decoding strategies.</p>
+
+    <!-- Test 1: Single File Split -->
+    <div class="test-section">
+        <h2>Test 1: Single File — Split &amp; Parallel Decode</h2>
+        <p>Splits a single MP3 at frame boundaries into N chunks, then decodes all chunks in parallel via <code>Promise.all()</code>.</p>
+
+        <div class="controls">
+            <input type="file" id="singleFileInput" accept=".mp3" />
+            <label>Chunks: <input type="number" id="chunkCount" value="8" min="2" max="64" /></label>
+            <button class="primary" id="singleFileBtn" disabled>Run Test</button>
+        </div>
+
+        <div id="singleStatus" class="status"></div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Chunk</th>
+                    <th>Byte Range</th>
+                    <th>Chunk Size</th>
+                    <th>Decoded Duration</th>
+                    <th>Sample Rate</th>
+                    <th>Channels</th>
+                    <th>PCM Size</th>
+                    <th>Decode Time</th>
+                </tr>
+            </thead>
+            <tbody id="singleBody">
+                <tr><td colspan="8" style="text-align:center; color:#999;">No test run yet.</td></tr>
+            </tbody>
+            <tfoot id="singleFoot" style="display:none;">
+                <tr>
+                    <th colspan="2">Totals / Summary</th>
+                    <td class="mono" id="sTotalSize"></td>
+                    <td class="mono" id="sTotalDur"></td>
+                    <td colspan="2"></td>
+                    <td class="mono" id="sTotalPCM"></td>
+                    <td class="mono" id="sTotalDecode"></td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div id="singleSummary" class="summary" style="display:none;"></div>
+    </div>
+
+    <!-- Test 2: Multiple Files -->
+    <div class="test-section">
+        <h2>Test 2: Multiple Files — Parallel Decode</h2>
+        <p>Select a folder of pre-split audio segments. All files are read and decoded in parallel.</p>
+
+        <div class="controls">
+            <input type="file" id="multiFileInput" accept="audio/*" webkitdirectory />
+            <button class="primary" id="multiFileBtn" disabled>Run Test</button>
+        </div>
+
+        <div id="multiStatus" class="status"></div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>File Name</th>
+                    <th>File Size</th>
+                    <th>Decoded Duration</th>
+                    <th>Sample Rate</th>
+                    <th>Channels</th>
+                    <th>PCM Size</th>
+                    <th>Decode Time</th>
+                </tr>
+            </thead>
+            <tbody id="multiBody">
+                <tr><td colspan="8" style="text-align:center; color:#999;">No test run yet.</td></tr>
+            </tbody>
+            <tfoot id="multiFoot" style="display:none;">
+                <tr>
+                    <th colspan="2">Totals / Summary</th>
+                    <td class="mono" id="mTotalSize"></td>
+                    <td class="mono" id="mTotalDur"></td>
+                    <td colspan="2"></td>
+                    <td class="mono" id="mTotalPCM"></td>
+                    <td class="mono" id="mTotalDecode"></td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div id="multiSummary" class="summary" style="display:none;"></div>
+    </div>
+
+    <script>
+        // ── Helpers ──────────────────────────────────────────────────────
+
+        function formatBytes(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+            return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+        }
+
+        function formatDuration(s) {
+            const h = Math.floor(s / 3600);
+            const m = Math.floor((s % 3600) / 60);
+            const sec = (s % 60).toFixed(2);
+            if (h > 0) return `${h}h ${m}m ${sec}s`;
+            if (m > 0) return `${m}m ${sec}s`;
+            return `${sec}s`;
+        }
+
+        function setStatus(el, msg, type) {
+            el.textContent = msg;
+            el.className = 'status ' + type;
+        }
+
+        // ── MP3 Frame Parser ─────────────────────────────────────────────
+
+        // Bitrate tables: [versionBits][layerBits][index] → kbps
+        const BITRATE_TABLE = {
+            // MPEG1
+            3: {
+                3: [0,32,64,96,128,160,192,224,256,288,320,352,384,416,448,0],  // Layer I
+                2: [0,32,48,56,64,80,96,112,128,160,192,224,256,320,384,0],     // Layer II
+                1: [0,32,40,48,56,64,80,96,112,128,160,192,224,256,320,0],      // Layer III
+            },
+            // MPEG2
+            2: {
+                3: [0,32,48,56,64,80,96,112,128,144,160,176,192,224,256,0],
+                2: [0,8,16,24,32,40,48,56,64,80,96,112,128,144,160,0],
+                1: [0,8,16,24,32,40,48,56,64,80,96,112,128,144,160,0],
+            },
+            // MPEG2.5
+            0: {
+                3: [0,32,48,56,64,80,96,112,128,144,160,176,192,224,256,0],
+                2: [0,8,16,24,32,40,48,56,64,80,96,112,128,144,160,0],
+                1: [0,8,16,24,32,40,48,56,64,80,96,112,128,144,160,0],
+            },
+        };
+
+        const SAMPLE_RATE_TABLE = {
+            3: [44100, 48000, 32000],   // MPEG1
+            2: [22050, 24000, 16000],   // MPEG2
+            0: [11025, 12000, 8000],    // MPEG2.5
+        };
+
+        function scanMP3Frames(buffer) {
+            const data = new Uint8Array(buffer);
+            let offset = 0;
+
+            // Skip ID3v2 tag if present
+            if (data.length > 10 && data[0] === 0x49 && data[1] === 0x44 && data[2] === 0x33) {
+                const size = ((data[6] & 0x7F) << 21) | ((data[7] & 0x7F) << 14) |
+                             ((data[8] & 0x7F) << 7) | (data[9] & 0x7F);
+                offset = 10 + size;
+                // Check for footer flag
+                if (data[5] & 0x10) offset += 10;
+            }
+
+            const frames = [];
+            let consecutiveFails = 0;
+
+            while (offset < data.length - 4 && consecutiveFails < 4096) {
+                // Check sync word: 11 set bits
+                if (data[offset] !== 0xFF || (data[offset + 1] & 0xE0) !== 0xE0) {
+                    offset++;
+                    consecutiveFails++;
+                    continue;
+                }
+
+                const b1 = data[offset + 1];
+                const b2 = data[offset + 2];
+
+                const versionBits = (b1 >> 3) & 0x03;   // 00=2.5, 10=2, 11=1
+                const layerBits   = (b1 >> 1) & 0x03;   // 01=III, 10=II, 11=I
+                const bitrateIdx  = (b2 >> 4) & 0x0F;
+                const srIdx       = (b2 >> 2) & 0x03;
+                const padding     = (b2 >> 1) & 0x01;
+
+                // Reject invalid combinations
+                if (versionBits === 1 || layerBits === 0 ||
+                    bitrateIdx === 0 || bitrateIdx === 15 || srIdx === 3) {
+                    offset++;
+                    consecutiveFails++;
+                    continue;
+                }
+
+                const brTable = BITRATE_TABLE[versionBits]?.[layerBits];
+                const srTable = SAMPLE_RATE_TABLE[versionBits];
+                if (!brTable || !srTable) { offset++; consecutiveFails++; continue; }
+
+                const bitrate = brTable[bitrateIdx] * 1000;  // bps
+                const sampleRate = srTable[srIdx];
+                if (!bitrate || !sampleRate) { offset++; consecutiveFails++; continue; }
+
+                let frameSize;
+                if (layerBits === 3) {
+                    // Layer I
+                    frameSize = Math.floor(12 * bitrate / sampleRate + padding) * 4;
+                } else if (versionBits === 3) {
+                    // MPEG1, Layer II/III
+                    frameSize = Math.floor(144 * bitrate / sampleRate) + padding;
+                } else {
+                    // MPEG2/2.5, Layer II/III
+                    frameSize = Math.floor(72 * bitrate / sampleRate) + padding;
+                }
+
+                if (frameSize < 4 || offset + frameSize > data.length) {
+                    offset++;
+                    consecutiveFails++;
+                    continue;
+                }
+
+                frames.push({ offset, size: frameSize });
+                offset += frameSize;
+                consecutiveFails = 0;
+            }
+
+            return frames;
+        }
+
+        function splitFramesIntoChunks(frames, numChunks) {
+            const totalFrames = frames.length;
+            const framesPerChunk = Math.ceil(totalFrames / numChunks);
+            const chunks = [];
+
+            for (let i = 0; i < numChunks && i * framesPerChunk < totalFrames; i++) {
+                const startFrame = i * framesPerChunk;
+                const endFrame = Math.min((i + 1) * framesPerChunk, totalFrames);
+                const startByte = frames[startFrame].offset;
+                const lastFrame = frames[endFrame - 1];
+                const endByte = lastFrame.offset + lastFrame.size;
+                chunks.push({ startByte, endByte, frameCount: endFrame - startFrame });
+            }
+
+            return chunks;
+        }
+
+        // ── Test 1: Single File Split ────────────────────────────────────
+
+        const singleFileInput = document.getElementById('singleFileInput');
+        const singleFileBtn = document.getElementById('singleFileBtn');
+        const singleStatus = document.getElementById('singleStatus');
+        const singleBody = document.getElementById('singleBody');
+        const singleFoot = document.getElementById('singleFoot');
+        const singleSummary = document.getElementById('singleSummary');
+        const chunkCountInput = document.getElementById('chunkCount');
+
+        singleFileInput.addEventListener('change', () => { singleFileBtn.disabled = !singleFileInput.files.length; });
+        singleFileBtn.addEventListener('click', runSingleFileTest);
+
+        async function runSingleFileTest() {
+            const file = singleFileInput.files[0];
+            if (!file) return;
+            const numChunks = parseInt(chunkCountInput.value) || 8;
+
+            singleFileBtn.disabled = true;
+            singleSummary.style.display = 'none';
+            setStatus(singleStatus, `Reading "${file.name}" (${formatBytes(file.size)})...`, 'loading');
+
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+
+                setStatus(singleStatus, 'Scanning MP3 frames...', 'loading');
+                const scanStart = performance.now();
+                const frames = scanMP3Frames(arrayBuffer);
+                const scanTime = performance.now() - scanStart;
+
+                if (frames.length === 0) {
+                    setStatus(singleStatus, 'Error: No MP3 frames found. Is this a valid MP3 file?', 'error');
+                    return;
+                }
+
+                setStatus(singleStatus, `Found ${frames.length.toLocaleString()} frames in ${scanTime.toFixed(0)}ms. Splitting into ${numChunks} chunks...`, 'loading');
+                const chunks = splitFramesIntoChunks(frames, numChunks);
+
+                // Decode all chunks in parallel
+                setStatus(singleStatus, `Decoding ${chunks.length} chunks in parallel...`, 'loading');
+                const audioCtx = new AudioContext();
+
+                const wallStart = performance.now();
+                const results = await Promise.all(chunks.map(async (chunk, idx) => {
+                    const slice = arrayBuffer.slice(chunk.startByte, chunk.endByte);
+                    const decodeStart = performance.now();
+                    try {
+                        const buf = await audioCtx.decodeAudioData(slice);
+                        const decodeTime = performance.now() - decodeStart;
+                        return {
+                            idx, success: true,
+                            startByte: chunk.startByte, endByte: chunk.endByte,
+                            chunkSize: chunk.endByte - chunk.startByte,
+                            duration: buf.duration, sampleRate: buf.sampleRate,
+                            channels: buf.numberOfChannels,
+                            pcmBytes: buf.numberOfChannels * buf.length * 4,
+                            decodeTime,
+                        };
+                    } catch (err) {
+                        return {
+                            idx, success: false,
+                            startByte: chunk.startByte, endByte: chunk.endByte,
+                            chunkSize: chunk.endByte - chunk.startByte,
+                            error: err.message,
+                            decodeTime: performance.now() - decodeStart,
+                        };
+                    }
+                }));
+                const wallTime = performance.now() - wallStart;
+                audioCtx.close();
+
+                // Render results
+                singleBody.innerHTML = '';
+                let totalSize = 0, totalDur = 0, totalPCM = 0, maxDecode = 0, failures = 0;
+
+                for (const r of results) {
+                    const row = document.createElement('tr');
+                    if (r.success) {
+                        totalSize += r.chunkSize;
+                        totalDur += r.duration;
+                        totalPCM += r.pcmBytes;
+                        maxDecode = Math.max(maxDecode, r.decodeTime);
+                        row.innerHTML = `
+                            <td class="mono">${r.idx + 1}</td>
+                            <td class="mono">${r.startByte.toLocaleString()}–${r.endByte.toLocaleString()}</td>
+                            <td class="mono">${formatBytes(r.chunkSize)}</td>
+                            <td class="mono">${formatDuration(r.duration)}</td>
+                            <td class="mono">${r.sampleRate} Hz</td>
+                            <td class="mono">${r.channels}</td>
+                            <td class="mono">${formatBytes(r.pcmBytes)}</td>
+                            <td class="mono">${r.decodeTime.toFixed(0)} ms</td>
+                        `;
+                    } else {
+                        failures++;
+                        row.innerHTML = `
+                            <td class="mono">${r.idx + 1}</td>
+                            <td class="mono">${r.startByte.toLocaleString()}–${r.endByte.toLocaleString()}</td>
+                            <td class="mono">${formatBytes(r.chunkSize)}</td>
+                            <td colspan="5" style="color:#dc2626;">Failed: ${r.error}</td>
+                        `;
+                    }
+                    singleBody.appendChild(row);
+                }
+
+                document.getElementById('sTotalSize').textContent = formatBytes(totalSize);
+                document.getElementById('sTotalDur').textContent = formatDuration(totalDur);
+                document.getElementById('sTotalPCM').textContent = formatBytes(totalPCM);
+                document.getElementById('sTotalDecode').textContent = `${wallTime.toFixed(0)} ms (wall)`;
+                singleFoot.style.display = '';
+
+                const sumIndividual = results.filter(r => r.success).reduce((s, r) => s + r.decodeTime, 0);
+                singleSummary.innerHTML = `
+                    <strong>Results:</strong>
+                    ${frames.length.toLocaleString()} frames → ${chunks.length} chunks
+                    &nbsp;|&nbsp; Frame scan: ${scanTime.toFixed(0)} ms
+                    &nbsp;|&nbsp; Wall time (parallel): <strong>${wallTime.toFixed(0)} ms</strong>
+                    &nbsp;|&nbsp; Sum of individual: ${sumIndividual.toFixed(0)} ms
+                    &nbsp;|&nbsp; Longest chunk: ${maxDecode.toFixed(0)} ms
+                    ${failures > 0 ? `&nbsp;|&nbsp; <span style="color:#dc2626;">${failures} chunk(s) failed</span>` : ''}
+                `;
+                singleSummary.style.display = '';
+
+                setStatus(singleStatus, `Done. Wall time: ${wallTime.toFixed(0)}ms for ${chunks.length} chunks decoded in parallel.`, 'success');
+
+            } catch (err) {
+                setStatus(singleStatus, `Error: ${err.message}`, 'error');
+                console.error(err);
+            } finally {
+                singleFileBtn.disabled = !singleFileInput.files.length;
+            }
+        }
+
+        // ── Test 2: Multiple Files ───────────────────────────────────────
+
+        const multiFileInput = document.getElementById('multiFileInput');
+        const multiFileBtn = document.getElementById('multiFileBtn');
+        const multiStatus = document.getElementById('multiStatus');
+        const multiBody = document.getElementById('multiBody');
+        const multiFoot = document.getElementById('multiFoot');
+        const multiSummary = document.getElementById('multiSummary');
+
+        multiFileInput.addEventListener('change', () => { multiFileBtn.disabled = !multiFileInput.files.length; });
+        multiFileBtn.addEventListener('click', runMultiFileTest);
+
+        async function runMultiFileTest() {
+            const files = Array.from(multiFileInput.files)
+                .filter(f => f.type.startsWith('audio/') || /\.(mp3|wav|m4a|m4b|ogg|flac|aac|wma)$/i.test(f.name))
+                .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+
+            if (files.length === 0) {
+                setStatus(multiStatus, 'No audio files found in selected folder.', 'error');
+                return;
+            }
+
+            multiFileBtn.disabled = true;
+            multiSummary.style.display = 'none';
+            setStatus(multiStatus, `Reading ${files.length} files...`, 'loading');
+
+            try {
+                const audioCtx = new AudioContext();
+
+                // Read all files into ArrayBuffers first
+                const readStart = performance.now();
+                const buffers = await Promise.all(files.map(f => f.arrayBuffer()));
+                const readTime = performance.now() - readStart;
+
+                setStatus(multiStatus, `Files read in ${readTime.toFixed(0)}ms. Decoding ${files.length} files in parallel...`, 'loading');
+
+                // Decode all in parallel
+                const wallStart = performance.now();
+                const results = await Promise.all(buffers.map(async (buf, idx) => {
+                    const decodeStart = performance.now();
+                    try {
+                        const audioBuf = await audioCtx.decodeAudioData(buf);
+                        const decodeTime = performance.now() - decodeStart;
+                        return {
+                            idx, success: true,
+                            name: files[idx].name,
+                            fileSize: files[idx].size,
+                            duration: audioBuf.duration,
+                            sampleRate: audioBuf.sampleRate,
+                            channels: audioBuf.numberOfChannels,
+                            pcmBytes: audioBuf.numberOfChannels * audioBuf.length * 4,
+                            decodeTime,
+                        };
+                    } catch (err) {
+                        return {
+                            idx, success: false,
+                            name: files[idx].name,
+                            fileSize: files[idx].size,
+                            error: err.message,
+                            decodeTime: performance.now() - decodeStart,
+                        };
+                    }
+                }));
+                const wallTime = performance.now() - wallStart;
+                audioCtx.close();
+
+                // Render results
+                multiBody.innerHTML = '';
+                let totalSize = 0, totalDur = 0, totalPCM = 0, failures = 0;
+
+                for (const r of results) {
+                    const row = document.createElement('tr');
+                    if (r.success) {
+                        totalSize += r.fileSize;
+                        totalDur += r.duration;
+                        totalPCM += r.pcmBytes;
+                        row.innerHTML = `
+                            <td class="mono">${r.idx + 1}</td>
+                            <td>${r.name}</td>
+                            <td class="mono">${formatBytes(r.fileSize)}</td>
+                            <td class="mono">${formatDuration(r.duration)}</td>
+                            <td class="mono">${r.sampleRate} Hz</td>
+                            <td class="mono">${r.channels}</td>
+                            <td class="mono">${formatBytes(r.pcmBytes)}</td>
+                            <td class="mono">${r.decodeTime.toFixed(0)} ms</td>
+                        `;
+                    } else {
+                        failures++;
+                        row.innerHTML = `
+                            <td class="mono">${r.idx + 1}</td>
+                            <td>${r.name}</td>
+                            <td class="mono">${formatBytes(r.fileSize)}</td>
+                            <td colspan="5" style="color:#dc2626;">Failed: ${r.error}</td>
+                        `;
+                    }
+                    multiBody.appendChild(row);
+                }
+
+                const sumIndividual = results.filter(r => r.success).reduce((s, r) => s + r.decodeTime, 0);
+                const maxDecode = Math.max(...results.filter(r => r.success).map(r => r.decodeTime));
+
+                document.getElementById('mTotalSize').textContent = formatBytes(totalSize);
+                document.getElementById('mTotalDur').textContent = formatDuration(totalDur);
+                document.getElementById('mTotalPCM').textContent = formatBytes(totalPCM);
+                document.getElementById('mTotalDecode').textContent = `${wallTime.toFixed(0)} ms (wall)`;
+                multiFoot.style.display = '';
+
+                multiSummary.innerHTML = `
+                    <strong>Results:</strong>
+                    ${files.length} files
+                    &nbsp;|&nbsp; File read (parallel): ${readTime.toFixed(0)} ms
+                    &nbsp;|&nbsp; Wall time (parallel decode): <strong>${wallTime.toFixed(0)} ms</strong>
+                    &nbsp;|&nbsp; Sum of individual: ${sumIndividual.toFixed(0)} ms
+                    &nbsp;|&nbsp; Longest file: ${maxDecode.toFixed(0)} ms
+                    ${failures > 0 ? `&nbsp;|&nbsp; <span style="color:#dc2626;">${failures} file(s) failed</span>` : ''}
+                `;
+                multiSummary.style.display = '';
+
+                setStatus(multiStatus, `Done. Wall time: ${wallTime.toFixed(0)}ms for ${files.length} files decoded in parallel.`, 'success');
+
+            } catch (err) {
+                setStatus(multiStatus, `Error: ${err.message}`, 'error');
+                console.error(err);
+            } finally {
+                multiFileBtn.disabled = !multiFileInput.files.length;
+            }
+        }
+    </script>
+</body>
+</html>

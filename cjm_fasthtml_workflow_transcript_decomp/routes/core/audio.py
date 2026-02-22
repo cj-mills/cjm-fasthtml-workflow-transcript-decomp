@@ -22,31 +22,28 @@ DEBUG_AUDIO = False
 def _handle_audio_src(
     workflow:StructureDecompWorkflow,  # The workflow instance
     sess,  # FastHTML session object
+    path:str=None,  # Audio file path (from query parameter)
 ):  # Audio file response or 404
-    """Serve the audio file for the current alignment session."""
-    session_id = get_session_id(sess)
+    """Serve an audio file by path for Web Audio API playback."""
+    if DEBUG_AUDIO:
+        print(f"[AUDIO_SRC] path param: {path}")
+
+    # Use provided path, or fall back to media_path from state
+    if not path:
+        session_id = get_session_id(sess)
+        state = workflow.state_store.get_state(workflow.config.workflow_id, session_id)
+        align_state = state.get("step_states", {}).get("alignment", {})
+        path = align_state.get("media_path")
 
     if DEBUG_AUDIO:
-        print(f"[AUDIO_SRC] Serving audio for session: {session_id}")
+        print(f"[AUDIO_SRC] resolved path: {path}")
 
-    state = workflow.state_store.get_state(workflow.config.workflow_id, session_id)
-    align_state = state.get("step_states", {}).get("alignment", {})
-    media_path = align_state.get("media_path")
-
-    if DEBUG_AUDIO:
-        print(f"[AUDIO_SRC] media_path from state: {media_path}")
-        if media_path:
-            print(f"[AUDIO_SRC] file exists: {Path(media_path).is_file()}")
-
-    if not media_path or not Path(media_path).is_file():
+    if not path or not Path(path).is_file():
         if DEBUG_AUDIO:
-            print(f"[AUDIO_SRC] Returning 404 - media_path missing or file not found")
+            print(f"[AUDIO_SRC] Returning 404 - path missing or file not found")
         return Response(status_code=404)
 
-    if DEBUG_AUDIO:
-        print(f"[AUDIO_SRC] Returning FileResponse for: {media_path}")
-
-    return FileResponse(str(media_path), media_type="audio/mpeg")
+    return FileResponse(str(path), media_type="audio/mpeg")
 
 # %% ../../../nbs/routes/core/audio.ipynb #g7b8c9d0
 def init_audio_router(
@@ -57,9 +54,9 @@ def init_audio_router(
     router = APIRouter(prefix=prefix)
 
     @router
-    def audio_src(request, sess):
-        """Serve the audio file for alignment playback."""
-        return _handle_audio_src(workflow, sess)
+    def audio_src(request, sess, path:str=None):
+        """Serve an audio file by path for Web Audio API playback."""
+        return _handle_audio_src(workflow, sess, path=path)
 
     routes = {
         "audio_src": audio_src,

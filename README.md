@@ -56,22 +56,22 @@ graph LR
     combined_handlers --> combined_step_combined
     combined_keyboard_config --> combined_html_ids
     combined_step_combined --> combined_keyboard_config
-    combined_step_combined --> combined_helpers
     combined_step_combined --> combined_html_ids
+    combined_step_combined --> combined_helpers
     routes_core_audio --> workflow_workflow
-    routes_core_chrome --> combined_keyboard_config
     routes_core_chrome --> combined_html_ids
-    routes_core_chrome --> combined_step_combined
+    routes_core_chrome --> combined_keyboard_config
     routes_core_chrome --> workflow_workflow
-    routes_core_init --> routes_core_status
-    routes_core_init --> routes_core_chrome
-    routes_core_init --> routes_core_sources
+    routes_core_chrome --> combined_step_combined
     routes_core_init --> workflow_workflow
+    routes_core_init --> routes_core_sources
+    routes_core_init --> routes_core_chrome
+    routes_core_init --> routes_core_status
     routes_core_init --> routes_core_audio
     routes_core_sources --> workflow_workflow
     routes_core_status --> workflow_workflow
-    routes_init --> combined_handlers
     routes_init --> workflow_workflow
+    routes_init --> combined_handlers
     routes_init --> routes_core_init
     workflow_workflow --> core_config
     workflow_workflow --> combined_step_combined
@@ -106,8 +106,9 @@ from cjm_fasthtml_workflow_transcript_decomp.routes.core.audio import (
 def _handle_audio_src(
     workflow:StructureDecompWorkflow,  # The workflow instance
     sess,  # FastHTML session object
+    path:str=None,  # Audio file path (from query parameter)
 ):  # Audio file response or 404
-    "Serve the audio file for the current alignment session."
+    "Serve an audio file by path for Web Audio API playback."
 ```
 
 ``` python

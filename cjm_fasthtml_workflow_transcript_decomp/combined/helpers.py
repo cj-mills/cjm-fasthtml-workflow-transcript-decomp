@@ -63,6 +63,7 @@ def extract_alignment_state(
         "visible_count": state.get("visible_count", ALIGN_DEFAULT_VISIBLE_COUNT),
         "card_width": state.get("card_width", ALIGN_DEFAULT_CARD_WIDTH),
         "media_path": state.get("media_path"),
+        "media_paths": state.get("media_paths", []),
         "audio_duration": state.get("audio_duration"),
         "is_auto_mode": state.get("is_auto_mode", False),
     }

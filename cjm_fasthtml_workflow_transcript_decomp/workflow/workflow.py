@@ -487,7 +487,10 @@ def _create_step_flow(
         align_state = step_states.get("alignment", {})
         chunk_dicts = align_state.get("vad_chunks", [])
         vad_chunks = [VADChunk.from_dict(c) for c in chunk_dicts]
-        media_path = align_state.get("media_path")
+        media_paths = align_state.get("media_paths", [])
+        review_urls_obj = getattr(workflow, '_review_urls', ReviewUrls())
+        audio_src_url = review_urls_obj.audio_src
+        audio_urls = [f"{audio_src_url}?path={mp}" for mp in media_paths] if audio_src_url and media_paths else []
         
         # Assemble segments with their corresponding VAD chunks
         assembled = [
@@ -514,7 +517,7 @@ def _create_step_flow(
             playback_speed=playback_speed,
             auto_navigate=auto_navigate,
             urls=getattr(workflow, '_review_urls', ReviewUrls()),
-            media_path=media_path,
+            audio_urls=audio_urls,
         )
     
     # Create render wrapper for verify step
@@ -601,6 +604,7 @@ def _create_step_flow(
         show_progress=self.config.show_progress,
         wrap_in_form=True
     )
+
 
 # %% ../../nbs/workflow/workflow.ipynb #a27c7fd5
 @patch

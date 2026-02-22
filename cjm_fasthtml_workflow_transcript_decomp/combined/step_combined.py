@@ -507,10 +507,12 @@ def render_combined_step(
         align_focused = align_state["focused_index"]
         align_visible = align_state["visible_count"]
         align_width = align_state["card_width"]
-        media_path = align_state["media_path"]
+        media_paths = align_state.get("media_paths", [])
+        audio_src_url = align_urls.audio_src if align_urls else ""
+        audio_urls = [f"{audio_src_url}?path={mp}" for mp in media_paths] if audio_src_url and media_paths else []
 
         if DEBUG_COMBINED_RENDER:
-            print(f"[COMBINED_RENDER] media_path: {media_path}")
+            print(f"[COMBINED_RENDER] media_paths: {len(media_paths)}, audio_urls: {len(audio_urls)}")
 
         align_body = render_align_column_body(
             chunks=chunks,
@@ -519,7 +521,7 @@ def render_combined_step(
             card_width=align_width,
             urls=align_urls,
             kb_system=None,  # KB system is in stable container
-            media_path=media_path,
+            audio_urls=audio_urls,
         )
         align_mini_text = render_align_mini_stats_text(chunks)
 
