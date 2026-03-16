@@ -40,7 +40,7 @@ def init_routers(
     )
     
     # Selection routers use dependency injection
-    selection_routers, selection_urls, selection_routes = init_selection_routers(
+    selection_routers, selection_urls, selection_routes, render_local_files_panel, sb_state = init_selection_routers(
         state_store=workflow.state_store,
         source_service=workflow.source_service,
         workflow_id=workflow.config.workflow_id,
@@ -113,6 +113,10 @@ def init_routers(
     workflow._review_urls = review_urls
     workflow._verify_urls = verify_urls
     workflow._switch_chrome_url = core_routes["switch_chrome"].to()
+
+    # Store selection-specific objects for renderer access
+    workflow._render_local_files_panel = render_local_files_panel
+    workflow._sb_state = sb_state
 
     # Store route dicts on workflow
     workflow._core_routes = core_routes

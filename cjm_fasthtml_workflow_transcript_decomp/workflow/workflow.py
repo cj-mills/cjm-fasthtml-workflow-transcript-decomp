@@ -320,8 +320,6 @@ def _create_selection_renderer(
         step_state = ctx.state.get("step_states", {}).get("selection", {})
         selected_sources = step_state.get("selected_sources", [])
         grouping_mode = step_state.get("grouping_mode", "media_path")
-        external_db_paths = step_state.get("external_db_paths", [])
-        file_browser_state = step_state.get("file_browser_state", {})
         active_tab = ctx.get("source_tab", "db")
         
         return render_selection_step(
@@ -329,10 +327,10 @@ def _create_selection_renderer(
             transcriptions=transcriptions,
             selected_sources=selected_sources,
             grouping_mode=grouping_mode,
-            external_db_paths=external_db_paths,
-            file_browser_state=file_browser_state,
             active_tab=active_tab,
             urls=getattr(workflow, '_selection_urls', SelectionUrls()),
+            render_local_files_panel=getattr(workflow, '_render_local_files_panel', None),
+            sb_state=getattr(workflow, '_sb_state', None),
         )
     return render
 

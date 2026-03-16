@@ -160,3 +160,4 @@ checklink/cookies.txt
 /models/
 plugins_test.yaml
 cjm.yaml
+*.sesskey
