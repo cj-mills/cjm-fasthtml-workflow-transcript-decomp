@@ -40,7 +40,7 @@ from cjm_transcript_verify.components.step_renderer import render_verify_step
 
 # Step renderers
 from cjm_transcript_source_select.components.step_renderer import render_selection_step
-from ..combined.step_combined import render_combined_step
+from cjm_transcript_segment_align.components.step_renderer import render_combined_step
 from cjm_transcript_review.components.step_renderer import render_review_step
 
 # %% ../../nbs/workflow/workflow.ipynb #ngyugzueiw

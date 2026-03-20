@@ -14,7 +14,6 @@ from ...workflow.workflow import StructureDecompWorkflow
 
 from .status import init_status_router
 from .sources import init_sources_router
-from .chrome import init_chrome_router
 from .audio import init_audio_router
 
 # %% ../../../nbs/routes/core/init.ipynb #e5f6a7b8
@@ -22,16 +21,17 @@ def init_core_routers(
     workflow: StructureDecompWorkflow,  # The workflow instance
     prefix: str,  # Base prefix for core routes (e.g., "/workflow/core")
 ) -> Tuple[List[APIRouter], Dict[str, Callable]]:  # (routers, merged_routes)
-    """Initialize and return all core workflow routers."""
+    """Initialize and return all core workflow routers.
+    
+    Note: Chrome switching route is now in cjm-transcript-segment-align library.
+    It is initialized in routes/init.py alongside the other segment-align routes.
+    """
     # Initialize focused routers
     status_router, status_routes = init_status_router(
         workflow, f"{prefix}/status"
     )
     sources_router, sources_routes = init_sources_router(
         workflow, f"{prefix}/sources"
-    )
-    chrome_router, chrome_routes = init_chrome_router(
-        workflow, f"{prefix}/chrome"
     )
     audio_router, audio_routes = init_audio_router(
         workflow, f"{prefix}/audio"
@@ -41,10 +41,9 @@ def init_core_routers(
     merged_routes = {
         **status_routes,
         **sources_routes,
-        **chrome_routes,
         **audio_routes,
     }
 
-    routers = [status_router, sources_router, chrome_router, audio_router]
+    routers = [status_router, sources_router, audio_router]
 
     return routers, merged_routes
