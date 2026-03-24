@@ -20,8 +20,7 @@ from cjm_transcript_verify.routes.init import init_verify_routers
 
 # Import from cjm-transcript-segment-align (extracted combined library)
 from cjm_transcript_segment_align.components.handlers import (
-    wrapped_seg_split, wrapped_seg_merge,
-    wrapped_seg_undo, wrapped_seg_reset, wrapped_seg_ai_split,
+    create_seg_mutation_wrappers,
     create_seg_init_chrome_wrapper, create_align_init_chrome_wrapper,
 )
 from cjm_transcript_segment_align.routes.chrome import init_chrome_router
@@ -37,12 +36,12 @@ def init_routers(
     """Initialize and return all workflow routers."""
     base_prefix = workflow.config.route_prefix
 
-    # Initialize focused routers (status, sources, audio — chrome is now in segment-align lib)
+    # Initialize focused routers (status, sources, audio)
     core_routers, core_routes = init_core_routers(
         workflow, f"{base_prefix}/core"
     )
     
-    # Selection routers use dependency injection
+    # Selection routers
     selection_routers, selection_urls, selection_routes, render_local_files_panel, sb_state = init_selection_routers(
         state_store=workflow.state_store,
         source_service=workflow.source_service,
@@ -50,8 +49,7 @@ def init_routers(
         prefix=f"{base_prefix}/selection",
     )
 
-    # Alignment routers (need to initialize first to get align_urls for seg init)
-    # Create the align init wrapper first
+    # Alignment routers (need align_urls for seg init KB system)
     wrapped_align_init = create_align_init_chrome_wrapper()
     
     align_routers, align_urls, align_routes = init_alignment_routers(
@@ -64,49 +62,7 @@ def init_routers(
         wrapped_init=wrapped_align_init,
     )
 
-    # Chrome switching router (from cjm-transcript-segment-align)
-    chrome_router, chrome_routes = init_chrome_router(
-        state_store=workflow.state_store,
-        workflow_id=workflow.config.workflow_id,
-        seg_urls=None,  # Will be set after seg routers init (forward reference)
-        align_urls=align_urls,
-        prefix=f"{base_prefix}/core/chrome",
-    )
-    switch_chrome_url = chrome_routes["switch_chrome"].to()
-
-    # Forced alignment service (from cjm-transcript-segment-align)
-    # Try to load the FA plugin if discovered but not yet loaded
-    fa_service = ForcedAlignmentService(
-        workflow.plugin_manager,
-        workflow.config.fa_plugin_name,
-    )
-    fa_service.ensure_loaded()
-    fa_is_available = fa_service.is_available()
-
-    # Create the seg init wrapper with URLs needed for KB system + FA
-    # (FA URLs will be set after FA router init — use forward reference pattern)
-    fa_trigger_url = ""
-    fa_toggle_url = ""
-
-    wrapped_seg_init = create_seg_init_chrome_wrapper(
-        align_urls=align_urls,
-        switch_chrome_url=switch_chrome_url,
-        fa_trigger_url=fa_trigger_url,
-        fa_toggle_url=fa_toggle_url,
-        fa_available=fa_is_available,
-    )
-    
-    # Wrapped handlers for cross-domain coordination (alignment status OOB)
-    seg_wrapped = {
-        "init": wrapped_seg_init,
-        "split": wrapped_seg_split,
-        "merge": wrapped_seg_merge,
-        "undo": wrapped_seg_undo,
-        "reset": wrapped_seg_reset,
-        "ai_split": wrapped_seg_ai_split,
-    }
-    
-    # Segmentation routers use dependency injection
+    # Segmentation routers (without mutation wrappers — need FA URLs first)
     seg_routers, seg_urls, seg_routes = init_segmentation_routers(
         state_store=workflow.state_store,
         workflow_id=workflow.config.workflow_id,
@@ -114,11 +70,20 @@ def init_routers(
         segmentation_service=workflow.segmentation_service,
         prefix=f"{base_prefix}/seg",
         max_history_depth=workflow.config.max_history_depth,
-        wrapped_handlers=seg_wrapped,
     )
 
-    # Now initialize FA routes with seg_urls
+    # Forced alignment service + routes (need seg_urls)
+    fa_service = ForcedAlignmentService(
+        workflow.plugin_manager,
+        workflow.config.fa_plugin_name,
+    )
+    fa_service.ensure_loaded()
+    fa_is_available = fa_service.is_available()
+
     fa_routers = []
+    fa_trigger_url = ""
+    fa_toggle_url = ""
+
     if fa_is_available:
         fa_router, fa_routes = init_forced_alignment_routers(
             state_store=workflow.state_store,
@@ -129,41 +94,87 @@ def init_routers(
             prefix=f"{base_prefix}/fa",
         )
         fa_routers = [fa_router]
-
-        # Rebuild seg init wrapper with actual FA URLs
         fa_trigger_url = fa_routes["trigger"].to()
         fa_toggle_url = fa_routes["toggle"].to()
 
-        wrapped_seg_init_with_fa = create_seg_init_chrome_wrapper(
-            align_urls=align_urls,
-            switch_chrome_url=switch_chrome_url,
-            fa_trigger_url=fa_trigger_url,
-            fa_toggle_url=fa_toggle_url,
-            fa_available=True,
-        )
-        seg_wrapped["init"] = wrapped_seg_init_with_fa
-
-        # Re-initialize segmentation routers with the updated init handler
-        seg_routers, seg_urls, seg_routes = init_segmentation_routers(
-            state_store=workflow.state_store,
-            workflow_id=workflow.config.workflow_id,
-            source_service=workflow.source_service,
-            segmentation_service=workflow.segmentation_service,
-            prefix=f"{base_prefix}/seg",
-            max_history_depth=workflow.config.max_history_depth,
-            wrapped_handlers=seg_wrapped,
-        )
-
-    # Update chrome router with seg_urls (forward reference resolution)
+    # Chrome switching router (needs FA URLs for toolbar extra_actions)
     chrome_router, chrome_routes = init_chrome_router(
         state_store=workflow.state_store,
         workflow_id=workflow.config.workflow_id,
         seg_urls=seg_urls,
         align_urls=align_urls,
         prefix=f"{base_prefix}/core/chrome",
+        fa_trigger_url=fa_trigger_url,
+        fa_toggle_url=fa_toggle_url,
+        fa_available=fa_is_available,
+    )
+    switch_chrome_url = chrome_routes["switch_chrome"].to()
+
+    # Create mutation wrappers (now that FA URLs are known)
+    wrapped_mutations = create_seg_mutation_wrappers(
+        fa_trigger_url=fa_trigger_url,
+        fa_toggle_url=fa_toggle_url,
+        fa_available=fa_is_available,
     )
 
-    # Review routers use dependency injection
+    # Override mutation routes with wrapped versions
+    seg_mutation_router = APIRouter(prefix=f"{base_prefix}/seg/workflow")
+
+    @seg_mutation_router
+    async def split(request, sess, segment_index: int):
+        return await wrapped_mutations["split"](
+            workflow.state_store, workflow.config.workflow_id, request, sess, segment_index,
+            urls=seg_urls, max_history_depth=workflow.config.max_history_depth,
+        )
+
+    @seg_mutation_router
+    async def merge(request, sess, segment_index: int):
+        return await wrapped_mutations["merge"](
+            workflow.state_store, workflow.config.workflow_id, request, sess, segment_index,
+            urls=seg_urls, max_history_depth=workflow.config.max_history_depth,
+        )
+
+    @seg_mutation_router
+    async def undo(request, sess):
+        return await wrapped_mutations["undo"](
+            workflow.state_store, workflow.config.workflow_id, request, sess, urls=seg_urls,
+        )
+
+    @seg_mutation_router
+    async def reset(request, sess):
+        return await wrapped_mutations["reset"](
+            workflow.state_store, workflow.config.workflow_id, request, sess,
+            urls=seg_urls, max_history_depth=workflow.config.max_history_depth,
+        )
+
+    @seg_mutation_router
+    async def ai_split(request, sess):
+        return await wrapped_mutations["ai_split"](
+            workflow.state_store, workflow.config.workflow_id,
+            workflow.segmentation_service, request, sess,
+            urls=seg_urls, max_history_depth=workflow.config.max_history_depth,
+        )
+
+    # Seg init wrapper (builds combined KB system + shared chrome)
+    wrapped_seg_init = create_seg_init_chrome_wrapper(
+        align_urls=align_urls,
+        switch_chrome_url=switch_chrome_url,
+        fa_trigger_url=fa_trigger_url,
+        fa_toggle_url=fa_toggle_url,
+        fa_available=fa_is_available,
+    )
+
+    seg_init_router = APIRouter(prefix=f"{base_prefix}/seg/workflow")
+
+    @seg_init_router
+    async def init(request, sess):
+        return await wrapped_seg_init(
+            workflow.state_store, workflow.config.workflow_id,
+            workflow.source_service, workflow.segmentation_service,
+            request, sess, urls=seg_urls,
+        )
+
+    # Review routers
     review_routers, review_urls, review_routes = init_review_routers(
         state_store=workflow.state_store,
         workflow_id=workflow.config.workflow_id,
@@ -173,7 +184,7 @@ def init_routers(
         alert_container_id="commit-alert-container",
     )
     
-    # Verify routers use dependency injection
+    # Verify routers
     verify_routers, verify_urls, verify_routes = init_verify_routers(
         state_store=workflow.state_store,
         workflow_id=workflow.config.workflow_id,
@@ -188,6 +199,9 @@ def init_routers(
     workflow._review_urls = review_urls
     workflow._verify_urls = verify_urls
     workflow._switch_chrome_url = switch_chrome_url
+    workflow._fa_trigger_url = fa_trigger_url
+    workflow._fa_toggle_url = fa_toggle_url
+    workflow._fa_available = fa_is_available
 
     # Store selection-specific objects for renderer access
     workflow._render_local_files_panel = render_local_files_panel
@@ -203,6 +217,7 @@ def init_routers(
 
     return (
         core_routers + [chrome_router] + fa_routers +
+        [seg_mutation_router, seg_init_router] +
         selection_routers + seg_routers + align_routers +
         review_routers + verify_routers
     )

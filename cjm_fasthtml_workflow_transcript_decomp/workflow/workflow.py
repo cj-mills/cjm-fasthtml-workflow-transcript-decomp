@@ -356,6 +356,9 @@ def _create_combined_renderer(
             seg_urls=getattr(workflow, '_seg_urls', SegmentationUrls()),
             align_urls=getattr(workflow, '_align_urls', AlignmentUrls()),
             switch_chrome_url=getattr(workflow, '_switch_chrome_url', ''),
+            fa_available=getattr(workflow, '_fa_available', False),
+            fa_trigger_url=getattr(workflow, '_fa_trigger_url', ''),
+            fa_toggle_url=getattr(workflow, '_fa_toggle_url', ''),
         )
     return render
 
