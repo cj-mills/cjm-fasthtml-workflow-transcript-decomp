@@ -20,16 +20,14 @@ from cjm_fasthtml_tailwind.utilities.spacing import m
 from cjm_fasthtml_tailwind.core.base import combine_classes
 
 from cjm_plugin_system.core.manager import PluginManager
+from cjm_plugin_system.core.queue import JobQueue
 from cjm_workflow_state.state_store import SQLiteWorkflowStateStore
 
 from ..core.config import StructureDecompWorkflowConfig
 from cjm_transcript_source_select.models import SelectionUrls
-from cjm_transcript_segmentation.models import SegmentationUrls, TextSegment
-from cjm_transcript_vad_align.models import AlignmentUrls, VADChunk
-from cjm_fasthtml_card_stack.core.models import CardStackUrls
+from cjm_transcript_segmentation.models import TextSegment
+from cjm_transcript_vad_align.models import VADChunk
 from cjm_transcript_source_select.services.source import SourceService
-from cjm_transcript_segmentation.services.segmentation import SegmentationService
-from cjm_transcript_vad_align.services.alignment import AlignmentService
 from cjm_transcript_review.services.graph import GraphService
 from cjm_transcript_review.models import ReviewUrls
 from cjm_transcript_review.components.review_card import AssembledSegment
@@ -40,7 +38,6 @@ from cjm_transcript_verify.components.step_renderer import render_verify_step
 
 # Step renderers
 from cjm_transcript_source_select.components.step_renderer import render_selection_step
-from cjm_transcript_segment_align.components.step_renderer import render_combined_step
 from cjm_transcript_review.components.step_renderer import render_review_step
 
 # %% ../../nbs/workflow/workflow.ipynb #ngyugzueiw
@@ -119,6 +116,9 @@ class StructureDecompWorkflow:
         # Store the injected PluginManager
         self._plugin_manager = plugin_manager
         
+        # Create host-owned JobQueue for plugin job execution
+        self._job_queue = JobQueue(plugin_manager)
+        
         # Create SQLite-backed state store for persistence (pure, session_id-based)
         self._state_store = SQLiteWorkflowStateStore(
             db_path=self.config.get_state_db_path()
@@ -127,18 +127,10 @@ class StructureDecompWorkflow:
         # Adapter for StepFlow compatibility (resolves sess -> session_id)
         self._session_adapter = _SessionStateStoreAdapter(self._state_store)
         
-        # Create services
+        # Create services (only those not managed by page-centric libraries)
         self._source_service = SourceService(
             plugin_manager,
             source_categories=self.config.source_categories
-        )
-        self._segmentation_service = SegmentationService(
-            plugin_manager,
-            plugin_name=self.config.text_plugin
-        )
-        self._alignment_service = AlignmentService(
-            plugin_manager,
-            plugin_name=self.config.vad_plugin
         )
         self._graph_service = GraphService(
             plugin_manager,
@@ -149,11 +141,11 @@ class StructureDecompWorkflow:
             plugin_name=self.config.graph_plugin
         )
         
-        # Create StepFlow
-        self._step_flow = self._create_step_flow()
-        
-        # Create routers (focused routers for each domain)
+        # Create routers first (sets _sa_result needed by StepFlow)
         self._routers = self._create_routers()
+        
+        # Create StepFlow (uses _sa_result from router init)
+        self._step_flow = self._create_step_flow()
         self._stepflow_router = self._step_flow.create_router(
             prefix=self.config.get_full_stepflow_prefix()
         )
@@ -176,19 +168,14 @@ class StructureDecompWorkflow:
         return self._plugin_manager
     
     @property
+    def job_queue(self) -> JobQueue:  # Job queue instance
+        """Access to host-owned job queue."""
+        return self._job_queue
+    
+    @property
     def source_service(self) -> SourceService:  # Source service instance
         """Access to source service."""
         return self._source_service
-    
-    @property
-    def segmentation_service(self) -> SegmentationService:  # Segmentation service instance
-        """Access to segmentation service."""
-        return self._segmentation_service
-    
-    @property
-    def alignment_service(self) -> AlignmentService:  # Alignment service instance
-        """Access to alignment service."""
-        return self._alignment_service
     
     @property
     def graph_service(self) -> GraphService:  # Graph service instance
@@ -335,31 +322,12 @@ def _create_selection_renderer(
     return render
 
 # %% ../../nbs/workflow/workflow.ipynb #288u75ru16r
-def _validate_segmentation(
-    state: Dict[str, Any]  # Workflow state dictionary
-) -> bool:  # True if segments and VAD chunks are 1:1 aligned
-    """Validate that segmentation and alignment are complete."""
-    step_states = state.get("step_states", {})
-    seg_state = step_states.get("segmentation", {})
-    segments = seg_state.get("segments", [])
-    alignment_state = step_states.get("alignment", {})
-    vad_chunks = alignment_state.get("vad_chunks", [])
-    return len(segments) > 0 and len(vad_chunks) > 0 and len(segments) == len(vad_chunks)
-
 def _create_combined_renderer(
-    workflow: StructureDecompWorkflow  # Workflow instance for URL access
+    workflow: StructureDecompWorkflow  # Workflow instance with _sa_result set
 ):  # Render callable for StepFlow
     """Create render function for the segmentation & alignment step."""
     def render(ctx: InteractionContext):
-        return render_combined_step(
-            ctx=ctx,
-            seg_urls=getattr(workflow, '_seg_urls', SegmentationUrls()),
-            align_urls=getattr(workflow, '_align_urls', AlignmentUrls()),
-            switch_chrome_url=getattr(workflow, '_switch_chrome_url', ''),
-            fa_available=getattr(workflow, '_fa_available', False),
-            fa_trigger_url=getattr(workflow, '_fa_trigger_url', ''),
-            fa_toggle_url=getattr(workflow, '_fa_toggle_url', ''),
-        )
+        return workflow._sa_result.render_step(ctx)
     return render
 
 # %% ../../nbs/workflow/workflow.ipynb #mni9sa15j2
@@ -580,7 +548,7 @@ def _create_step_flow(
                 id="segmentation",
                 title="Segment & Align",
                 render=_create_combined_renderer(workflow),
-                validate=_validate_segmentation,
+                validate=workflow._sa_result.validate_alignment,
                 data_loader=load_empty,
                 data_keys=["segments"],
                 show_back=True,

@@ -55,7 +55,7 @@ def main():
 
     # Import plugin system components
     from cjm_plugin_system.core.manager import PluginManager
-    from cjm_plugin_system.core.scheduling import SafetyScheduler
+    from cjm_plugin_system.core.scheduling import QueueScheduler
 
     # Import workflow components
     from cjm_fasthtml_workflow_transcript_decomp.workflow.workflow import StructureDecompWorkflow
@@ -68,12 +68,16 @@ def main():
 
     print("  Library components imported successfully")
 
+    # SSE headers (for job monitor — harmless if FA unavailable)
+    from cjm_fasthtml_job_monitor.components.modal import get_sse_headers
+
     # Create the FastHTML app
     app, rt = fast_app(
         pico=False,
         hdrs=[
             *get_daisyui_headers(),
             create_theme_persistence_script(),
+            *get_sse_headers(),
         ],
         title="Structure Decomposition Workflow Demo",
         htmlkw={'data-theme': 'light'},
@@ -86,7 +90,7 @@ def main():
 
     # Create the PluginManager (host application responsibility)
     print("\n[1/3] Creating PluginManager...")
-    plugin_manager = PluginManager(scheduler=SafetyScheduler())
+    plugin_manager = PluginManager(scheduler=QueueScheduler())
 
     # Discover plugins from JSON manifests
     plugin_manager.discover_manifests()
@@ -319,6 +323,17 @@ def main():
         *structure_workflow.get_routers(),
         *mgmt_routers,
     )
+
+    # JobQueue lifecycle hooks
+    @app.on_event("startup")
+    async def on_startup():
+        await structure_workflow.job_queue.start()
+        print("Job queue started")
+
+    @app.on_event("shutdown")
+    async def on_shutdown():
+        await structure_workflow.job_queue.stop()
+        print("Job queue stopped")
 
     # Debug: Print registered routes
     print("\n" + "="*70)

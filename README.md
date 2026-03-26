@@ -40,9 +40,9 @@ graph LR
 
     routes_core_audio --> workflow_workflow
     routes_core_init --> workflow_workflow
-    routes_core_init --> routes_core_sources
-    routes_core_init --> routes_core_audio
     routes_core_init --> routes_core_status
+    routes_core_init --> routes_core_audio
+    routes_core_init --> routes_core_sources
     routes_core_sources --> workflow_workflow
     routes_core_status --> workflow_workflow
     routes_init --> workflow_workflow
@@ -350,15 +350,8 @@ def _create_selection_renderer(
 ```
 
 ``` python
-def _validate_segmentation(
-    state: Dict[str, Any]  # Workflow state dictionary
-) -> bool:  # True if segments and VAD chunks are 1:1 aligned
-    "Validate that segmentation and alignment are complete."
-```
-
-``` python
 def _create_combined_renderer(
-    workflow: StructureDecompWorkflow  # Workflow instance for URL access
+    workflow: StructureDecompWorkflow  # Workflow instance with _sa_result set
 ):  # Render callable for StepFlow
     "Create render function for the segmentation & alignment step."
 ```
@@ -490,32 +483,24 @@ class StructureDecompWorkflow:
             return self._plugin_manager
         
         @property
-        def source_service(self) -> SourceService:  # Source service instance
+        def job_queue(self) -> JobQueue:  # Job queue instance
         "Access to plugin manager."
+    
+    def job_queue(self) -> JobQueue:  # Job queue instance
+            """Access to host-owned job queue."""
+            return self._job_queue
+        
+        @property
+        def source_service(self) -> SourceService:  # Source service instance
+        "Access to host-owned job queue."
     
     def source_service(self) -> SourceService:  # Source service instance
             """Access to source service."""
             return self._source_service
         
         @property
-        def segmentation_service(self) -> SegmentationService:  # Segmentation service instance
-        "Access to source service."
-    
-    def segmentation_service(self) -> SegmentationService:  # Segmentation service instance
-            """Access to segmentation service."""
-            return self._segmentation_service
-        
-        @property
-        def alignment_service(self) -> AlignmentService:  # Alignment service instance
-        "Access to segmentation service."
-    
-    def alignment_service(self) -> AlignmentService:  # Alignment service instance
-            """Access to alignment service."""
-            return self._alignment_service
-        
-        @property
         def graph_service(self) -> GraphService:  # Graph service instance
-        "Access to alignment service."
+        "Access to source service."
     
     def graph_service(self) -> GraphService:  # Graph service instance
             """Access to graph service."""
