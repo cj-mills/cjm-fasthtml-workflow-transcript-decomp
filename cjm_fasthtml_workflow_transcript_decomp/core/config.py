@@ -38,6 +38,7 @@ class StructureDecompWorkflowConfig:
     vad_plugin: str = "cjm-media-plugin-silero-vad"  # VAD plugin for audio alignment
     graph_plugin: str = "cjm-graph-plugin-sqlite"  # Graph plugin for storage
     fa_plugin_name: str = "cjm-transcription-plugin-qwen3-forced-aligner"  # Forced alignment plugin (optional)
+    sysmon_plugin_name: Optional[str] = None  # System monitor plugin for GPU stats in job monitor
     
     # Plugin categories to discover for source data
     source_categories: List[str] = field(default_factory=lambda: ["transcription"])  # Categories for source plugins

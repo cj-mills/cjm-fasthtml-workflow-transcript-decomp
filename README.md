@@ -39,9 +39,9 @@ graph LR
     workflow_workflow[workflow.workflow<br/>workflow]
 
     routes_core_audio --> workflow_workflow
+    routes_core_init --> routes_core_sources
     routes_core_init --> routes_core_status
     routes_core_init --> routes_core_audio
-    routes_core_init --> routes_core_sources
     routes_core_init --> workflow_workflow
     routes_core_sources --> workflow_workflow
     routes_core_status --> workflow_workflow
@@ -128,6 +128,7 @@ class StructureDecompWorkflowConfig:
     vad_plugin: str = 'cjm-media-plugin-silero-vad'  # VAD plugin for audio alignment
     graph_plugin: str = 'cjm-graph-plugin-sqlite'  # Graph plugin for storage
     fa_plugin_name: str = 'cjm-transcription-plugin-qwen3-forced-aligner'  # Forced alignment plugin (optional)
+    sysmon_plugin_name: Optional[str]  # System monitor plugin for GPU stats in job monitor
     source_categories: List[str] = field(...)  # Categories for source plugins
     no_plugins_redirect: Optional[str]  # URL to redirect when required plugins unavailable
     state_db_path: Optional[Path]  # Path to SQLite state database (uses default if None)

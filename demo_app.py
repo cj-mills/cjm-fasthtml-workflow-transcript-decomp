@@ -128,11 +128,13 @@ def main():
             print(f"    - {meta.name}: error - {e}")
 
     # Optionally load system monitor for resource-aware scheduling
+    sysmon_name = None
     monitors = plugin_manager.get_discovered_by_category("system_monitor")
     if monitors:
         try:
             plugin_manager.load_plugin(monitors[0])
             plugin_manager.register_system_monitor(monitors[0].name)
+            sysmon_name = monitors[0].name
             print(f"\n  System monitor registered: {monitors[0].name}")
         except Exception as e:
             print(f"\n  System monitor failed to load: {e}")
@@ -151,6 +153,7 @@ def main():
     config = StructureDecompWorkflowConfig(
         route_prefix="/workflow",
         no_plugins_redirect="/",
+        sysmon_plugin_name=sysmon_name,
     )
 
     structure_workflow = StructureDecompWorkflow.create_and_setup(

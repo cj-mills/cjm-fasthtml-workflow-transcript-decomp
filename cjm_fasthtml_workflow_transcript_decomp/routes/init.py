@@ -53,6 +53,7 @@ def init_routers(
         text_plugin=workflow.config.text_plugin,
         vad_plugin=workflow.config.vad_plugin,
         fa_plugin_name=workflow.config.fa_plugin_name,
+        sysmon_plugin_name=workflow.config.sysmon_plugin_name,
         max_history_depth=workflow.config.max_history_depth,
     )
 
