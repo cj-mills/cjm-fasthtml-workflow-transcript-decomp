@@ -34,7 +34,7 @@ def init_routers(
     )
     
     # Selection routers
-    selection_routers, selection_urls, selection_routes, render_local_files_panel, sb_state = init_selection_routers(
+    selection = init_selection_routers(
         state_store=workflow.state_store,
         source_service=workflow.source_service,
         workflow_id=workflow.config.workflow_id,
@@ -75,9 +75,10 @@ def init_routers(
     )
 
     # Store on workflow for renderer access
-    workflow._selection_urls = selection_urls
-    workflow._render_local_files_panel = render_local_files_panel
-    workflow._sb_state = sb_state
+    workflow._selection_result = selection
+    workflow._selection_urls = selection.urls
+    workflow._render_local_files_panel = selection.render_local_files_panel
+    workflow._sb_state = selection.sb_state
     workflow._sa_result = sa_result
     workflow._review_urls = review_urls
     workflow._verify_urls = verify_urls
@@ -85,5 +86,5 @@ def init_routers(
 
     return (
         core_routers + sa_routers +
-        selection_routers + review_routers + verify_routers
+        selection.routers + review_routers + verify_routers
     )

@@ -270,6 +270,12 @@ def _create_data_loaders(
     """Create data loader functions for StepFlow steps."""
     def load_sources(request) -> Dict[str, Any]:
         """Load available transcription sources."""
+        # Eagerly restore external DB paths so source browser includes them
+        selection_result = getattr(workflow, '_selection_result', None)
+        if selection_result is not None:
+            session_id = get_session_id(request.session)
+            selection_result.restore_state(session_id)
+
         sources = workflow._source_service.get_available_sources()
         transcriptions = workflow._source_service.query_transcriptions(limit=50)
         return {"sources": sources, "transcriptions": transcriptions}
@@ -307,14 +313,13 @@ def _create_selection_renderer(
         step_state = ctx.state.get("step_states", {}).get("selection", {})
         selected_sources = step_state.get("selected_sources", [])
         grouping_mode = step_state.get("grouping_mode", "media_path")
-        active_tab = ctx.get("source_tab", "db")
         
         return render_selection_step(
             sources=sources,
             transcriptions=transcriptions,
             selected_sources=selected_sources,
             grouping_mode=grouping_mode,
-            active_tab=active_tab,
+            active_tab="db",
             urls=getattr(workflow, '_selection_urls', SelectionUrls()),
             render_local_files_panel=getattr(workflow, '_render_local_files_panel', None),
             sb_state=getattr(workflow, '_sb_state', None),
