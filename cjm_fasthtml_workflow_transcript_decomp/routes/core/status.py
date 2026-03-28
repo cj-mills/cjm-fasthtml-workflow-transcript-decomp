@@ -47,9 +47,32 @@ async def _handle_reset(
     request,  # FastHTML request object
     sess  # FastHTML session object
 ):  # StepFlow start view
-    """Reset workflow and return to start."""
+    """Reset workflow and return to start, preserving external DB state."""
     session_id = get_session_id(sess)
-    workflow.state_store.clear_state(workflow.config.workflow_id, session_id)
+    wf_id = workflow.config.workflow_id
+
+    # Extract environment state to preserve across reset
+    workflow_state = workflow.state_store.get_state(wf_id, session_id)
+    selection_state = workflow_state.get("step_states", {}).get("selection", {})
+    preserved = {
+        k: selection_state[k]
+        for k in ("external_db_paths", "file_browser_state", "current_browse_path")
+        if k in selection_state
+    }
+
+    # Reset in-memory caches so next restore re-reads from DB
+    selection_result = getattr(workflow, '_selection_result', None)
+    if selection_result is not None:
+        selection_result.reset_state()
+
+    # Clear all persisted state
+    workflow.state_store.clear_state(wf_id, session_id)
+
+    # Write back preserved environment state
+    if preserved:
+        from cjm_transcript_source_select.routes.core import _update_step_state
+        _update_step_state(workflow.state_store, wf_id, session_id, **preserved)
+
     return await workflow._stepflow_router.start(request, sess)
 
 # %% ../../../nbs/routes/core/status.ipynb #h8c9d0e1
