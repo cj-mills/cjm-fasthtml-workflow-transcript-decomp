@@ -1,0 +1,243 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "cjm-fasthtml-workflow-transcript-decomp",
+    "section": "",
+    "text": "pip install cjm_fasthtml_workflow_transcript_decomp",
+    "crumbs": [
+      "cjm-fasthtml-workflow-transcript-decomp"
+    ]
+  },
+  {
+    "objectID": "index.html#install",
+    "href": "index.html#install",
+    "title": "cjm-fasthtml-workflow-transcript-decomp",
+    "section": "",
+    "text": "pip install cjm_fasthtml_workflow_transcript_decomp",
+    "crumbs": [
+      "cjm-fasthtml-workflow-transcript-decomp"
+    ]
+  },
+  {
+    "objectID": "index.html#project-structure",
+    "href": "index.html#project-structure",
+    "title": "cjm-fasthtml-workflow-transcript-decomp",
+    "section": "Project Structure",
+    "text": "Project Structure\nnbs/\n├── core/ (1)\n│   └── config.ipynb  # Configuration dataclass for structure decomposition workflow\n├── routes/ (5)\n│   ├── core/ (4)\n│   │   ├── audio.ipynb    # Audio file serving route handlers for alignment playback\n│   │   ├── init.ipynb     # Router assembly for core workflow routes\n│   │   ├── sources.ipynb  # Source data retrieval route handlers\n│   │   └── status.ipynb   # Workflow status and lifecycle route handlers\n│   └── init.ipynb  # Router initialization for the structure decomposition workflow\n└── workflow/ (1)\n    └── workflow.ipynb  # Main workflow class for structure decomposition\nTotal: 7 notebooks across 3 directories",
+    "crumbs": [
+      "cjm-fasthtml-workflow-transcript-decomp"
+    ]
+  },
+  {
+    "objectID": "index.html#module-dependencies",
+    "href": "index.html#module-dependencies",
+    "title": "cjm-fasthtml-workflow-transcript-decomp",
+    "section": "Module Dependencies",
+    "text": "Module Dependencies\ngraph LR\n    core_config[core.config&lt;br/&gt;config]\n    routes_core_audio[routes.core.audio&lt;br/&gt;audio]\n    routes_core_init[routes.core.init&lt;br/&gt;init]\n    routes_core_sources[routes.core.sources&lt;br/&gt;sources]\n    routes_core_status[routes.core.status&lt;br/&gt;status]\n    routes_init[routes.init&lt;br/&gt;init]\n    workflow_workflow[workflow.workflow&lt;br/&gt;workflow]\n\n    routes_core_audio --&gt; workflow_workflow\n    routes_core_init --&gt; routes_core_sources\n    routes_core_init --&gt; routes_core_status\n    routes_core_init --&gt; routes_core_audio\n    routes_core_init --&gt; workflow_workflow\n    routes_core_sources --&gt; workflow_workflow\n    routes_core_status --&gt; workflow_workflow\n    routes_init --&gt; routes_core_init\n    routes_init --&gt; workflow_workflow\n    workflow_workflow --&gt; core_config\n10 cross-module dependencies detected",
+    "crumbs": [
+      "cjm-fasthtml-workflow-transcript-decomp"
+    ]
+  },
+  {
+    "objectID": "index.html#cli-reference",
+    "href": "index.html#cli-reference",
+    "title": "cjm-fasthtml-workflow-transcript-decomp",
+    "section": "CLI Reference",
+    "text": "CLI Reference\nNo CLI commands found in this project.",
+    "crumbs": [
+      "cjm-fasthtml-workflow-transcript-decomp"
+    ]
+  },
+  {
+    "objectID": "index.html#module-overview",
+    "href": "index.html#module-overview",
+    "title": "cjm-fasthtml-workflow-transcript-decomp",
+    "section": "Module Overview",
+    "text": "Module Overview\nDetailed documentation for each module in the project:\n\naudio (audio.ipynb)\n\nAudio file serving route handlers for alignment playback\n\n\nImport\nfrom cjm_fasthtml_workflow_transcript_decomp.routes.core.audio import (\n    DEBUG_AUDIO,\n    init_audio_router\n)\n\n\nFunctions\ndef _handle_audio_src(\n    workflow:StructureDecompWorkflow,  # The workflow instance\n    sess,  # FastHTML session object\n    path:str=None,  # Audio file path (from query parameter)\n):  # Audio file response or 404\n    \"Serve an audio file by path for Web Audio API playback.\"\ndef init_audio_router(\n    workflow: StructureDecompWorkflow,  # The workflow instance\n    prefix: str,  # Route prefix (e.g., \"/workflow/core/audio\")\n) -&gt; Tuple[APIRouter, Dict[str, Callable]]:  # (router, route_dict)\n    \"Initialize audio serving routes.\"\n\n\nVariables\nDEBUG_AUDIO = False\n\n\n\nconfig (config.ipynb)\n\nConfiguration dataclass for structure decomposition workflow\n\n\nImport\nfrom cjm_fasthtml_workflow_transcript_decomp.core.config import (\n    DEFAULT_WORKFLOW_CONFIG_DIR,\n    StructureDecompWorkflowConfig\n)\n\n\nClasses\n@dataclass\nclass StructureDecompWorkflowConfig:\n    \"Configuration for structure decomposition workflow.\"\n    \n    workflow_id: str = 'structure_decomposition'  # Unique identifier for this workflow\n    route_prefix: str = '/structure_decomp'  # Base URL prefix for workflow routes\n    stepflow_prefix: str = '/flow'  # Sub-prefix for StepFlow routes\n    container_id: str = 'sd-workflow-container'  # HTML ID for main workflow container\n    show_progress: bool = True  # Show step progress indicator in StepFlow\n    max_history_depth: int = 500  # Maximum undo history entries for decomposition phase\n    text_plugin: str = 'cjm-text-plugin-nltk'  # Text processing plugin for sentence splitting\n    vad_plugin: str = 'cjm-media-plugin-silero-vad'  # VAD plugin for audio alignment\n    graph_plugin: str = 'cjm-graph-plugin-sqlite'  # Graph plugin for storage\n    fa_plugin_name: str = 'cjm-transcription-plugin-qwen3-forced-aligner'  # Forced alignment plugin (optional)\n    sysmon_plugin_name: Optional[str]  # System monitor plugin for GPU stats in job monitor\n    source_categories: List[str] = field(...)  # Categories for source plugins\n    no_plugins_redirect: Optional[str]  # URL to redirect when required plugins unavailable\n    state_db_path: Optional[Path]  # Path to SQLite state database (uses default if None)\n    config_dir: Path = field(...)  # Directory for workflow settings\n    \n    def get_full_stepflow_prefix(self) -&gt; str:  # Combined route_prefix + stepflow_prefix\n            \"\"\"Get the full prefix for the StepFlow router.\"\"\"\n            return f\"{self.route_prefix}{self.stepflow_prefix}\"\n        \n        def get_state_db_path(self) -&gt; Path:  # Resolved path to state database\n        \"Get the full prefix for the StepFlow router.\"\n    \n    def get_state_db_path(self) -&gt; Path:  # Resolved path to state database\n            \"\"\"Get the path to the SQLite state database.\"\"\"\n            if self.state_db_path\n        \"Get the path to the SQLite state database.\"\n\n\nVariables\nDEFAULT_WORKFLOW_CONFIG_DIR\n\n\n\ninit (init.ipynb)\n\nRouter assembly for core workflow routes\n\n\nImport\nfrom cjm_fasthtml_workflow_transcript_decomp.routes.core.init import (\n    init_core_routers\n)\n\n\nFunctions\ndef init_core_routers(\n    workflow: StructureDecompWorkflow,  # The workflow instance\n    prefix: str,  # Base prefix for core routes (e.g., \"/workflow/core\")\n) -&gt; Tuple[List[APIRouter], Dict[str, Callable]]:  # (routers, merged_routes)\n    \"\"\"\n    Initialize and return all core workflow routers.\n    \n    Note: Chrome switching route is now in cjm-transcript-segment-align library.\n    It is initialized in routes/init.py alongside the other segment-align routes.\n    \"\"\"\n\n\n\ninit (init.ipynb)\n\nRouter initialization for the structure decomposition workflow\n\n\nImport\nfrom cjm_fasthtml_workflow_transcript_decomp.routes.init import (\n    init_routers\n)\n\n\nFunctions\ndef init_routers(\n    workflow: \"StructureDecompWorkflow\",  # The workflow instance\n) -&gt; List[APIRouter]:  # List of configured routers\n    \"Initialize and return all workflow routers.\"\n\n\n\nsources (sources.ipynb)\n\nSource data retrieval route handlers\n\n\nImport\nfrom cjm_fasthtml_workflow_transcript_decomp.routes.core.sources import (\n    init_sources_router\n)\n\n\nFunctions\ndef _handle_get_sources(\n    workflow: StructureDecompWorkflow,  # The workflow instance\n    request,  # FastHTML request object\n    provider_id: str = None,  # Optional plugin name filter\n    limit: int = 50  # Maximum number of results\n):  # JSON response with transcription sources\n    \"Get available transcription sources.\"\ndef init_sources_router(\n    workflow: StructureDecompWorkflow,  # The workflow instance\n    prefix: str,  # Route prefix (e.g., \"/workflow/core/sources\")\n) -&gt; Tuple[APIRouter, Dict[str, Callable]]:  # (router, route_dict)\n    \"Initialize source data routes.\"\n\n\n\nstatus (status.ipynb)\n\nWorkflow status and lifecycle route handlers\n\n\nImport\nfrom cjm_fasthtml_workflow_transcript_decomp.routes.core.status import (\n    init_status_router\n)\n\n\nFunctions\nasync def _handle_current_status(\n    workflow: StructureDecompWorkflow,  # The workflow instance\n    request,  # FastHTML request object\n    sess  # FastHTML session object\n):  # Appropriate UI component based on current state\n    \"Return current workflow status - determines what to show.\"\nasync def _handle_reset(\n    workflow: StructureDecompWorkflow,  # The workflow instance\n    request,  # FastHTML request object\n    sess  # FastHTML session object\n):  # StepFlow start view\n    \"Reset workflow and return to start.\"\ndef init_status_router(\n    workflow: StructureDecompWorkflow,  # The workflow instance\n    prefix: str,  # Route prefix (e.g., \"/workflow/core/status\")\n) -&gt; Tuple[APIRouter, Dict[str, Callable]]:  # (router, route_dict)\n    \"Initialize status and lifecycle routes.\"\n\n\n\nworkflow (workflow.ipynb)\n\nMain workflow class for structure decomposition\n\n\nImport\nfrom cjm_fasthtml_workflow_transcript_decomp.workflow.workflow import (\n    StructureDecompWorkflow\n)\n\n\nFunctions\n@patch\ndef setup(\n    self: StructureDecompWorkflow,\n    app  # FastHTML application instance\n) -&gt; None\n    \"Initialize workflow with FastHTML app.\"\n@patch\ndef cleanup(\n    self: StructureDecompWorkflow\n) -&gt; None\n    \"Clean up workflow resources.\"\n@patch\ndef get_routers(\n    self: StructureDecompWorkflow\n) -&gt; List[APIRouter]:  # List of routers to register\n    \"Return all routers for registration with the app.\"\n@patch\ndef render_entry_point(\n    self: StructureDecompWorkflow,\n    request,  # FastHTML request object\n    sess  # FastHTML session object\n):  # FastHTML component\n    \"Render the workflow entry point for embedding.\"\ndef _create_data_loaders(\n    workflow: StructureDecompWorkflow  # Workflow instance for service access\n):  # (load_sources, load_empty) callables\n    \"Create data loader functions for StepFlow steps.\"\ndef _validate_always_true(\n    state: Dict[str, Any]  # Workflow state dictionary\n) -&gt; bool:  # Always True\n    \"No-op validator for steps that are always valid.\"\ndef _validate_selection(\n    state: Dict[str, Any]  # Workflow state dictionary\n) -&gt; bool:  # True if at least one source is selected\n    \"Validate that sources have been selected.\"\ndef _create_selection_renderer(\n    workflow: StructureDecompWorkflow  # Workflow instance for URL access\n):  # Render callable for StepFlow\n    \"Create render function for the source selection step.\"\ndef _create_combined_renderer(\n    workflow: StructureDecompWorkflow  # Workflow instance with _sa_result set\n):  # Render callable for StepFlow\n    \"Create render function for the segmentation & alignment step.\"\ndef _create_review_renderer(\n    workflow: StructureDecompWorkflow  # Workflow instance for URL and state access\n):  # Render callable for StepFlow\n    \"Create render function for the review step.\"\ndef _create_review_hook(\n    workflow: StructureDecompWorkflow  # Workflow instance for service and state access\n):  # on_leave callable\n    \"Create on_leave hook for the review step (commits to graph).\"\ndef _create_verify_renderer(\n    workflow: StructureDecompWorkflow  # Workflow instance for URL access\n):  # Render callable for StepFlow\n    \"Create render function for the verify step.\"\ndef _create_verify_hooks(\n    workflow: StructureDecompWorkflow  # Workflow instance for service and state access\n):  # (on_enter_verify, on_complete) callables\n    \"Create lifecycle hooks for the verify step.\"\n@patch\ndef _create_step_flow(\n    self: StructureDecompWorkflow\n) -&gt; StepFlow:  # Configured StepFlow instance\n    \"Create and configure the StepFlow instance.\"\n@patch\ndef _create_routers(\n    self: StructureDecompWorkflow\n) -&gt; List[APIRouter]:  # List of configured APIRouters\n    \"Create the workflow's API routers.\"\n\n\nClasses\nclass _SessionStateStoreAdapter:\n    def __init__(\n        self,\n        store: SQLiteWorkflowStateStore  # The pure, framework-agnostic store\n    )\n    \"Adapter bridging StepFlow's sess-based protocol to the pure session_id-based store.\"\n    \n    def __init__(\n            self,\n            store: SQLiteWorkflowStateStore  # The pure, framework-agnostic store\n        )\n        \"Wrap a pure store with session resolution.\"\n    \n    def get_current_step(\n            self,\n            flow_id: str,  # Workflow identifier\n            sess: Any  # FastHTML session object\n        ) -&gt; Optional[str]:  # Current step ID or None\n        \"Get current step ID, resolving session from sess.\"\n    \n    def set_current_step(\n            self,\n            flow_id: str,  # Workflow identifier\n            sess: Any,  # FastHTML session object\n            step_id: str  # Step ID to set as current\n        ) -&gt; None\n        \"Set current step ID, resolving session from sess.\"\n    \n    def get_state(\n            self,\n            flow_id: str,  # Workflow identifier\n            sess: Any  # FastHTML session object\n        ) -&gt; Dict[str, Any]:  # Workflow state dictionary\n        \"Get all workflow state, resolving session from sess.\"\n    \n    def update_state(\n            self,\n            flow_id: str,  # Workflow identifier\n            sess: Any,  # FastHTML session object\n            updates: Dict[str, Any]  # State updates to apply\n        ) -&gt; None\n        \"Update workflow state, resolving session from sess.\"\n    \n    def clear_state(\n            self,\n            flow_id: str,  # Workflow identifier\n            sess: Any  # FastHTML session object\n        ) -&gt; None\n        \"Clear all workflow state, resolving session from sess.\"\nclass StructureDecompWorkflow:\n    def __init__(\n        self,\n        plugin_manager: PluginManager,  # Plugin manager from host application\n        config: Optional[StructureDecompWorkflowConfig] = None  # Workflow configuration\n    )\n    \"Self-contained structure decomposition workflow.\"\n    \n    def __init__(\n            self,\n            plugin_manager: PluginManager,  # Plugin manager from host application\n            config: Optional[StructureDecompWorkflowConfig] = None  # Workflow configuration\n        )\n        \"Initialize the workflow with injected PluginManager.\"\n    \n    def create_and_setup(\n            cls,\n            app,  # FastHTML application instance\n            plugin_manager: PluginManager,  # Plugin manager from host application\n            config: Optional[StructureDecompWorkflowConfig] = None  # Workflow configuration\n        ) -&gt; \"StructureDecompWorkflow\":  # Configured and setup workflow instance\n        \"Create, configure, and setup a workflow in one call.\"\n    \n    def plugin_manager(self) -&gt; PluginManager:  # Plugin manager instance\n            \"\"\"Access to plugin manager.\"\"\"\n            return self._plugin_manager\n        \n        @property\n        def job_queue(self) -&gt; JobQueue:  # Job queue instance\n        \"Access to plugin manager.\"\n    \n    def job_queue(self) -&gt; JobQueue:  # Job queue instance\n            \"\"\"Access to host-owned job queue.\"\"\"\n            return self._job_queue\n        \n        @property\n        def source_service(self) -&gt; SourceService:  # Source service instance\n        \"Access to host-owned job queue.\"\n    \n    def source_service(self) -&gt; SourceService:  # Source service instance\n            \"\"\"Access to source service.\"\"\"\n            return self._source_service\n        \n        @property\n        def graph_service(self) -&gt; GraphService:  # Graph service instance\n        \"Access to source service.\"\n    \n    def graph_service(self) -&gt; GraphService:  # Graph service instance\n            \"\"\"Access to graph service.\"\"\"\n            return self._graph_service\n        \n        @property\n        def verify_service(self) -&gt; VerifyService:  # Verify service instance\n        \"Access to graph service.\"\n    \n    def verify_service(self) -&gt; VerifyService:  # Verify service instance\n            \"\"\"Access to verify service.\"\"\"\n            return self._verify_service\n        \n        @property\n        def state_store(self) -&gt; SQLiteWorkflowStateStore:  # State store instance\n        \"Access to verify service.\"\n    \n    def state_store(self) -&gt; SQLiteWorkflowStateStore:  # State store instance\n            \"\"\"Access to state store.\"\"\"\n            return self._state_store\n        \n        @property\n        def routers(self) -&gt; List[APIRouter]:  # List of workflow routers\n        \"Access to state store.\"\n    \n    def routers(self) -&gt; List[APIRouter]:  # List of workflow routers\n            \"\"\"Access to workflow routers (excludes stepflow router).\"\"\"\n            return self._routers\n        \n        @property\n        def stepflow_router(self) -&gt; APIRouter:  # StepFlow-generated router\n        \"Access to workflow routers (excludes stepflow router).\"\n    \n    def stepflow_router(self) -&gt; APIRouter:  # StepFlow-generated router\n        \"StepFlow-generated router.\"",
+    "crumbs": [
+      "cjm-fasthtml-workflow-transcript-decomp"
+    ]
+  },
+  {
+    "objectID": "routes/core/sources.html#router",
+    "href": "routes/core/sources.html#router",
+    "title": "sources",
+    "section": "Router",
+    "text": "Router\n\nsource\n\ninit_sources_router\n\ndef init_sources_router(\n    workflow:StructureDecompWorkflow, # The workflow instance\n    prefix:str, # Route prefix (e.g., \"/workflow/core/sources\")\n)-&gt;Tuple: # (router, route_dict)\n\nInitialize source data routes.",
+    "crumbs": [
+      "routes",
+      "core",
+      "sources"
+    ]
+  },
+  {
+    "objectID": "routes/core/audio.html#router",
+    "href": "routes/core/audio.html#router",
+    "title": "audio",
+    "section": "Router",
+    "text": "Router\n\nsource\n\ninit_audio_router\n\ndef init_audio_router(\n    workflow:StructureDecompWorkflow, # The workflow instance\n    prefix:str, # Route prefix (e.g., \"/workflow/core/audio\")\n)-&gt;Tuple: # (router, route_dict)\n\nInitialize audio serving routes.",
+    "crumbs": [
+      "routes",
+      "core",
+      "audio"
+    ]
+  },
+  {
+    "objectID": "routes/init.html",
+    "href": "routes/init.html",
+    "title": "init",
+    "section": "",
+    "text": "The init_routers function calls all focused router initializers and wires up cross-router dependencies.\n\nsource\n\n\n\ndef init_routers(\n    workflow:StructureDecompWorkflow, # The workflow instance\n)-&gt;List: # List of configured routers\n\nInitialize and return all workflow routers.",
+    "crumbs": [
+      "routes",
+      "init"
+    ]
+  },
+  {
+    "objectID": "routes/init.html#router-assembly",
+    "href": "routes/init.html#router-assembly",
+    "title": "init",
+    "section": "",
+    "text": "The init_routers function calls all focused router initializers and wires up cross-router dependencies.\n\nsource\n\n\n\ndef init_routers(\n    workflow:StructureDecompWorkflow, # The workflow instance\n)-&gt;List: # List of configured routers\n\nInitialize and return all workflow routers.",
+    "crumbs": [
+      "routes",
+      "init"
+    ]
+  },
+  {
+    "objectID": "workflow/workflow.html",
+    "href": "workflow/workflow.html",
+    "title": "workflow",
+    "section": "",
+    "text": "Bridges the pure SQLiteWorkflowStateStore (which accepts session_id: str) to the WorkflowStateStore protocol expected by StepFlow (which passes sess objects).",
+    "crumbs": [
+      "workflow",
+      "workflow"
+    ]
+  },
+  {
+    "objectID": "workflow/workflow.html#session-state-store-adapter",
+    "href": "workflow/workflow.html#session-state-store-adapter",
+    "title": "workflow",
+    "section": "",
+    "text": "Bridges the pure SQLiteWorkflowStateStore (which accepts session_id: str) to the WorkflowStateStore protocol expected by StepFlow (which passes sess objects).",
+    "crumbs": [
+      "workflow",
+      "workflow"
+    ]
+  },
+  {
+    "objectID": "workflow/workflow.html#structuredecompworkflow",
+    "href": "workflow/workflow.html#structuredecompworkflow",
+    "title": "workflow",
+    "section": "StructureDecompWorkflow",
+    "text": "StructureDecompWorkflow\nMain workflow class that orchestrates the structure decomposition process. It creates and manages:\n\nSQLiteWorkflowStateStore: Persistent state storage for workflow progress\nServices: Source, Segmentation, Alignment, and Graph services\nStepFlow: 3-step wizard with navigation\nRoutes: API endpoints for the workflow\n\n\nsource\n\nStructureDecompWorkflow\n\ndef StructureDecompWorkflow(\n    plugin_manager:PluginManager, # Plugin manager from host application\n    config:Optional=None, # Workflow configuration\n):\n\nSelf-contained structure decomposition workflow.\n\nsource\n\n\nStructureDecompWorkflow.setup\n\ndef setup(\n    app, # FastHTML application instance\n)-&gt;None:\n\nInitialize workflow with FastHTML app.\n\nsource\n\n\nStructureDecompWorkflow.cleanup\n\ndef cleanup(\n    \n)-&gt;None:\n\nClean up workflow resources.\n\nsource\n\n\nStructureDecompWorkflow.get_routers\n\ndef get_routers(\n    \n)-&gt;List: # List of routers to register\n\nReturn all routers for registration with the app.\n\nsource\n\n\nStructureDecompWorkflow.render_entry_point\n\ndef render_entry_point(\n    request, # FastHTML request object\n    sess, # FastHTML session object\n):\n\nRender the workflow entry point for embedding.",
+    "crumbs": [
+      "workflow",
+      "workflow"
+    ]
+  },
+  {
+    "objectID": "workflow/workflow.html#shared-stepflow-utilities",
+    "href": "workflow/workflow.html#shared-stepflow-utilities",
+    "title": "workflow",
+    "section": "Shared StepFlow Utilities",
+    "text": "Shared StepFlow Utilities",
+    "crumbs": [
+      "workflow",
+      "workflow"
+    ]
+  },
+  {
+    "objectID": "workflow/workflow.html#selection-step",
+    "href": "workflow/workflow.html#selection-step",
+    "title": "workflow",
+    "section": "Selection Step",
+    "text": "Selection Step",
+    "crumbs": [
+      "workflow",
+      "workflow"
+    ]
+  },
+  {
+    "objectID": "workflow/workflow.html#segmentation-step",
+    "href": "workflow/workflow.html#segmentation-step",
+    "title": "workflow",
+    "section": "Segmentation Step",
+    "text": "Segmentation Step",
+    "crumbs": [
+      "workflow",
+      "workflow"
+    ]
+  },
+  {
+    "objectID": "workflow/workflow.html#review-step",
+    "href": "workflow/workflow.html#review-step",
+    "title": "workflow",
+    "section": "Review Step",
+    "text": "Review Step",
+    "crumbs": [
+      "workflow",
+      "workflow"
+    ]
+  },
+  {
+    "objectID": "workflow/workflow.html#verify-step",
+    "href": "workflow/workflow.html#verify-step",
+    "title": "workflow",
+    "section": "Verify Step",
+    "text": "Verify Step",
+    "crumbs": [
+      "workflow",
+      "workflow"
+    ]
+  },
+  {
+    "objectID": "routes/core/init.html",
+    "href": "routes/core/init.html",
+    "title": "init",
+    "section": "",
+    "text": "source\n\n\n\ndef init_core_routers(\n    workflow:StructureDecompWorkflow, # The workflow instance\n    prefix:str, # Base prefix for core routes (e.g., \"/workflow/core\")\n)-&gt;Tuple: # (routers, merged_routes)\n\nInitialize and return all core workflow routers.\nNote: Chrome switching route is now in cjm-transcript-segment-align library. It is initialized in routes/init.py alongside the other segment-align routes.",
+    "crumbs": [
+      "routes",
+      "core",
+      "init"
+    ]
+  },
+  {
+    "objectID": "routes/core/init.html#router-assembly",
+    "href": "routes/core/init.html#router-assembly",
+    "title": "init",
+    "section": "",
+    "text": "source\n\n\n\ndef init_core_routers(\n    workflow:StructureDecompWorkflow, # The workflow instance\n    prefix:str, # Base prefix for core routes (e.g., \"/workflow/core\")\n)-&gt;Tuple: # (routers, merged_routes)\n\nInitialize and return all core workflow routers.\nNote: Chrome switching route is now in cjm-transcript-segment-align library. It is initialized in routes/init.py alongside the other segment-align routes.",
+    "crumbs": [
+      "routes",
+      "core",
+      "init"
+    ]
+  },
+  {
+    "objectID": "routes/core/status.html#router",
+    "href": "routes/core/status.html#router",
+    "title": "status",
+    "section": "Router",
+    "text": "Router\n\nsource\n\ninit_status_router\n\ndef init_status_router(\n    workflow:StructureDecompWorkflow, # The workflow instance\n    prefix:str, # Route prefix (e.g., \"/workflow/core/status\")\n)-&gt;Tuple: # (router, route_dict)\n\nInitialize status and lifecycle routes.",
+    "crumbs": [
+      "routes",
+      "core",
+      "status"
+    ]
+  },
+  {
+    "objectID": "core/config.html",
+    "href": "core/config.html",
+    "title": "config",
+    "section": "",
+    "text": "source\n\nStructureDecompWorkflowConfig\n\ndef StructureDecompWorkflowConfig(\n    workflow_id:str='structure_decomposition', route_prefix:str='/structure_decomp', stepflow_prefix:str='/flow',\n    container_id:str='sd-workflow-container', show_progress:bool=True, max_history_depth:int=500,\n    text_plugin:str='cjm-text-plugin-nltk', vad_plugin:str='cjm-media-plugin-silero-vad',\n    graph_plugin:str='cjm-graph-plugin-sqlite', fa_plugin_name:str='cjm-transcription-plugin-qwen3-forced-aligner',\n    sysmon_plugin_name:Optional=None, source_categories:List=&lt;factory&gt;, no_plugins_redirect:Optional=None,\n    state_db_path:Optional=None, config_dir:Path=&lt;factory&gt;\n)-&gt;None:\n\nConfiguration for structure decomposition workflow.",
+    "crumbs": [
+      "core",
+      "config"
+    ]
+  }
+]
