@@ -72,6 +72,8 @@ def main():
     from cjm_fasthtml_job_monitor.components.modal import get_sse_headers
 
     # Create the FastHTML app
+    APP_ID = "txdecomp"
+
     app, rt = fast_app(
         pico=False,
         hdrs=[
@@ -81,7 +83,8 @@ def main():
         ],
         title="Structure Decomposition Workflow Demo",
         htmlkw={'data-theme': 'light'},
-        secret_key="your-secret-key-here"
+        session_cookie=f'session_{APP_ID}_',
+        secret_key=f'{APP_ID}-demo-secret',
     )
 
     router = APIRouter(prefix="")
