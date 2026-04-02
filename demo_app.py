@@ -64,7 +64,6 @@ def main():
     # Import management components
     from cjm_transcript_workflow_management.services.management import ManagementService
     from cjm_transcript_workflow_management.routes.init import init_management_routers
-    from cjm_transcript_workflow_management.components.page_renderer import render_management_page
 
     print("  Library components imported successfully")
 
@@ -173,7 +172,7 @@ def main():
 
     # Create management service (shares the same plugin_manager / graph plugin)
     mgmt_service = ManagementService(plugin_manager, "cjm-graph-plugin-sqlite")
-    mgmt_routers, mgmt_urls, mgmt_routes = init_management_routers(
+    mgmt_result = init_management_routers(
         service=mgmt_service,
         prefix="/manage",
     )
@@ -298,14 +297,10 @@ def main():
     @router
     async def manage(request):
         """Graph management page — list, inspect, delete, import/export documents."""
-
-        async def manage_content():
-            documents = await mgmt_service.list_documents_async()
-            return render_management_page(documents, mgmt_urls)
-
+        await mgmt_result.refresh_items()
         return handle_htmx_request(
             request,
-            await manage_content(),
+            mgmt_result.render_page,
             wrap_fn=lambda content: wrap_with_layout(content, navbar=navbar)
         )
 
@@ -327,7 +322,7 @@ def main():
         app,
         router,
         *structure_workflow.get_routers(),
-        *mgmt_routers,
+        *mgmt_result.routers,
     )
 
     # JobQueue lifecycle hooks
