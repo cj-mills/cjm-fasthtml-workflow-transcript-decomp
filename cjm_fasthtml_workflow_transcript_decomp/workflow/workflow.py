@@ -36,6 +36,9 @@ from cjm_transcript_verify.models import VerifyUrls
 from cjm_transcript_verify.services.verify import VerifyService
 from cjm_transcript_verify.components.step_renderer import render_verify_step
 
+from cjm_fasthtml_step_progress.core.models import StepInfo
+from cjm_fasthtml_step_progress.components.progress_bar import render_step_progress
+
 # Step renderers
 from cjm_transcript_source_select.components.step_renderer import render_selection_step
 from cjm_transcript_review.components.step_renderer import render_review_step
@@ -532,6 +535,12 @@ def _create_step_flow(
     on_leave_review = _create_review_hook(workflow)
     on_enter_verify, on_complete = _create_verify_hooks(workflow)
     
+    # Build step progress renderer (maps Step objects to StepInfo for the progress bar)
+    def _progress_renderer(steps, current_index):
+        return render_step_progress(
+            [StepInfo(s.title) for s in steps], current_index
+        )
+    
     return StepFlow(
         debug=True,
         flow_id=self.config.workflow_id,
@@ -587,6 +596,7 @@ def _create_step_flow(
         ],
         on_complete=on_complete,
         show_progress=self.config.show_progress,
+        progress_renderer=_progress_renderer,
         wrap_in_form=True
     )
 

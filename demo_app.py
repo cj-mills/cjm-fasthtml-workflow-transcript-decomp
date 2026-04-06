@@ -156,6 +156,7 @@ def main():
         route_prefix="/workflow",
         no_plugins_redirect="/",
         sysmon_plugin_name=sysmon_name,
+        show_progress=True
     )
 
     structure_workflow = StructureDecompWorkflow.create_and_setup(

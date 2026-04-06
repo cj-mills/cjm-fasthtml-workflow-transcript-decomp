@@ -39,14 +39,14 @@ graph LR
     workflow_workflow[workflow.workflow<br/>workflow]
 
     routes_core_audio --> workflow_workflow
-    routes_core_init --> routes_core_sources
-    routes_core_init --> routes_core_audio
     routes_core_init --> workflow_workflow
     routes_core_init --> routes_core_status
+    routes_core_init --> routes_core_sources
+    routes_core_init --> routes_core_audio
     routes_core_sources --> workflow_workflow
     routes_core_status --> workflow_workflow
-    routes_init --> routes_core_init
     routes_init --> workflow_workflow
+    routes_init --> routes_core_init
     workflow_workflow --> core_config
 ```
 
