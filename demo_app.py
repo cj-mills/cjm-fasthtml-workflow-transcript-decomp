@@ -44,10 +44,13 @@ def main():
     from cjm_fasthtml_tailwind.utilities.spacing import p, m
     from cjm_fasthtml_tailwind.utilities.sizing import container, max_w, w, h
     from cjm_fasthtml_tailwind.utilities.typography import font_size, font_weight, text_align
+    from cjm_fasthtml_tailwind.utilities.flexbox_and_grid import flex_display, items, gap
     from cjm_fasthtml_tailwind.core.base import combine_classes
     from cjm_fasthtml_daisyui.components.actions.button import btn, btn_colors, btn_sizes
     from cjm_fasthtml_daisyui.components.data_display.badge import badge, badge_colors
     from cjm_fasthtml_daisyui.components.feedback.alert import alert, alert_colors
+    from cjm_fasthtml_daisyui.components.navigation.tabs import tabs, tab, tab_modifiers, tabs_styles
+    from cjm_fasthtml_lucide_icons.factory import lucide_icon
 
     print("\n" + "="*70)
     print("Initializing cjm-fasthtml-workflow-transcript-decomp Demo")
@@ -64,6 +67,19 @@ def main():
     # Import management components
     from cjm_transcript_workflow_management.services.management import ManagementService
     from cjm_transcript_workflow_management.routes.init import init_management_routers
+
+    # Import session management components
+    from cjm_fasthtml_workflow_session_management.services.management import SessionManagementService
+    from cjm_fasthtml_workflow_session_management.routes.init import init_session_manager_routers
+    from cjm_fasthtml_workflow_session_management.models import ColumnSpec
+
+    # Import decomp-specific session integration helpers (schema-knowledge bridge
+    # between this workflow's state shape and the session manager's display fields).
+    from cjm_fasthtml_workflow_transcript_decomp.workflow.session_integration import (
+        decomp_enricher,
+        decomp_label_generator,
+        get_decomp_step_title,
+    )
 
     print("  Library components imported successfully")
 
@@ -177,7 +193,34 @@ def main():
         service=mgmt_service,
         prefix="/manage",
     )
-    print(f"\n  Management service available: {mgmt_service.is_available()}")
+    print(f"\n  Graph management service available: {mgmt_service.is_available()}")
+
+    # Create session management service (shares the workflow's state store so
+    # it sees every state change the workflow makes in real time).
+    session_mgmt_service = SessionManagementService(
+        state_store=structure_workflow.state_store,
+        flow_id=structure_workflow.config.workflow_id,
+        enricher=decomp_enricher,
+        label_generator=decomp_label_generator,
+    )
+    session_mgmt_result = init_session_manager_routers(
+        service=session_mgmt_service,
+        workflow_url="/workflow",
+        prefix="/manage/sessions",
+        column_specs=[
+            ColumnSpec(field="sources", header="Sources"),
+            ColumnSpec(field="segments", header="Segments"),
+        ],
+        get_step_title=get_decomp_step_title,
+        page_title="Workflow Sessions",
+        page_icon="layers",
+    )
+    # Now that the session manager page URL exists, wire the workflow to redirect
+    # to the demo's /manage page on Phase 4 completion (so the redirect lands on
+    # the tabbed management layout, not the library's raw session manager URL).
+    structure_workflow.on_complete_redirect_url = "/manage"
+    print(f"  Session manager page:   {session_mgmt_result.urls.management_page}")
+    print(f"  Existing sessions:      {len(session_mgmt_service.list_sessions())}")
 
     # Check plugin and source status
     sources = structure_workflow.source_service.get_available_sources()
@@ -295,13 +338,71 @@ def main():
             wrap_fn=lambda content: wrap_with_layout(content, navbar=navbar)
         )
 
+    # --- Management tab helper ---
+    # Content-agnostic tab nav renderer. Each tab is defined by (label, icon,
+    # tab_key). The active tab is determined by a `?tab=` query parameter, with
+    # "sessions" as the default (since "Start New Workflow" redirects here and
+    # sessions is the primary landing view).
+
+    MGMT_TABS = [
+        ("Sessions", "layers", "sessions"),
+        ("Documents", "file-text", "documents"),
+    ]
+    MGMT_WRAPPER_ID = "mgmt-wrapper"
+
+    def _render_mgmt_tabs(active_tab):
+        """Render the management tab bar with HTMX swap on click."""
+        tab_links = []
+        for label, icon, key in MGMT_TABS:
+            is_active = (key == active_tab)
+            tab_cls = combine_classes(tab, tab_modifiers.active) if is_active else str(tab)
+            tab_links.append(
+                A(
+                    lucide_icon(icon, size=4),
+                    label,
+                    role="tab",
+                    cls=combine_classes(tab_cls, flex_display, items.center, gap(1)),
+                    hx_get=f"/manage?tab={key}",
+                    hx_target=f"#{MGMT_WRAPPER_ID}",
+                    hx_swap="outerHTML",
+                    hx_push_url=f"/manage?tab={key}",
+                )
+            )
+        return Div(
+            *tab_links,
+            role="tablist",
+            cls=combine_classes(tabs, tabs_styles.border, m.b(4)),
+        )
+
     @router
     async def manage(request):
-        """Graph management page — list, inspect, delete, import/export documents."""
-        await mgmt_result.refresh_items()
+        """Management page with HTMX-swapped tabs (Sessions / Documents).
+
+        Only one management page exists in the DOM at a time. Tab clicks fetch
+        the selected page via HTMX and swap the entire wrapper (tab nav + content)
+        via outerHTML. The `?tab=` query parameter determines the active tab
+        (defaults to "sessions"). Full page requests wrap with the navbar layout.
+        """
+        active_tab = request.query_params.get("tab", "sessions")
+
+        async def _build_wrapper():
+            """Build the tab nav + active tab content wrapper."""
+            if active_tab == "documents":
+                await mgmt_result.refresh_items()
+                content = mgmt_result.render_page()
+            else:
+                session_mgmt_result.refresh_items(request=request)
+                content = session_mgmt_result.render_page()
+            return Div(
+                _render_mgmt_tabs(active_tab),
+                content,
+                id=MGMT_WRAPPER_ID,
+            )
+
+        wrapper = await _build_wrapper()
         return handle_htmx_request(
             request,
-            mgmt_result.render_page,
+            lambda: wrapper,
             wrap_fn=lambda content: wrap_with_layout(content, navbar=navbar)
         )
 
@@ -324,6 +425,7 @@ def main():
         router,
         *structure_workflow.get_routers(),
         *mgmt_result.routers,
+        *session_mgmt_result.routers,
     )
 
     # JobQueue lifecycle hooks
@@ -382,7 +484,7 @@ if __name__ == "__main__":
     print("\nAvailable routes:")
     print(f"  http://{display_host}:{port}/          - Homepage with status")
     print(f"  http://{display_host}:{port}/workflow  - Structure decomposition workflow")
-    print(f"  http://{display_host}:{port}/manage   - Graph management (list, inspect, delete, import/export)")
+    print(f"  http://{display_host}:{port}/manage    - Management (Documents + Sessions tabs)")
     print("\n" + "="*70 + "\n")
 
     # Open browser after a short delay

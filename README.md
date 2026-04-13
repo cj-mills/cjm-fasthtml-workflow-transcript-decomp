@@ -21,10 +21,11 @@ pip install cjm_fasthtml_workflow_transcript_decomp
     │   │   ├── sources.ipynb  # Source data retrieval route handlers
     │   │   └── status.ipynb   # Workflow status and lifecycle route handlers
     │   └── init.ipynb  # Router initialization for the structure decomposition workflow
-    └── workflow/ (1)
-        └── workflow.ipynb  # Main workflow class for structure decomposition
+    └── workflow/ (2)
+        ├── session_integration.ipynb  # Schema-knowledge helpers for presenting decomposition workflow sessions in a `cjm-fasthtml-workflow-session-management` session manager.
+        └── workflow.ipynb             # Main workflow class for structure decomposition
 
-Total: 7 notebooks across 3 directories
+Total: 8 notebooks across 3 directories
 
 ## Module Dependencies
 
@@ -36,6 +37,7 @@ graph LR
     routes_core_sources[routes.core.sources<br/>sources]
     routes_core_status[routes.core.status<br/>status]
     routes_init[routes.init<br/>init]
+    workflow_session_integration[workflow.session_integration<br/>Session Integration]
     workflow_workflow[workflow.workflow<br/>workflow]
 
     routes_core_audio --> workflow_workflow
@@ -199,6 +201,53 @@ def init_routers(
     workflow: "StructureDecompWorkflow",  # The workflow instance
 ) -> List[APIRouter]:  # List of configured routers
     "Initialize and return all workflow routers."
+```
+
+### Session Integration (`session_integration.ipynb`)
+
+> Schema-knowledge helpers for presenting decomposition workflow
+> sessions in a `cjm-fasthtml-workflow-session-management` session
+> manager.
+
+#### Import
+
+``` python
+from cjm_fasthtml_workflow_transcript_decomp.workflow.session_integration import (
+    DECOMP_STEP_TITLES,
+    get_decomp_step_title,
+    decomp_enricher,
+    decomp_label_generator
+)
+```
+
+#### Functions
+
+``` python
+def get_decomp_step_title(
+    step_id:str # Raw step ID from the state store
+) -> str: # Human-readable step title, or the raw ID if not mapped
+    "Look up the human-readable title for a decomposition workflow step ID."
+```
+
+``` python
+def decomp_enricher(
+    state_json:Dict[str, Any] # Raw session state blob from the state store
+) -> Dict[str, str]: # Display fields keyed by column name
+    "Extract source count and segment count from decomposition workflow state."
+```
+
+``` python
+def decomp_label_generator(
+    summary:SessionSummary, # Session metadata from the state store
+    state_json:Dict[str, Any] # Raw session state blob
+) -> str: # Resolved display label
+    "Derive a default session label from the first selected source, or a timestamp."
+```
+
+#### Variables
+
+``` python
+DECOMP_STEP_TITLES: Dict[str, str]
 ```
 
 ### sources (`sources.ipynb`)
@@ -460,14 +509,16 @@ class StructureDecompWorkflow:
     def __init__(
         self,
         plugin_manager: PluginManager,  # Plugin manager from host application
-        config: Optional[StructureDecompWorkflowConfig] = None  # Workflow configuration
+        config: Optional[StructureDecompWorkflowConfig] = None,  # Workflow configuration
+        on_complete_redirect_url: Optional[str] = None,  # If set, "Start New Workflow" redirects here instead of resetting in place
     )
     "Self-contained structure decomposition workflow."
     
     def __init__(
             self,
             plugin_manager: PluginManager,  # Plugin manager from host application
-            config: Optional[StructureDecompWorkflowConfig] = None  # Workflow configuration
+            config: Optional[StructureDecompWorkflowConfig] = None,  # Workflow configuration
+            on_complete_redirect_url: Optional[str] = None,  # If set, "Start New Workflow" redirects here instead of resetting in place
         )
         "Initialize the workflow with injected PluginManager."
     
@@ -475,9 +526,33 @@ class StructureDecompWorkflow:
             cls,
             app,  # FastHTML application instance
             plugin_manager: PluginManager,  # Plugin manager from host application
-            config: Optional[StructureDecompWorkflowConfig] = None  # Workflow configuration
+            config: Optional[StructureDecompWorkflowConfig] = None,  # Workflow configuration
+            on_complete_redirect_url: Optional[str] = None,  # Optional "Start New Workflow" redirect URL (see __init__)
         ) -> "StructureDecompWorkflow":  # Configured and setup workflow instance
         "Create, configure, and setup a workflow in one call."
+    
+    def on_complete_redirect_url(self) -> Optional[str]:  # Current redirect URL or None
+            """The URL `on_complete` will redirect to on Phase 4 completion, or None to reset in place.
+            
+            Settable at runtime — `on_complete` reads this attribute dynamically at call time,
+            so hosts can wire session management after workflow construction and still have
+            the redirect take effect on the next "Start New Workflow" click.
+            """
+            return self._on_complete_redirect_url
+        
+        @on_complete_redirect_url.setter
+        def on_complete_redirect_url(self, value: Optional[str]) -> None
+        "The URL `on_complete` will redirect to on Phase 4 completion, or None to reset in place.
+
+Settable at runtime — `on_complete` reads this attribute dynamically at call time,
+so hosts can wire session management after workflow construction and still have
+the redirect take effect on the next "Start New Workflow" click."
+    
+    def on_complete_redirect_url(self, value: Optional[str]) -> None:
+            self._on_complete_redirect_url = value
+        
+        @property
+        def plugin_manager(self) -> PluginManager:  # Plugin manager instance
     
     def plugin_manager(self) -> PluginManager:  # Plugin manager instance
             """Access to plugin manager."""

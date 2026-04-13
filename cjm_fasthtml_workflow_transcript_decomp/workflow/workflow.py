@@ -7,7 +7,7 @@ __all__ = ['StructureDecompWorkflow']
 
 # %% ../../nbs/workflow/workflow.ipynb #604d9638
 from typing import Dict, Any, List, Optional
-from fasthtml.common import Div, P, A, APIRouter
+from fasthtml.common import Div, P, A, Script, APIRouter
 from fastcore.basics import patch
 
 from cjm_fasthtml_interactions.patterns.step_flow import Step, StepFlow
@@ -110,11 +110,18 @@ class StructureDecompWorkflow:
     def __init__(
         self,
         plugin_manager: PluginManager,  # Plugin manager from host application
-        config: Optional[StructureDecompWorkflowConfig] = None  # Workflow configuration
+        config: Optional[StructureDecompWorkflowConfig] = None,  # Workflow configuration
+        on_complete_redirect_url: Optional[str] = None,  # If set, "Start New Workflow" redirects here instead of resetting in place
     ):
         """Initialize the workflow with injected PluginManager."""
         self.config = config or StructureDecompWorkflowConfig()
         self._app = None  # Set in setup()
+        
+        # Where the "Start New Workflow" button should take the user on completion.
+        # None means "reset in place" (the default, preserving existing behavior).
+        # Hosts that wire up session management pass the session manager page URL here.
+        # Read dynamically by `on_complete` so hosts can also set it after __init__.
+        self._on_complete_redirect_url = on_complete_redirect_url
         
         # Store the injected PluginManager
         self._plugin_manager = plugin_manager
@@ -158,12 +165,31 @@ class StructureDecompWorkflow:
         cls,
         app,  # FastHTML application instance
         plugin_manager: PluginManager,  # Plugin manager from host application
-        config: Optional[StructureDecompWorkflowConfig] = None  # Workflow configuration
+        config: Optional[StructureDecompWorkflowConfig] = None,  # Workflow configuration
+        on_complete_redirect_url: Optional[str] = None,  # Optional "Start New Workflow" redirect URL (see __init__)
     ) -> "StructureDecompWorkflow":  # Configured and setup workflow instance
         """Create, configure, and setup a workflow in one call."""
-        workflow = cls(plugin_manager=plugin_manager, config=config)
+        workflow = cls(
+            plugin_manager=plugin_manager,
+            config=config,
+            on_complete_redirect_url=on_complete_redirect_url,
+        )
         workflow.setup(app)
         return workflow
+    
+    @property
+    def on_complete_redirect_url(self) -> Optional[str]:  # Current redirect URL or None
+        """The URL `on_complete` will redirect to on Phase 4 completion, or None to reset in place.
+        
+        Settable at runtime — `on_complete` reads this attribute dynamically at call time,
+        so hosts can wire session management after workflow construction and still have
+        the redirect take effect on the next "Start New Workflow" click.
+        """
+        return self._on_complete_redirect_url
+    
+    @on_complete_redirect_url.setter
+    def on_complete_redirect_url(self, value: Optional[str]) -> None:
+        self._on_complete_redirect_url = value
     
     @property
     def plugin_manager(self) -> PluginManager:  # Plugin manager instance
@@ -511,14 +537,31 @@ def _create_verify_hooks(
         return None
     
     async def on_complete(state: Dict[str, Any], request):
-        """Handle workflow completion — reset to Phase 1."""
+        """Handle workflow completion.
+        
+        If `workflow.on_complete_redirect_url` is set (e.g. by a host wiring up
+        session management), perform a full page navigation to that URL via
+        JavaScript. Otherwise fall back to the original reset-in-place behavior
+        via HTMX. The redirect URL is read dynamically from the workflow instance
+        so hosts can set it any time before the user clicks "Start New Workflow".
+        
+        A JS redirect (not an HTMX swap) is used because the target page is a
+        completely different layout — a full page navigation ensures the target
+        route's `handle_htmx_request` applies the full layout wrapper (navbar, etc.).
+        """
+        redirect_url = workflow._on_complete_redirect_url
+        if redirect_url:
+            return Div(
+                Script(f"window.location.href = '{redirect_url}';"),
+                id=workflow.config.container_id,
+            )
         return Div(
             P("Workflow complete. Starting new workflow..."),
             hx_get=workflow._stepflow_router.reset.to(),
             hx_trigger="load",
             hx_target=f"#{workflow.config.container_id}",
             hx_swap="outerHTML",
-            id=workflow.config.container_id
+            id=workflow.config.container_id,
         )
     
     return on_enter_verify, on_complete
