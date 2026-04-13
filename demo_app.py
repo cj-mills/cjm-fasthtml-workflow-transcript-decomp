@@ -346,7 +346,7 @@ def main():
 
     MGMT_TABS = [
         ("Sessions", "layers", "sessions"),
-        ("Documents", "file-text", "documents"),
+        ("Graphs", "file-text", "graphs"),
     ]
     MGMT_WRAPPER_ID = "mgmt-wrapper"
 
@@ -387,7 +387,7 @@ def main():
 
         async def _build_wrapper():
             """Build the tab nav + active tab content wrapper."""
-            if active_tab == "documents":
+            if active_tab == "graphs":
                 await mgmt_result.refresh_items()
                 content = mgmt_result.render_page()
             else:
