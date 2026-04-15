@@ -86,6 +86,9 @@ def main():
     # SSE headers (for job monitor — harmless if FA unavailable)
     from cjm_fasthtml_job_monitor.components.modal import get_sse_headers
 
+    # Web Audio library — static asset mount (SoundTouch worklet for pitch-preserving speed)
+    from cjm_fasthtml_web_audio.components import mount_web_audio_static
+
     # Create the FastHTML app
     APP_ID = "txdecomp"
 
@@ -101,6 +104,9 @@ def main():
         session_cookie=f'session_{APP_ID}_',
         secret_key=f'{APP_ID}-demo-secret',
     )
+
+    # Mount vendored static assets (SoundTouch worklet for pitch-preserving speed)
+    mount_web_audio_static(app)
 
     router = APIRouter(prefix="")
 
