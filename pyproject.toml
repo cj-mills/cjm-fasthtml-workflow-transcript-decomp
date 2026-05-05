@@ -25,6 +25,6 @@ cjm_fasthtml_workflow_transcript_decomp = "cjm_fasthtml_workflow_transcript_deco
 version = {attr = "cjm_fasthtml_workflow_transcript_decomp.__version__"}
 
 [tool.setuptools.packages.find]
-include = ["cjm_fasthtml_workflow_transcript_decomp"]
+include = ["cjm_fasthtml_workflow_transcript_decomp*"]
 
 [tool.nbdev]
