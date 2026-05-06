@@ -16,6 +16,8 @@ from cjm_fasthtml_interactions.patterns.async_loading import AsyncLoadingContain
 from cjm_fasthtml_interactions.core.state_store import get_session_id
 from cjm_fasthtml_daisyui.components.actions.button import btn, btn_colors
 from cjm_fasthtml_daisyui.utilities.semantic_colors import text_dui
+
+from cjm_fasthtml_design_system.text_tiers import text_tiers
 from cjm_fasthtml_tailwind.utilities.spacing import m
 from cjm_fasthtml_tailwind.core.base import combine_classes
 
@@ -272,7 +274,7 @@ def render_entry_point(
         content = [
             P(
                 "No transcription sources available. Please load transcription plugins first.",
-                cls=combine_classes(text_dui.base_content.opacity(60), m.b(4))
+                cls=combine_classes(text_tiers.tertiary, m.b(4))
             )
         ]
         if self.config.no_plugins_redirect:
