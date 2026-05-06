@@ -47,6 +47,7 @@ def main():
     from cjm_fasthtml_tailwind.utilities.flexbox_and_grid import flex_display, items, gap
     from cjm_fasthtml_tailwind.core.base import combine_classes
     from cjm_fasthtml_daisyui.components.actions.button import btn, btn_colors, btn_sizes
+    from cjm_fasthtml_design_system.buttons import buttons
     from cjm_fasthtml_daisyui.components.data_display.badge import badge, badge_colors
     from cjm_fasthtml_daisyui.components.feedback.alert import alert, alert_colors
     from cjm_fasthtml_daisyui.components.navigation.tabs import tabs, tab, tab_modifiers, tabs_styles
@@ -298,7 +299,7 @@ def main():
                     A(
                         "Start Structure Decomposition",
                         href="/workflow",
-                        cls=combine_classes(btn, btn_colors.primary, btn_sizes.lg, m.r(2))
+                        cls=combine_classes(buttons.page_primary, m.r(2))
                     ),
                 ),
 

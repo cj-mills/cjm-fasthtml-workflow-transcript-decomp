@@ -14,10 +14,10 @@ from cjm_fasthtml_interactions.patterns.step_flow import Step, StepFlow
 from cjm_fasthtml_interactions.core.context import InteractionContext
 from cjm_fasthtml_interactions.patterns.async_loading import AsyncLoadingContainer
 from cjm_fasthtml_interactions.core.state_store import get_session_id
-from cjm_fasthtml_daisyui.components.actions.button import btn, btn_colors
 from cjm_fasthtml_daisyui.utilities.semantic_colors import text_dui
 
 from cjm_fasthtml_design_system.text_tiers import text_tiers
+from cjm_fasthtml_design_system.buttons import buttons
 from cjm_fasthtml_tailwind.utilities.spacing import m
 from cjm_fasthtml_tailwind.core.base import combine_classes
 
@@ -282,7 +282,7 @@ def render_entry_point(
                 A(
                     "Go to Settings",
                     href=self.config.no_plugins_redirect,
-                    cls=combine_classes(btn, btn_colors.primary)
+                    cls=buttons.step_primary
                 )
             )
         return Div(*content, id=self.config.container_id)
