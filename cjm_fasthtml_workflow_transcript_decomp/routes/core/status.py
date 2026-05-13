@@ -8,7 +8,7 @@ __all__ = ['init_status_router']
 # %% ../../../nbs/routes/core/status.ipynb #c3d4e5f6
 from typing import Tuple, Dict, Callable
 
-from fasthtml.common import APIRouter
+from cjm_fasthtml_app_core.core.routing import APIRouter
 
 from cjm_fasthtml_interactions.core.state_store import get_session_id
 

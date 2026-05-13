@@ -32,7 +32,8 @@ import atexit
 
 def main():
     """Main entry point - initializes workflow and starts the server."""
-    from fasthtml.common import fast_app, Div, H1, P, Span, A, Code, APIRouter
+    from fasthtml.common import fast_app, Div, H1, P, Span, A, Code
+    from cjm_fasthtml_app_core.core.routing import APIRouter
     from cjm_fasthtml_daisyui.core.resources import get_daisyui_headers
     from cjm_fasthtml_daisyui.core.testing import create_theme_persistence_script
     from cjm_fasthtml_app_core.components.navbar import create_navbar

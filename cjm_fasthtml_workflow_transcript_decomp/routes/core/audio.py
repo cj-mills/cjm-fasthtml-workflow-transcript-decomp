@@ -9,7 +9,7 @@ __all__ = ['DEBUG_AUDIO', 'init_audio_router']
 from pathlib import Path
 from typing import Tuple, Dict, Callable
 
-from fasthtml.common import APIRouter
+from cjm_fasthtml_app_core.core.routing import APIRouter
 from starlette.responses import FileResponse, Response
 
 from cjm_fasthtml_interactions.core.state_store import get_session_id

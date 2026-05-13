@@ -8,7 +8,7 @@ __all__ = ['init_core_routers']
 # %% ../../../nbs/routes/core/init.ipynb #c3d4e5f6
 from typing import List, Dict, Callable, Tuple
 
-from fasthtml.common import APIRouter
+from cjm_fasthtml_app_core.core.routing import APIRouter
 
 from ...workflow.workflow import StructureDecompWorkflow
 

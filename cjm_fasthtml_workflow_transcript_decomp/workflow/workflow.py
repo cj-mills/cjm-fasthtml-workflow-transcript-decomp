@@ -7,7 +7,8 @@ __all__ = ['StructureDecompWorkflow']
 
 # %% ../../nbs/workflow/workflow.ipynb #604d9638
 from typing import Dict, Any, List, Optional
-from fasthtml.common import Div, P, A, Script, APIRouter
+from fasthtml.common import Div, P, A, Script
+from cjm_fasthtml_app_core.core.routing import APIRouter
 from fastcore.basics import patch
 
 from cjm_fasthtml_interactions.patterns.step_flow import Step, StepFlow

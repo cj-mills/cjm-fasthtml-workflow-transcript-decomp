@@ -8,7 +8,7 @@ __all__ = ['init_routers']
 # %% ../../nbs/routes/init.ipynb #a996b93f
 from typing import List
 
-from fasthtml.common import APIRouter
+from cjm_fasthtml_app_core.core.routing import APIRouter
 
 # Import subpackage router assemblies
 from .core.init import init_core_routers
