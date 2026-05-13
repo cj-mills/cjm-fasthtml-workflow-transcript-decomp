@@ -80,6 +80,7 @@ def init_routers(
     workflow._selection_urls = selection.urls
     workflow._render_local_files_panel = selection.render_local_files_panel
     workflow._sb_state = selection.sb_state
+    workflow._fb_kb_manager = selection.fb_kb_manager
     workflow._sa_result = sa_result
     workflow._review_urls = review_urls
     workflow._verify_urls = verify_urls

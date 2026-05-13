@@ -354,6 +354,7 @@ def _create_selection_renderer(
             urls=getattr(workflow, '_selection_urls', SelectionUrls()),
             render_local_files_panel=getattr(workflow, '_render_local_files_panel', None),
             sb_state=getattr(workflow, '_sb_state', None),
+            fb_kb_manager=getattr(workflow, '_fb_kb_manager', None),
         )
     return render
 
